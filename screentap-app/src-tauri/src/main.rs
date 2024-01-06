@@ -10,13 +10,22 @@ use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::io::Write;
 use rusqlite::{params, Connection, Result};
+use std::thread;
+use std::time::Duration;
 
 const DATASET_ROOT: &str = "/Users/tleyden/Development/screentap/dataset";
 const DATABASE_FILENAME: &str = "screentap.db";
 
-
 #[tauri::command]
 fn greet() -> String {
+    format!("No screenshot saved, running in background thread ..")
+}
+
+/**
+ * Helper function to save a screenshot and OCR text to the dataset directory and DB
+ */
+fn save_screenshot() -> String {
+
     let now = Local::now();
     let timestamp_png_filename = generate_filename(now, "png");
     let dataset_root_path = Path::new(DATASET_ROOT);
@@ -43,7 +52,7 @@ fn greet() -> String {
         Err(e) => format!("Error occurred: {} at {}", e, current_time_formatted),
     };
 
-    result
+    result  // TODO: return the save_result instead of this string
 }
 
 /**
@@ -128,12 +137,23 @@ fn main() {
     let db_filename = dataset_root_path.join(DATABASE_FILENAME);
     println!("Creating db_filename: {} if it doesn't exist", db_filename.to_str().unwrap());
     let db_create_result = create_db(db_filename.to_str().unwrap());
-
     match db_create_result {
         Ok(()) => println!("Created db"),
         Err(e) => eprintln!("Failed to create db: {}", e),
     }
 
+    // Spawn a thread to save screenshots in the background
+    thread::spawn(|| {
+        loop {
+            println!("Saving screenshot in background thread ..");
+            let _ = save_screenshot();
+            let sleep_time_secs = 300;
+            println!("Sleeping for {} secs ..", sleep_time_secs);
+            thread::sleep(Duration::from_secs(sleep_time_secs));
+        }
+    });
+
+    // Run the Tauri event loop
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())
