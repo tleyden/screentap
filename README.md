@@ -14,9 +14,9 @@ cargo install create-tauri-app --locked
 
 Install Yarn
 
-(I think this gets insalled by `cargo install create-tauri-app`)
+(I think yarn gets installed by `cargo install create-tauri-app`)
 
-## Running Tauri app
+## Run Tauri app
 
 ```
 cd screentap-app
