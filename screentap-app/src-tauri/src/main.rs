@@ -16,7 +16,7 @@ const DATABASE_FILENAME: &str = "screentap.db";
 
 
 #[tauri::command]
-fn greet(name: &str) -> String {
+fn greet() -> String {
     let now = Local::now();
     let timestamp_png_filename = generate_filename(now, "png");
     let dataset_root_path = Path::new(DATASET_ROOT);
@@ -37,9 +37,10 @@ fn greet(name: &str) -> String {
         ocr_text.to_string().as_str()
     );
 
+    let current_time_formatted = now.format("%Y-%m-%d %H:%M:%S").to_string();
     let result = match save_result {
-        Ok(()) => format!("{}.  Screenshot saved to DB successfully.", name),
-        Err(e) => format!("{}.  Error occurred: {}", name, e),
+        Ok(()) => format!("Screenshot saved to DB successfully at {}", current_time_formatted),
+        Err(e) => format!("Error occurred: {} at {}", e, current_time_formatted),
     };
 
     result
