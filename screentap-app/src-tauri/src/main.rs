@@ -1,10 +1,15 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+extern crate screen_ocr_swift_rs;
+use screen_ocr_swift_rs::extract_text;
+
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+    let ocr_text = extract_text("/Users/tleyden/Development/screentap/screentap-app/screentap_test_screenshot.png");
+    let result = format!("Hello, {} - {}", name, ocr_text);
+    result
 }
 
 fn main() {
