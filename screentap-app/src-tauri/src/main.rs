@@ -5,13 +5,14 @@ extern crate screen_ocr_swift_rs;
 use screen_ocr_swift_rs::extract_text;
 use screen_ocr_swift_rs::screen_capture;
 
-use chrono::{DateTime, Local};
+use chrono::{DateTime, Local, Utc};
 use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::io::Write;
-use rusqlite::{Connection, Result};
+use rusqlite::{params, Connection, Result};
 
 const DATASET_ROOT: &str = "/Users/tleyden/Development/screentap/dataset";
+const DATABASE_FILENAME: &str = "screentap.db";
 
 
 #[tauri::command]
@@ -30,6 +31,17 @@ fn greet(name: &str) -> String {
     match write_string_to_file(target_ocr_text_file_path, ocr_text.to_string().as_str()) {
         Ok(()) => println!("Content written to file successfully."),
         Err(e) => eprintln!("Failed to write to file: {}", e),
+    }
+
+    // Save screenshot meta to the DB
+    let save_result = save_screenshot_meta(
+        target_png_file_path.to_str().unwrap(), 
+        ocr_text.to_string().as_str()
+    );
+
+    match save_result {
+        Ok(()) => println!("Screenshot saved to DB successfully."),
+        Err(e) => eprintln!("Failed to save screenshot to DB: {}", e),
     }
 
     result
@@ -54,6 +66,9 @@ fn write_string_to_file<P: AsRef<Path>>(file_path: P, content: &str) -> std::io:
     Ok(())
 }
 
+/**
+ * Helper function to create the DB if it doesn't exist
+ */
 fn create_db(db_filename: &str) -> Result<()> {
 
     let conn = Connection::open(db_filename)?;
@@ -80,11 +95,38 @@ fn create_db(db_filename: &str) -> Result<()> {
 
 }
 
+
+/**
+ * Helper function to save screenshot meta to the DB
+ */
+fn save_screenshot_meta(screenshot_file_path: &str, ocr_text: &str) -> Result<()> {
+
+    let dataset_root_path = Path::new(DATASET_ROOT);
+    let db_filename = dataset_root_path.join(DATABASE_FILENAME);
+    let conn = Connection::open(db_filename.to_str().unwrap())?;
+
+    let now = Utc::now().naive_utc();
+
+    conn.execute(
+        "INSERT INTO documents (timestamp, ocr_text, file_path) VALUES (?1, ?2, ?3)",
+        params![now.timestamp(), ocr_text, screenshot_file_path],
+    )?;
+
+    // Insert the OCR text into the full-text search index
+    conn.execute(
+        "INSERT INTO ocr_text_index (ocr_text) VALUES (?1)",
+        [ocr_text],
+    )?;
+
+    Ok(())
+
+}
+
 fn main() {
 
     // Create the database if it doesn't exist
     let dataset_root_path = Path::new(DATASET_ROOT);
-    let db_filename = dataset_root_path.join("screentap.db");
+    let db_filename = dataset_root_path.join(DATABASE_FILENAME);
     println!("Creating db_filename: {} if it doesn't exist", db_filename.to_str().unwrap());
     let db_create_result = create_db(db_filename.to_str().unwrap());
 
@@ -92,7 +134,6 @@ fn main() {
         Ok(()) => println!("Created db"),
         Err(e) => eprintln!("Failed to create db: {}", e),
     }
-
 
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![greet])
