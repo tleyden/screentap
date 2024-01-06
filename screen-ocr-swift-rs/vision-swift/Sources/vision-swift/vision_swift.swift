@@ -1,6 +1,41 @@
 import Foundation
 import SwiftRs
 import Vision
+import ScreenCaptureKit
+import CoreGraphics
+
+@_cdecl("screen_capture_swift")
+@available(macOS 10.15, *)
+public func screen_capture() -> SRData? {
+
+    // Specify the display to capture (main display in this case)
+    let displayID = CGMainDisplayID()
+
+    // Capture the screen image
+    if let image = CGDisplayCreateImage(displayID) {
+
+        // Convert the CGImage to NSData
+        let bitmapRep = NSBitmapImageRep(cgImage: image)
+        guard let imageData = bitmapRep.representation(using: .png, properties: [:]) else {
+            print("Failed to convert image to PNG data")
+            return nil
+        }
+
+        // Convert NSData to Byte Array
+        let byteArray = [UInt8](imageData)
+
+        return SRData(byteArray)
+
+        // byteArray now contains the screen capture as a Swift byte array
+        // You can now use byteArray as needed
+        
+    } else {
+        print("Failed to capture screen")
+    }
+
+    return nil
+
+}
 
 @_cdecl("perform_ocr_swift")
 @available(macOS 10.15, *)
