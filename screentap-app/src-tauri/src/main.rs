@@ -22,9 +22,7 @@ fn greet(name: &str) -> String {
     let dataset_root_path = Path::new(DATASET_ROOT);
     let target_png_file_path = dataset_root_path.join(timestamp_png_filename);
     screen_capture(target_png_file_path.to_str().unwrap());
-    // let ocr_text = extract_text("/Users/tleyden/Development/screentap/screentap-app/screentap_test_screenshot.png");
     let ocr_text = extract_text(target_png_file_path.to_str().unwrap());
-    let result = format!("Hello, {} - {}", name, ocr_text);
     let timestamp_ocr_text_filename = generate_filename(now, "txt");
     let target_ocr_text_file_path = dataset_root_path.join(timestamp_ocr_text_filename);
 
@@ -39,10 +37,10 @@ fn greet(name: &str) -> String {
         ocr_text.to_string().as_str()
     );
 
-    match save_result {
-        Ok(()) => println!("Screenshot saved to DB successfully."),
-        Err(e) => eprintln!("Failed to save screenshot to DB: {}", e),
-    }
+    let result = match save_result {
+        Ok(()) => format!("{}.  Screenshot saved to DB successfully.", name),
+        Err(e) => format!("{}.  Error occurred: {}", name, e),
+    };
 
     result
 }
