@@ -2242,9 +2242,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
+name = "screen-ocr-swift-rs"
+version = "0.1.0"
+dependencies = [
+ "swift-rs",
+]
+
+[[package]]
 name = "screentap-app"
 version = "0.0.0"
 dependencies = [
+ "screen-ocr-swift-rs",
  "serde",
  "serde_json",
  "tauri",
@@ -2513,6 +2521,17 @@ name = "strsim"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
+
+[[package]]
+name = "swift-rs"
+version = "1.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1bbdb58577b6301f8d17ae2561f32002a5bae056d444e0f69e611e504a276204"
+dependencies = [
+ "base64 0.21.5",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "syn"
