@@ -1,3 +1,6 @@
+
+An open-source privacy first clone of the popular Rewind.ai commercial app.  Heavily inspired by [rem](https://github.com/jasonjmcghee/rem).
+
 ## One time setup
 
 Install rust
