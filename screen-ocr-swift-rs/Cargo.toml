@@ -1,0 +1,12 @@
+[package]
+name = "screen-ocr-swift-rs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+swift-rs = "1.0.6"
+
+[build-dependencies]
+swift-rs = { version = "1.0.6", features = ["build"] }
