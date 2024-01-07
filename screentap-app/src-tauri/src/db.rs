@@ -1,5 +1,5 @@
 use rusqlite::{params, Connection, Result};
-use chrono::Utc;
+use chrono::NaiveDateTime;
 use std::path::Path;
 
 
@@ -39,13 +39,13 @@ pub fn create_db(dataset_root: &str, db_filename: &str) -> Result<()> {
 /**
  * Helper function to save screenshot meta to the DB
  */
-pub fn save_screenshot_meta(screenshot_file_path: &str, ocr_text: &str, dataset_root: &str, db_filename: &str) -> Result<()> {
+pub fn save_screenshot_meta(screenshot_file_path: &str, ocr_text: &str, dataset_root: &str, db_filename: &str, now: NaiveDateTime) -> Result<()> {
 
     let dataset_root_path = Path::new(dataset_root);
     let db_filename_fq_path = dataset_root_path.join(db_filename);
     let conn = Connection::open(db_filename_fq_path.to_str().unwrap())?;
 
-    let now = Utc::now().naive_utc();
+    // let now = Utc::now().naive_utc();
 
     conn.execute(
         "INSERT INTO documents (timestamp, ocr_text, file_path) VALUES (?1, ?2, ?3)",

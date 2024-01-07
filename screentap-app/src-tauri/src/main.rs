@@ -18,8 +18,6 @@ fn greet() -> String {
     format!("No screenshot saved, running in background thread ..")
 }
 
-
-
 fn main() {
 
     // Spawn a thread to save screenshots in the background
