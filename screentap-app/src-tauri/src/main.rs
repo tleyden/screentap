@@ -13,6 +13,7 @@ mod db;
 mod utils; 
 mod screenshot;
 
+// TODO: make this a relative dir somehow
 const DATASET_ROOT: &str = "/Users/tleyden/Development/screentap/screentap-app/public/dataset";
 const DATABASE_FILENAME: &str = "screentap.db";
 
@@ -20,11 +21,25 @@ const DATABASE_FILENAME: &str = "screentap.db";
 #[tauri::command]
 fn search_screenshots(term: &str) -> Vec<HashMap<String, String>> {
 
-    println!("(not) searching for {}, just return all records", term);
+    // if term is empty, get all records
+    match term {
+        "" => {
+            let screenshot_records = db::get_all_screenshots(DATASET_ROOT, DATABASE_FILENAME);
+            let screenshot_hashmaps = db::create_hashmap_vector(screenshot_records.unwrap().as_slice());
+            return screenshot_hashmaps;
+        },
+        _ => {
+            let screenshot_records = db::search_screenshots_ocr(term, DATASET_ROOT, DATABASE_FILENAME);
+            // match screenshot_records {
+            //     Ok(_) => println!("Found records"),
+            //     Err(e) => println!("Error {}", e),
+            // }
+            let screenshot_hashmaps = db::create_hashmap_vector(screenshot_records.unwrap().as_slice());
+            return screenshot_hashmaps;
 
-    let screenshot_records = db::get_all_screenshots(DATASET_ROOT, DATABASE_FILENAME);
-    let screenshot_hashmaps = db::create_hashmap_vector(screenshot_records.unwrap().as_slice());
-    screenshot_hashmaps   
+        }
+    };
+
 }
 
 fn main() {

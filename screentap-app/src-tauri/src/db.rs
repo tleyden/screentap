@@ -55,11 +55,22 @@ pub fn create_db(dataset_root: &str, db_filename: &str) -> Result<()> {
     )?;
 
     // Enable full-text search on the OCR text column
+    // conn.execute(
+    //     "CREATE VIRTUAL TABLE IF NOT EXISTS ocr_text_index 
+    //         USING fts5(ocr_text);",
+    //     [],
+    // )?;
+
     conn.execute(
-        "CREATE VIRTUAL TABLE IF NOT EXISTS ocr_text_index 
-            USING fts5(ocr_text);",
+        "CREATE VIRTUAL TABLE IF NOT EXISTS ocr_text_index USING fts5(
+            content='documents',
+            ocr_text,
+            content_rowid='id'
+        );",
         [],
     )?;
+
+
 
     Ok(())
 
@@ -100,10 +111,38 @@ pub fn get_all_screenshots(dataset_root: &str, db_filename: &str) -> Result<Vec<
     let db_filename_fq_path = dataset_root_path.join(db_filename);
     let conn = Connection::open(db_filename_fq_path.to_str().unwrap())?;
 
-    // let now = Utc::now().naive_utc();
-
     let mut stmt = conn.prepare("SELECT id, timestamp, ocr_text, file_path FROM documents")?;
     let screenshots = stmt.query_map([], |row| {
+        Ok(ScreenshotRecord {
+            id: row.get(0)?,
+            timestamp: row.get(1)?,
+            ocr_text: row.get(2)?,
+            file_path: row.get(3)?,
+        })
+    })?
+    .collect::<Result<Vec<_>, _>>()?;
+
+    Ok(screenshots)
+
+}
+
+/**
+ * Helper function to search screenshots in the db matching ocr term
+ */
+pub fn search_screenshots_ocr(term: &str, dataset_root: &str, db_filename: &str) -> Result<Vec<ScreenshotRecord>, rusqlite::Error> {
+
+    let dataset_root_path = Path::new(dataset_root);
+    let db_filename_fq_path = dataset_root_path.join(db_filename);
+    let conn = Connection::open(db_filename_fq_path.to_str().unwrap())?;
+
+    // SELECT ocr_text_index.rowid, d.file_path, d.ocr_text, d.timestamp, d.id  FROM ocr_text_index JOIN documents d on d.id = ocr_text_index.rowid WHERE ocr_text_index.ocr_text MATCH 'Database' ;
+
+    // let mut stmt = conn.prepare("SELECT * FROM ocr_text_index WHERE ocr_text MATCH ?")?;
+    let mut stmt = conn.prepare("SELECT ocr_text_index.rowid, d.timestamp, d.ocr_text, d.file_path FROM ocr_text_index JOIN documents d on d.id = ocr_text_index.rowid WHERE ocr_text_index.ocr_text MATCH 'Database'")?;
+
+    // let screenshots = stmt.query_map(params![term], |row| {
+    let screenshots = stmt.query_map([], |row| {
+        print!("row: {:?}", row);
         Ok(ScreenshotRecord {
             id: row.get(0)?,
             timestamp: row.get(1)?,
