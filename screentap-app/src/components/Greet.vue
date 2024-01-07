@@ -23,19 +23,38 @@ async function searchscreenshots() {
     <button type="submit">Search Screenshots</button>
   </form>
 
-  <div>
+  <!-- <div>
     <table>
-      <tr>
-        <th>Image Path</th>
-        <th>OCR Text</th>
-      </tr>
       <tr v-for="(item, index) in searchScreenshotsResult" :key="index">
-        <td>{{ item['image_path'] }}</td>
-        <td>{{ item['ocr_text'] }}</td>
+        <td><img :src="item['image_path']" alt="Screenshot" :title="item['ocr_text']"></td>
       </tr>
     </table>
+  </div> -->
+
+  <div class="flex-container">
+    <div v-for="(item, index) in searchScreenshotsResult" :key="index" class="flex-item">
+      <img :src="item['image_path']" alt="Screenshot" :title="item['ocr_text']">
+    </div>
   </div>
 
-  <!-- <img src="/Users/tleyden/Development/screentap/dataset/2024_01_07_11_10_27.png" alt="Loaded Image" /> -->
-
 </template>
+
+<style>
+  .flex-container {
+    display: flex;
+    flex-direction: row; /* or column, depending on how you want to display items */
+    flex-wrap: wrap; /* allows items to wrap to the next line */
+    justify-content: space-around; /* or any other justification you prefer */
+  }
+
+  .flex-item {
+    margin: 10px; /* adjust as needed for spacing */
+    /* additional styles for the flex items */
+  }
+
+  .flex-item img {
+    width: 100%; /* or any specific size */
+    height: auto; /* maintains the aspect ratio */
+    /* additional styles for the images */
+  }
+</style>

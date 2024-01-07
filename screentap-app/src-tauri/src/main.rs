@@ -13,7 +13,7 @@ mod db;
 mod utils; 
 mod screenshot;
 
-const DATASET_ROOT: &str = "/Users/tleyden/Development/screentap/dataset";
+const DATASET_ROOT: &str = "/Users/tleyden/Development/screentap/screentap-app/public/dataset";
 const DATABASE_FILENAME: &str = "screentap.db";
 
 
@@ -26,11 +26,11 @@ fn search_screenshots(term: &str) -> Vec<HashMap<String, String>> {
 
     // Example data - replace with your actual OCR logic
     results.push(HashMap::from([
-        ("image_path".to_string(), "/path/to/image1.jpg".to_string()),
+        ("image_path".to_string(), "/dataset/2024_01_07_12_40_56.png".to_string()),
         ("ocr_text".to_string(), "Text from image 1".to_string()),
     ]));
     results.push(HashMap::from([
-        ("image_path".to_string(), "/path/to/image2.jpg".to_string()),
+        ("image_path".to_string(), "/dataset/2024_01_07_12_40_56.png".to_string()),
         ("ocr_text".to_string(), "Text from image 2".to_string()),
     ]));
 
