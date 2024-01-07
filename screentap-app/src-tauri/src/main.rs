@@ -5,13 +5,14 @@ extern crate screen_ocr_swift_rs;
 use screen_ocr_swift_rs::extract_text;
 use screen_ocr_swift_rs::screen_capture;
 
-use chrono::{DateTime, Local, Utc};
+use chrono::{DateTime, Local};
 use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::io::Write;
-use rusqlite::{params, Connection, Result};
 use std::thread;
 use std::time::Duration;
+
+mod db;
 
 const DATASET_ROOT: &str = "/Users/tleyden/Development/screentap/dataset";
 const DATABASE_FILENAME: &str = "screentap.db";
@@ -25,6 +26,8 @@ fn greet() -> String {
  * Helper function to save a screenshot and OCR text to the dataset directory and DB
  */
 fn save_screenshot() -> String {
+
+    db::hello();
 
     let now = Local::now();
     let timestamp_png_filename = generate_filename(now, "png");
@@ -41,9 +44,11 @@ fn save_screenshot() -> String {
     }
 
     // Save screenshot meta to the DB
-    let save_result = save_screenshot_meta(
+    let save_result = db::save_screenshot_meta(
         target_png_file_path.to_str().unwrap(), 
-        ocr_text.to_string().as_str()
+        ocr_text.to_string().as_str(),
+        DATASET_ROOT,
+        DATABASE_FILENAME
     );
 
     let current_time_formatted = now.format("%Y-%m-%d %H:%M:%S").to_string();
@@ -74,61 +79,6 @@ fn write_string_to_file<P: AsRef<Path>>(file_path: P, content: &str) -> std::io:
     Ok(())
 }
 
-/**
- * Helper function to create the DB if it doesn't exist
- */
-fn create_db(db_filename: &str) -> Result<()> {
-
-    let conn = Connection::open(db_filename)?;
-
-    // Create a table with the desired columns
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS documents (
-                id INTEGER PRIMARY KEY,
-                timestamp TIMESTAMP NOT NULL,
-                ocr_text TEXT NOT NULL,
-                file_path TEXT NOT NULL
-            )",
-        [],
-    )?;
-
-    // Enable full-text search on the OCR text column
-    conn.execute(
-        "CREATE VIRTUAL TABLE IF NOT EXISTS ocr_text_index 
-            USING fts5(ocr_text);",
-        [],
-    )?;
-
-    Ok(())
-
-}
-
-
-/**
- * Helper function to save screenshot meta to the DB
- */
-fn save_screenshot_meta(screenshot_file_path: &str, ocr_text: &str) -> Result<()> {
-
-    let dataset_root_path = Path::new(DATASET_ROOT);
-    let db_filename = dataset_root_path.join(DATABASE_FILENAME);
-    let conn = Connection::open(db_filename.to_str().unwrap())?;
-
-    let now = Utc::now().naive_utc();
-
-    conn.execute(
-        "INSERT INTO documents (timestamp, ocr_text, file_path) VALUES (?1, ?2, ?3)",
-        params![now.timestamp(), ocr_text, screenshot_file_path],
-    )?;
-
-    // Insert the OCR text into the full-text search index
-    conn.execute(
-        "INSERT INTO ocr_text_index (ocr_text) VALUES (?1)",
-        [ocr_text],
-    )?;
-
-    Ok(())
-
-}
 
 fn main() {
 
@@ -136,7 +86,7 @@ fn main() {
     let dataset_root_path = Path::new(DATASET_ROOT);
     let db_filename = dataset_root_path.join(DATABASE_FILENAME);
     println!("Creating db_filename: {} if it doesn't exist", db_filename.to_str().unwrap());
-    let db_create_result = create_db(db_filename.to_str().unwrap());
+    let db_create_result = db::create_db(db_filename.to_str().unwrap());
     match db_create_result {
         Ok(()) => println!("Created db"),
         Err(e) => eprintln!("Failed to create db: {}", e),
