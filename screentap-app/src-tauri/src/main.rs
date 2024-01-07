@@ -29,14 +29,18 @@ fn search_screenshots(term: &str) -> Vec<HashMap<String, String>> {
             return screenshot_hashmaps;
         },
         _ => {
-            let screenshot_records = db::search_screenshots_ocr(term, DATASET_ROOT, DATABASE_FILENAME);
-            // match screenshot_records {
-            //     Ok(_) => println!("Found records"),
-            //     Err(e) => println!("Error {}", e),
-            // }
-            let screenshot_hashmaps = db::create_hashmap_vector(screenshot_records.unwrap().as_slice());
-            return screenshot_hashmaps;
-
+            let screenshot_records_result = db::search_screenshots_ocr(term, DATASET_ROOT, DATABASE_FILENAME);
+            match screenshot_records_result {
+                Ok(screenshot_records) => { 
+                    println!("Found records");
+                    let screenshot_hashmaps = db::create_hashmap_vector(screenshot_records.as_slice());
+                    return screenshot_hashmaps;
+                },
+                Err(e) => { 
+                    println!("Error {}", e);
+                    return vec![];
+                },
+            }
         }
     };
 

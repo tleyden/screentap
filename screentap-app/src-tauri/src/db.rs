@@ -135,14 +135,14 @@ pub fn search_screenshots_ocr(term: &str, dataset_root: &str, db_filename: &str)
     let db_filename_fq_path = dataset_root_path.join(db_filename);
     let conn = Connection::open(db_filename_fq_path.to_str().unwrap())?;
 
-    // SELECT ocr_text_index.rowid, d.file_path, d.ocr_text, d.timestamp, d.id  FROM ocr_text_index JOIN documents d on d.id = ocr_text_index.rowid WHERE ocr_text_index.ocr_text MATCH 'Database' ;
+    let mut stmt = conn.prepare(r#"
+        SELECT ocr_text_index.rowid, d.timestamp, d.ocr_text, d.file_path 
+        FROM ocr_text_index 
+        JOIN documents d on d.id = ocr_text_index.rowid 
+        WHERE ocr_text_index.ocr_text MATCH ?
+    "#)?;
 
-    // let mut stmt = conn.prepare("SELECT * FROM ocr_text_index WHERE ocr_text MATCH ?")?;
-    let mut stmt = conn.prepare("SELECT ocr_text_index.rowid, d.timestamp, d.ocr_text, d.file_path FROM ocr_text_index JOIN documents d on d.id = ocr_text_index.rowid WHERE ocr_text_index.ocr_text MATCH 'Database'")?;
-
-    // let screenshots = stmt.query_map(params![term], |row| {
-    let screenshots = stmt.query_map([], |row| {
-        print!("row: {:?}", row);
+    let screenshots = stmt.query_map([term], |row| {
         Ok(ScreenshotRecord {
             id: row.get(0)?,
             timestamp: row.get(1)?,
