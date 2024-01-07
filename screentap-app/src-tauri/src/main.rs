@@ -3,7 +3,7 @@
 
 extern crate screen_ocr_swift_rs;
 
-use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu};
+use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, CustomMenuItem};
 
 use std::thread;
 use std::time::Duration;
@@ -22,7 +22,8 @@ fn greet() -> String {
 
 fn main() {
 
-    let system_tray_menu = SystemTrayMenu::new();
+    let quit = CustomMenuItem::new("quit".to_string(), "Quit").accelerator("Cmd+Q");
+    let system_tray_menu = SystemTrayMenu::new().add_item(quit);
 
     // Spawn a thread to save screenshots in the background
     thread::spawn(|| {
@@ -46,7 +47,7 @@ fn main() {
     tauri::Builder::default()
     .system_tray(SystemTray::new().with_menu(system_tray_menu))
     .on_system_tray_event(|app, event| match event {
-        SystemTrayEvent::LeftClick {
+        SystemTrayEvent::RightClick {
             position: _,
             size: _,
             ..
@@ -59,6 +60,12 @@ fn main() {
                 window.show().unwrap();
                 window.set_focus().unwrap();
             }
+        },
+        SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
+            "quit" => {
+                std::process::exit(0);
+            }
+            _ => {}
         },
         _ => {}
     })
