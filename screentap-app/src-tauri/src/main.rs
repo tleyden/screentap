@@ -1,4 +1,4 @@
-    // Prevents additional console window on Windows in release, DO NOT REMOVE!!
+// Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 extern crate screen_ocr_swift_rs;
@@ -17,33 +17,23 @@ mod screenshot;
 const DATASET_ROOT: &str = "/Users/tleyden/Development/screentap/screentap-app/public/dataset";
 const DATABASE_FILENAME: &str = "screentap.db";
 
-
 #[tauri::command]
 fn search_screenshots(term: &str) -> Vec<HashMap<String, String>> {
-
-    // if term is empty, get all records
-    match term {
-        "" => {
-            let screenshot_records = db::get_all_screenshots(DATASET_ROOT, DATABASE_FILENAME);
-            let screenshot_hashmaps = db::create_hashmap_vector(screenshot_records.unwrap().as_slice());
-            return screenshot_hashmaps;
-        },
-        _ => {
-            let screenshot_records_result = db::search_screenshots_ocr(term, DATASET_ROOT, DATABASE_FILENAME);
-            match screenshot_records_result {
-                Ok(screenshot_records) => { 
-                    println!("Found records");
-                    let screenshot_hashmaps = db::create_hashmap_vector(screenshot_records.as_slice());
-                    return screenshot_hashmaps;
-                },
-                Err(e) => { 
-                    println!("Error {}", e);
-                    return vec![];
-                },
-            }
-        }
+    let screenshot_records_result = if term.is_empty() {
+        db::get_all_screenshots(DATASET_ROOT, DATABASE_FILENAME)
+    } else {
+        db::search_screenshots_ocr(term, DATASET_ROOT, DATABASE_FILENAME)
     };
 
+    match screenshot_records_result {
+        Ok(screenshot_records) => {
+            db::create_hashmap_vector(screenshot_records.as_slice())
+        },
+        Err(e) => {
+            println!("Error searching screenshots: {}.  Returning empty result", e);
+            vec![]
+        },
+    }
 }
 
 fn main() {
