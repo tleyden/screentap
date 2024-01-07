@@ -1,3 +1,5 @@
+
+<!-- Vue.js script -->
 <script setup lang="ts">
 import { ref } from "vue";
 import { invoke } from "@tauri-apps/api/tauri";
@@ -12,24 +14,13 @@ async function searchscreenshots() {
 
 </script>
 
+<!-- Vue.js template -->
 <template>
-  <!-- <form class="row" @submit.prevent="greet">
-    <input id="greet-input" v-model="searchKeyword" placeholder="What are you looking for..." />
-    <button type="submit">Search Screenshots</button>
-  </form> -->
 
   <form class="row" @submit.prevent="searchscreenshots">
     <input id="search-screenshots-input" v-model="searchKeyword" placeholder="What are you looking for..." />
     <button type="submit">Search Screenshots</button>
   </form>
-
-  <!-- <div>
-    <table>
-      <tr v-for="(item, index) in searchScreenshotsResult" :key="index">
-        <td><img :src="item['image_path']" alt="Screenshot" :title="item['ocr_text']"></td>
-      </tr>
-    </table>
-  </div> -->
 
   <div class="flex-container">
     <div v-for="(item, index) in searchScreenshotsResult" :key="index" class="flex-item">
@@ -39,7 +30,9 @@ async function searchscreenshots() {
 
 </template>
 
+<!-- CSS styles -->
 <style>
+
   .flex-container {
     display: flex;
     flex-direction: row; /* or column, depending on how you want to display items */
@@ -57,4 +50,5 @@ async function searchscreenshots() {
     height: auto; /* maintains the aspect ratio */
     /* additional styles for the images */
   }
+
 </style>
