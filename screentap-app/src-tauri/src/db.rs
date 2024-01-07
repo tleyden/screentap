@@ -54,13 +54,6 @@ pub fn create_db(dataset_root: &str, db_filename: &str) -> Result<()> {
         [],
     )?;
 
-    // Enable full-text search on the OCR text column
-    // conn.execute(
-    //     "CREATE VIRTUAL TABLE IF NOT EXISTS ocr_text_index 
-    //         USING fts5(ocr_text);",
-    //     [],
-    // )?;
-
     conn.execute(
         "CREATE VIRTUAL TABLE IF NOT EXISTS ocr_text_index USING fts5(
             content='documents',
