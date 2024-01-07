@@ -2,8 +2,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 extern crate screen_ocr_swift_rs;
-use screen_ocr_swift_rs::extract_text;
-use screen_ocr_swift_rs::screen_capture;
 
 use chrono::Local;
 use std::path::Path;
@@ -30,8 +28,10 @@ fn save_screenshot() -> String {
     let timestamp_png_filename = utils::generate_filename(now, "png");
     let dataset_root_path = Path::new(DATASET_ROOT);
     let target_png_file_path = dataset_root_path.join(timestamp_png_filename);
-    screen_capture(target_png_file_path.to_str().unwrap());
-    let ocr_text = extract_text(target_png_file_path.to_str().unwrap());
+
+    screen_ocr_swift_rs::screen_capture(target_png_file_path.to_str().unwrap());
+    let ocr_text = screen_ocr_swift_rs::extract_text(target_png_file_path.to_str().unwrap());
+    
     let timestamp_ocr_text_filename = utils::generate_filename(now, "txt");
     let target_ocr_text_file_path = dataset_root_path.join(timestamp_ocr_text_filename);
 
