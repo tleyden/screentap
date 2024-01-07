@@ -16,8 +16,9 @@ const DATASET_ROOT: &str = "/Users/tleyden/Development/screentap/dataset";
 const DATABASE_FILENAME: &str = "screentap.db";
 
 #[tauri::command]
-fn greet() -> String {
-    format!("No screenshot saved, running in background thread ..")
+fn search(term: &str) -> String {
+    println!("Searching for {}", term);
+    format!("No screenshot found for {}", term)
 }
 
 fn main() {
@@ -70,7 +71,7 @@ fn main() {
         },
         _ => {}
     })
-    .invoke_handler(tauri::generate_handler![greet])
+    .invoke_handler(tauri::generate_handler![search])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
     
