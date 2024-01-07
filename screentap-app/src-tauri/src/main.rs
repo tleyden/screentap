@@ -3,7 +3,7 @@
 
 extern crate screen_ocr_swift_rs;
 
-use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, CustomMenuItem};
+use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, CustomMenuItem, SystemTrayMenuItem};
 
 use std::thread;
 use std::time::Duration;
@@ -27,6 +27,7 @@ fn main() {
 
     let system_tray_menu = SystemTrayMenu::new()
         .add_item(show_hide_window)
+        .add_native_item(SystemTrayMenuItem::Separator)
         .add_item(quit);
 
     // Create the database if it doesn't exist
