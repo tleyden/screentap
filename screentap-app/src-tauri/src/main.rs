@@ -23,16 +23,20 @@ fn greet() -> String {
 fn main() {
 
     let quit = CustomMenuItem::new("quit".to_string(), "Quit").accelerator("Cmd+Q");
-    let system_tray_menu = SystemTrayMenu::new().add_item(quit);
+    let show_hide_window = CustomMenuItem::new("show_hide_window".to_string(), "Show/Hide Screentap");
+
+    let system_tray_menu = SystemTrayMenu::new()
+        .add_item(show_hide_window)
+        .add_item(quit);
+
+    // Create the database if it doesn't exist
+    match db::create_db(DATASET_ROOT, DATABASE_FILENAME) {
+        Ok(()) => println!("Ensured DB exists"),
+        Err(e) => eprintln!("Failed to create db: {}", e),
+    }
 
     // Spawn a thread to save screenshots in the background
     thread::spawn(|| {
-
-        // Create the database if it doesn't exist
-        match db::create_db(DATASET_ROOT, DATABASE_FILENAME) {
-            Ok(()) => println!("Ensured DB exists"),
-            Err(e) => eprintln!("Failed to create db: {}", e),
-        }
 
         loop {
             println!("Saving screenshot in background thread ..");
@@ -47,23 +51,19 @@ fn main() {
     tauri::Builder::default()
     .system_tray(SystemTray::new().with_menu(system_tray_menu))
     .on_system_tray_event(|app, event| match event {
-        SystemTrayEvent::RightClick {
-            position: _,
-            size: _,
-            ..
-        } => {
-            let window = app.get_window("main").unwrap();
-            // toggle application window
-            if window.is_visible().unwrap() {
-                window.hide().unwrap();
-            } else {
-                window.show().unwrap();
-                window.set_focus().unwrap();
-            }
-        },
         SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
             "quit" => {
                 std::process::exit(0);
+            },
+            "show_hide_window" => {
+                let window = app.get_window("main").unwrap();
+                // toggle application window
+                if window.is_visible().unwrap() {
+                    window.hide().unwrap();
+                } else {
+                    window.show().unwrap();
+                    window.set_focus().unwrap();
+                }
             }
             _ => {}
         },
