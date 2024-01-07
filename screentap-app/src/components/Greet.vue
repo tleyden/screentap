@@ -12,6 +12,17 @@ async function searchscreenshots() {
   searchScreenshotsResult.value = await invoke("search_screenshots", { term: searchKeyword.value });
 }
 
+function formatTitle(item: { timestamp: number, ocr_text: string }): string {
+  const readableTimestamp = new Date(item.timestamp * 1000).toLocaleString();
+  const truncatedText = truncateText(item.ocr_text);
+  return `[${readableTimestamp}] OCR Text: ${truncatedText}`;
+}
+
+function truncateText(text: string) {
+  const maxLength = 500;
+  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+}
+
 </script>
 
 <!-- Vue.js template -->
@@ -24,7 +35,7 @@ async function searchscreenshots() {
 
   <div class="flex-container">
     <div v-for="(item, index) in searchScreenshotsResult" :key="index" class="flex-item">
-      <img :src="item['file_path']" alt="Screenshot" :title="item['ocr_text']">
+      <img :src="item['file_path']" alt="Screenshot" :title="formatTitle(item)">
     </div>
   </div>
 
