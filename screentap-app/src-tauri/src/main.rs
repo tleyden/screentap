@@ -5,6 +5,7 @@ extern crate screen_ocr_swift_rs;
 
 use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, CustomMenuItem, SystemTrayMenuItem};
 
+use std::collections::HashMap;
 use std::thread;
 use std::time::Duration;
 
@@ -15,10 +16,25 @@ mod screenshot;
 const DATASET_ROOT: &str = "/Users/tleyden/Development/screentap/dataset";
 const DATABASE_FILENAME: &str = "screentap.db";
 
+
 #[tauri::command]
-fn search(term: &str) -> String {
+fn search_screenshots(term: &str) -> Vec<HashMap<String, String>> {
+
     println!("Searching for {}", term);
-    format!("No screenshot found for {}", term)
+
+    let mut results = Vec::new();
+
+    // Example data - replace with your actual OCR logic
+    results.push(HashMap::from([
+        ("image_path".to_string(), "/path/to/image1.jpg".to_string()),
+        ("ocr_text".to_string(), "Text from image 1".to_string()),
+    ]));
+    results.push(HashMap::from([
+        ("image_path".to_string(), "/path/to/image2.jpg".to_string()),
+        ("ocr_text".to_string(), "Text from image 2".to_string()),
+    ]));
+
+    results   
 }
 
 fn main() {
@@ -71,7 +87,7 @@ fn main() {
         },
         _ => {}
     })
-    .invoke_handler(tauri::generate_handler![search])
+    .invoke_handler(tauri::generate_handler![search_screenshots])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
     
