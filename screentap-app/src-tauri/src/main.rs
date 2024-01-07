@@ -5,8 +5,8 @@ extern crate screen_ocr_swift_rs;
 use screen_ocr_swift_rs::extract_text;
 use screen_ocr_swift_rs::screen_capture;
 
-use chrono::{Local};
-use std::path::{Path};
+use chrono::Local;
+use std::path::Path;
 use std::thread;
 use std::time::Duration;
 
@@ -25,8 +25,6 @@ fn greet() -> String {
  * Helper function to save a screenshot and OCR text to the dataset directory and DB
  */
 fn save_screenshot() -> String {
-
-    db::hello();
 
     let now = Local::now();
     let timestamp_png_filename = utils::generate_filename(now, "png");
@@ -60,22 +58,17 @@ fn save_screenshot() -> String {
 }
 
 
-
-
 fn main() {
-
-    // Create the database if it doesn't exist
-    let dataset_root_path = Path::new(DATASET_ROOT);
-    let db_filename = dataset_root_path.join(DATABASE_FILENAME);
-    println!("Creating db_filename: {} if it doesn't exist", db_filename.to_str().unwrap());
-    let db_create_result = db::create_db(db_filename.to_str().unwrap());
-    match db_create_result {
-        Ok(()) => println!("Created db"),
-        Err(e) => eprintln!("Failed to create db: {}", e),
-    }
 
     // Spawn a thread to save screenshots in the background
     thread::spawn(|| {
+
+        // Create the database if it doesn't exist
+        match db::create_db(DATASET_ROOT, DATABASE_FILENAME) {
+            Ok(()) => println!("Created db"),
+            Err(e) => eprintln!("Failed to create db: {}", e),
+        }
+
         loop {
             println!("Saving screenshot in background thread ..");
             let _ = save_screenshot();
@@ -90,4 +83,5 @@ fn main() {
         .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+    
 }

@@ -1,17 +1,18 @@
 use rusqlite::{params, Connection, Result};
-use chrono::{Utc};
-use std::path::{Path};
+use chrono::Utc;
+use std::path::Path;
 
-pub fn hello() {
-    println!("Hello from db.rs");
-}
 
 /**
  * Helper function to create the DB if it doesn't exist
  */
-pub fn create_db(db_filename: &str) -> Result<()> {
+pub fn create_db(dataset_root: &str, db_filename: &str) -> Result<()> {
 
-    let conn = Connection::open(db_filename)?;
+    let dataset_root_path = Path::new(dataset_root);
+    let db_filename_fq_path = dataset_root_path.join(db_filename);
+    println!("Creating db_filename: {} if it doesn't exist", db_filename_fq_path.to_str().unwrap());
+
+    let conn = Connection::open(db_filename_fq_path.to_str().unwrap())?;
 
     // Create a table with the desired columns
     conn.execute(
@@ -41,8 +42,8 @@ pub fn create_db(db_filename: &str) -> Result<()> {
 pub fn save_screenshot_meta(screenshot_file_path: &str, ocr_text: &str, dataset_root: &str, db_filename: &str) -> Result<()> {
 
     let dataset_root_path = Path::new(dataset_root);
-    let db_filename = dataset_root_path.join(db_filename);
-    let conn = Connection::open(db_filename.to_str().unwrap())?;
+    let db_filename_fq_path = dataset_root_path.join(db_filename);
+    let conn = Connection::open(db_filename_fq_path.to_str().unwrap())?;
 
     let now = Utc::now().naive_utc();
 
