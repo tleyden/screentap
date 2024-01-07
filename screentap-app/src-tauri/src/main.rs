@@ -36,6 +36,36 @@ fn search_screenshots(term: &str) -> Vec<HashMap<String, String>> {
     }
 }
 
+fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error + 'static>> {
+
+    let app_handle = app.handle();
+
+    println!("resource_dir: {}", app_handle.path_resolver().resource_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("app_config_dir: {}", app_handle.path_resolver().app_config_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("app_data_dir: {}", app_handle.path_resolver().app_data_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("app_local_data_dir: {}", app_handle.path_resolver().app_local_data_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("app_cache_dir: {}", app_handle.path_resolver().app_cache_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("app_log_dir: {}", app_handle.path_resolver().app_log_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("data_dir: {}", tauri::api::path::data_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("local_data_dir: {}", tauri::api::path::local_data_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("cache_dir: {}", tauri::api::path::cache_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("config_dir: {}", tauri::api::path::config_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("executable_dir: {}", tauri::api::path::executable_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("public_dir: {}", tauri::api::path::public_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("runtime_dir: {}", tauri::api::path::runtime_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("template_dir: {}", tauri::api::path::template_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("font_dir: {}", tauri::api::path::font_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("home_dir: {}", tauri::api::path::home_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("audio_dir: {}", tauri::api::path::audio_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("desktop_dir: {}", tauri::api::path::desktop_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("document_dir: {}", tauri::api::path::document_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("download_dir: {}", tauri::api::path::download_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+    println!("picture_dir: {}", tauri::api::path::picture_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
+
+    Ok(())
+
+}
+
 fn main() {
 
     let quit = CustomMenuItem::new("quit".to_string(), "Quit").accelerator("Cmd+Q");
@@ -66,6 +96,7 @@ fn main() {
     });
 
     tauri::Builder::default()
+    .setup(setup_handler)
     .system_tray(SystemTray::new().with_menu(system_tray_menu))
     .on_system_tray_event(|app, event| match event {
         SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
