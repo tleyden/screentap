@@ -111,7 +111,7 @@ pub fn get_all_screenshots(dataset_root: &str, db_filename: &str) -> Result<Vec<
     let db_filename_fq_path = dataset_root_path.join(db_filename);
     let conn = Connection::open(db_filename_fq_path.to_str().unwrap())?;
 
-    let mut stmt = conn.prepare("SELECT id, timestamp, ocr_text, file_path FROM documents")?;
+    let mut stmt = conn.prepare("SELECT id, timestamp, ocr_text, file_path FROM documents ORDER BY timestamp DESC")?;
     let screenshots = stmt.query_map([], |row| {
         Ok(ScreenshotRecord {
             id: row.get(0)?,
@@ -140,6 +140,7 @@ pub fn search_screenshots_ocr(term: &str, dataset_root: &str, db_filename: &str)
         FROM ocr_text_index 
         JOIN documents d on d.id = ocr_text_index.rowid 
         WHERE ocr_text_index.ocr_text MATCH ?
+        ORDER BY rank, d.timestamp DESC
     "#)?;
 
     let screenshots = stmt.query_map([term], |row| {

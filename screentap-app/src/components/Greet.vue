@@ -23,6 +23,9 @@ function truncateText(text: string) {
   return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 }
 
+// Trigger empty search to show all screenshots on page load
+searchscreenshots();
+
 </script>
 
 <!-- Vue.js template -->
