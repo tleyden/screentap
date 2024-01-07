@@ -1,7 +1,9 @@
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
+    // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 extern crate screen_ocr_swift_rs;
+
+use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu};
 
 use std::thread;
 use std::time::Duration;
@@ -20,6 +22,8 @@ fn greet() -> String {
 
 fn main() {
 
+    let system_tray_menu = SystemTrayMenu::new();
+
     // Spawn a thread to save screenshots in the background
     thread::spawn(|| {
 
@@ -32,16 +36,34 @@ fn main() {
         loop {
             println!("Saving screenshot in background thread ..");
             let _ = screenshot::save_screenshot(DATASET_ROOT, DATABASE_FILENAME);
+
             let sleep_time_secs = 300;
             println!("Sleeping for {} secs ..", sleep_time_secs);
             thread::sleep(Duration::from_secs(sleep_time_secs));
         }
     });
 
-    // Run the Tauri event loop
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+    .system_tray(SystemTray::new().with_menu(system_tray_menu))
+    .on_system_tray_event(|app, event| match event {
+        SystemTrayEvent::LeftClick {
+            position: _,
+            size: _,
+            ..
+        } => {
+            let window = app.get_window("main").unwrap();
+            // toggle application window
+            if window.is_visible().unwrap() {
+                window.hide().unwrap();
+            } else {
+                window.show().unwrap();
+                window.set_focus().unwrap();
+            }
+        },
+        _ => {}
+    })
+    .invoke_handler(tauri::generate_handler![greet])
+    .run(tauri::generate_context!())
+    .expect("error while running tauri application");
     
 }
