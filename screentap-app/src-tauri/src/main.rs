@@ -62,6 +62,13 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
     println!("download_dir: {}", tauri::api::path::download_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
     println!("picture_dir: {}", tauri::api::path::picture_dir().unwrap_or(std::path::PathBuf::new()).to_string_lossy());
 
+    let app_data_dir = app_handle.path_resolver().app_data_dir().unwrap().to_str().unwrap().to_string();
+    // If app_data_dir doesn't exist, create it
+    if !std::path::Path::new(&app_data_dir).exists() {
+        println!("Creating app_data_dir: {}", app_data_dir);
+        std::fs::create_dir_all(&app_data_dir)?;
+    }
+
     Ok(())
 
 }
