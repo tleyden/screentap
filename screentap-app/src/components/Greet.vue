@@ -24,7 +24,7 @@ async function searchscreenshots() {
 
   <div class="flex-container">
     <div v-for="(item, index) in searchScreenshotsResult" :key="index" class="flex-item">
-      <img :src="item['image_path']" alt="Screenshot" :title="item['ocr_text']">
+      <img :src="item['file_path']" alt="Screenshot" :title="item['ocr_text']">
     </div>
   </div>
 

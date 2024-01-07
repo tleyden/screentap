@@ -22,19 +22,25 @@ fn search_screenshots(term: &str) -> Vec<HashMap<String, String>> {
 
     println!("Searching for {}", term);
 
-    let mut results = Vec::new();
+    let screenshot_records = db::get_all_screenshots(DATASET_ROOT, DATABASE_FILENAME);
+    let screenshot_hashmaps = db::create_hashmap_vector(screenshot_records.unwrap().as_slice());
 
-    // Example data - replace with your actual OCR logic
-    results.push(HashMap::from([
-        ("image_path".to_string(), "/dataset/2024_01_07_12_40_56.png".to_string()),
-        ("ocr_text".to_string(), "Text from image 1".to_string()),
-    ]));
-    results.push(HashMap::from([
-        ("image_path".to_string(), "/dataset/2024_01_07_12_40_56.png".to_string()),
-        ("ocr_text".to_string(), "Text from image 2".to_string()),
-    ]));
+    // Loop over screenshot_records and convert to hashmaps
 
-    results   
+
+    // let mut results = Vec::new();
+
+    // // Example data - replace with your actual OCR logic
+    // results.push(HashMap::from([
+    //     ("image_path".to_string(), "/dataset/2024_01_07_12_40_56.png".to_string()),
+    //     ("ocr_text".to_string(), "Text from image 1".to_string()),
+    // ]));
+    // results.push(HashMap::from([
+    //     ("image_path".to_string(), "/dataset/2024_01_07_12_40_56.png".to_string()),
+    //     ("ocr_text".to_string(), "Text from image 2".to_string()),
+    // ]));
+    // results
+    screenshot_hashmaps   
 }
 
 fn main() {
