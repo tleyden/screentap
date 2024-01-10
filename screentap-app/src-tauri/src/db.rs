@@ -1,6 +1,8 @@
 use rusqlite::{params, Connection, Result};
 use chrono::NaiveDateTime;
 use std::{path::Path, collections::HashMap};
+use base64::engine::Engine as _;
+use base64::engine::general_purpose::STANDARD as BASE64;
 
 /**
  * Struct to represent screenshot records in the DB
@@ -11,6 +13,7 @@ pub struct ScreenshotRecord {
     timestamp: i32,    
     ocr_text: String,
     file_path: String,
+    base64_image: String,
 }
 
 /**
@@ -29,6 +32,7 @@ pub fn screenshot_record_to_hashmap(record: &ScreenshotRecord) -> HashMap<String
     map.insert("timestamp".to_string(), record.timestamp.to_string());
     map.insert("ocr_text".to_string(), record.ocr_text.clone());
     map.insert("file_path".to_string(), record.file_path.clone());
+    map.insert("base64_image".to_string(), record.base64_image.clone());
     map
 }
 
@@ -106,11 +110,17 @@ pub fn get_all_screenshots(dataset_root: &str, db_filename: &str) -> Result<Vec<
 
     let mut stmt = conn.prepare("SELECT id, timestamp, ocr_text, file_path FROM documents ORDER BY timestamp DESC")?;
     let screenshots = stmt.query_map([], |row| {
+
+        // open the file_path and convert to base64
+        let file_path: String = row.get(3)?;
+        let base64_image: String = load_file_as_base_64(&file_path, dataset_root);
+
         Ok(ScreenshotRecord {
             id: row.get(0)?,
             timestamp: row.get(1)?,
             ocr_text: row.get(2)?,
-            file_path: row.get(3)?,
+            file_path: file_path,
+            base64_image: base64_image,
         })
     })?
     .collect::<Result<Vec<_>, _>>()?;
@@ -137,11 +147,17 @@ pub fn search_screenshots_ocr(term: &str, dataset_root: &str, db_filename: &str)
     "#)?;
 
     let screenshots = stmt.query_map([term], |row| {
+
+        // open the file_path and convert to base64
+        let file_path: String = row.get(3)?;
+        let base64_image: String = load_file_as_base_64(&file_path, dataset_root);
+
         Ok(ScreenshotRecord {
             id: row.get(0)?,
             timestamp: row.get(1)?,
             ocr_text: row.get(2)?,
-            file_path: row.get(3)?,
+            file_path: file_path,
+            base64_image: base64_image,
         })
     })?
     .collect::<Result<Vec<_>, _>>()?;
@@ -150,3 +166,10 @@ pub fn search_screenshots_ocr(term: &str, dataset_root: &str, db_filename: &str)
 
 }
 
+fn load_file_as_base_64(file_path: &str, dataset_root: &str) -> String {
+    let dataset_root_path = Path::new(dataset_root);
+    let file_path_fq = dataset_root_path.join(file_path);
+    let file_contents = std::fs::read(file_path_fq).unwrap();
+    let base64_image = BASE64.encode(file_contents);
+    base64_image
+}
