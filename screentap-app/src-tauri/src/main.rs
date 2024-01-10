@@ -96,7 +96,7 @@ fn main() {
             println!("Saving screenshot in background thread ..");
             let _ = screenshot::save_screenshot(DATASET_ROOT, DATABASE_FILENAME);
 
-            let sleep_time_secs = 15;
+            let sleep_time_secs = 120;
             println!("Sleeping for {} secs ..", sleep_time_secs);
             thread::sleep(Duration::from_secs(sleep_time_secs));
         }
