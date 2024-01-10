@@ -113,10 +113,7 @@ pub fn get_all_screenshots(dataset_root: &str, db_filename: &str) -> Result<Vec<
 
         // open the file_path and convert to base64
         let file_path: String = row.get(3)?;
-        let file_path_fq = dataset_root_path.join(file_path.clone());
-        let file_path_fq_str = file_path_fq.to_str().unwrap();
-        let file_contents = std::fs::read(file_path_fq_str).unwrap();
-        let base64_image = BASE64.encode(file_contents);
+        let base64_image: String = load_file_as_base_64(&file_path, dataset_root);
 
         Ok(ScreenshotRecord {
             id: row.get(0)?,
@@ -153,10 +150,7 @@ pub fn search_screenshots_ocr(term: &str, dataset_root: &str, db_filename: &str)
 
         // open the file_path and convert to base64
         let file_path: String = row.get(3)?;
-        let file_path_fq = dataset_root_path.join(file_path.clone());
-        let file_path_fq_str = file_path_fq.to_str().unwrap();
-        let file_contents = std::fs::read(file_path_fq_str).unwrap();
-        let base64_image = BASE64.encode(file_contents);
+        let base64_image: String = load_file_as_base_64(&file_path, dataset_root);
 
         Ok(ScreenshotRecord {
             id: row.get(0)?,
@@ -172,3 +166,10 @@ pub fn search_screenshots_ocr(term: &str, dataset_root: &str, db_filename: &str)
 
 }
 
+fn load_file_as_base_64(file_path: &str, dataset_root: &str) -> String {
+    let dataset_root_path = Path::new(dataset_root);
+    let file_path_fq = dataset_root_path.join(file_path);
+    let file_contents = std::fs::read(file_path_fq).unwrap();
+    let base64_image = BASE64.encode(file_contents);
+    base64_image
+}
