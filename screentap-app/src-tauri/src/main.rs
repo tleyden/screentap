@@ -13,16 +13,18 @@ mod db;
 mod utils; 
 mod screenshot;
 
-// TODO: make this a relative dir somehow
-const DATASET_ROOT: &str = "/Users/tleyden/Development/screentap/screentap-app/public/dataset";
+
 const DATABASE_FILENAME: &str = "screentap.db";
 
 #[tauri::command]
-fn search_screenshots(term: &str) -> Vec<HashMap<String, String>> {
+fn search_screenshots(app_handle: tauri::AppHandle, term: &str) -> Vec<HashMap<String, String>> {
+
+    let app_data_dir = app_handle.path_resolver().app_data_dir().unwrap().to_str().unwrap().to_string();
+
     let screenshot_records_result = if term.is_empty() {
-        db::get_all_screenshots(DATASET_ROOT, DATABASE_FILENAME)
+        db::get_all_screenshots(app_data_dir.as_str(), DATABASE_FILENAME)
     } else {
-        db::search_screenshots_ocr(term, DATASET_ROOT, DATABASE_FILENAME)
+        db::search_screenshots_ocr(term, app_data_dir.as_str(), DATABASE_FILENAME)
     };
 
     match screenshot_records_result {
@@ -69,6 +71,26 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
         std::fs::create_dir_all(&app_data_dir)?;
     }
 
+    // Create the database if it doesn't exist
+    match db::create_db(app_data_dir.as_str(), DATABASE_FILENAME) {
+        Ok(()) => println!("Ensured DB exists"),
+        Err(e) => eprintln!("Failed to create db: {}", e),
+    }
+
+    // Spawn a thread to save screenshots in the background
+    // The move keyword is necessary to move app_data_dir into the thread
+    thread::spawn(move || {
+
+        loop {
+            println!("Saving screenshot in background thread ..");
+            let _ = screenshot::save_screenshot(app_data_dir.as_str(), DATABASE_FILENAME);
+
+            let sleep_time_secs = 120;
+            println!("Sleeping for {} secs ..", sleep_time_secs);
+            thread::sleep(Duration::from_secs(sleep_time_secs));
+        }
+    });
+
     Ok(())
 
 }
@@ -82,25 +104,6 @@ fn main() {
         .add_item(show_hide_window)
         .add_native_item(SystemTrayMenuItem::Separator)
         .add_item(quit);
-
-    // Create the database if it doesn't exist
-    match db::create_db(DATASET_ROOT, DATABASE_FILENAME) {
-        Ok(()) => println!("Ensured DB exists"),
-        Err(e) => eprintln!("Failed to create db: {}", e),
-    }
-
-    // Spawn a thread to save screenshots in the background
-    thread::spawn(|| {
-
-        loop {
-            println!("Saving screenshot in background thread ..");
-            let _ = screenshot::save_screenshot(DATASET_ROOT, DATABASE_FILENAME);
-
-            let sleep_time_secs = 120;
-            println!("Sleeping for {} secs ..", sleep_time_secs);
-            thread::sleep(Duration::from_secs(sleep_time_secs));
-        }
-    });
 
     tauri::Builder::default()
     .setup(setup_handler)
