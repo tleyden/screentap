@@ -23,6 +23,10 @@ function truncateText(text: string) {
   return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 }
 
+function getBase64Image(dynamicBase64: string) {
+  return dynamicBase64 ? `data:image/png;base64,${dynamicBase64}` : '';
+}
+
 // Trigger empty search to show all screenshots on page load
 searchscreenshots();
 
@@ -38,7 +42,7 @@ searchscreenshots();
 
   <div class="flex-container">
     <div v-for="(item, index) in searchScreenshotsResult" :key="index" class="flex-item">
-      <img :src="item['file_path']" alt="Screenshot" :title="formatTitle(item)">
+      <img :src="getBase64Image(item['base64_image'])" alt="Screenshot" :title="formatTitle(item)">
     </div>
   </div>
 
