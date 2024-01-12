@@ -101,11 +101,11 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
 
 }
 
-fn browse_screenshots(app: &tauri::AppHandle) -> tauri::Window {
+fn create_browse_screenshots_window(app: &tauri::AppHandle) -> tauri::Window {
     let new_window = tauri::WindowBuilder::new(
         app,
         "browse",
-        tauri::WindowUrl::App("index.html".into())
+        tauri::WindowUrl::App("index_browse.html".into())
     ).build().expect("failed to build window");
 
     new_window
@@ -143,7 +143,16 @@ fn main() {
                 }
             },
             "browse_screenshots" => {
-                let _ = browse_screenshots(&app);
+                let window = app.get_window("browse");
+                match window {
+                    Some(w) => {
+                        w.show().unwrap();
+                        w.set_focus().unwrap();
+                    },
+                    None => {
+                        let _ = create_browse_screenshots_window(&app);
+                    }
+                }   
             },
             _ => {}
         },
