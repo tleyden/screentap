@@ -107,17 +107,17 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
         Err(e) => eprintln!("Failed to create db: {}", e),
     }
 
+    // Save one screenshot on startup so we never have an empty screen
+    let _ = screenshot::save_screenshot(app_data_dir.as_str(), DATABASE_FILENAME);
+
     // Spawn a thread to save screenshots in the background
     // The move keyword is necessary to move app_data_dir into the thread
     thread::spawn(move || {
 
         loop {
-            println!("Saving screenshot in background thread ..");
-            let _ = screenshot::save_screenshot(app_data_dir.as_str(), DATABASE_FILENAME);
-
             let sleep_time_secs = 120;
-            println!("Sleeping for {} secs ..", sleep_time_secs);
             thread::sleep(Duration::from_secs(sleep_time_secs));
+            let _ = screenshot::save_screenshot(app_data_dir.as_str(), DATABASE_FILENAME);
         }
     });
 
@@ -139,7 +139,7 @@ fn create_browse_screenshots_window(app: &tauri::AppHandle) -> tauri::Window {
 fn main() {
 
     let quit = CustomMenuItem::new("quit".to_string(), "Quit").accelerator("Cmd+Q");
-    let show_hide_window = CustomMenuItem::new("show_hide_window".to_string(), "Show/Hide Screentap");
+    let show_hide_window = CustomMenuItem::new("search".to_string(), "Search");
     let browse_screenshots_menu_item = CustomMenuItem::new("browse_screenshots".to_string(), "Browse");
 
     let system_tray_menu = SystemTrayMenu::new()
@@ -156,15 +156,10 @@ fn main() {
             "quit" => {
                 std::process::exit(0);
             },
-            "show_hide_window" => {
+            "search" => {
                 let window = app.get_window("main").unwrap();
-                // toggle application window
-                if window.is_visible().unwrap() {
-                    window.hide().unwrap();
-                } else {
-                    window.show().unwrap();
-                    window.set_focus().unwrap();
-                }
+                window.show().unwrap();
+                window.set_focus().unwrap();
             },
             "browse_screenshots" => {
                 let window = app.get_window("browse");
