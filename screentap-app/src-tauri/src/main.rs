@@ -24,10 +24,13 @@ fn search_screenshots(app_handle: tauri::AppHandle, term: &str) -> Vec<HashMap<S
 
     let app_data_dir = app_handle.path_resolver().app_data_dir().unwrap().to_str().unwrap().to_string();
 
+    // Cap the max results until we implement techniques to reduce memory footprint
+    let max_results = 25;
+
     let screenshot_records_result = if term.is_empty() {
-        db::get_all_screenshots(app_data_dir.as_str(), DATABASE_FILENAME)
+        db::get_all_screenshots(app_data_dir.as_str(), DATABASE_FILENAME, max_results)
     } else {
-        db::search_screenshots_ocr(term, app_data_dir.as_str(), DATABASE_FILENAME)
+        db::search_screenshots_ocr(term, app_data_dir.as_str(), DATABASE_FILENAME, max_results)
     };
 
     match screenshot_records_result {

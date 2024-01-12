@@ -102,14 +102,14 @@ pub fn save_screenshot_meta(screenshot_file_path: &str, ocr_text: &str, dataset_
 /**
  * Helper function to get all screenshots from the DB
  */
-pub fn get_all_screenshots(dataset_root: &str, db_filename: &str) -> Result<Vec<ScreenshotRecord>, rusqlite::Error> {
+pub fn get_all_screenshots(dataset_root: &str, db_filename: &str, limit: i8) -> Result<Vec<ScreenshotRecord>, rusqlite::Error> {
 
     let dataset_root_path = Path::new(dataset_root);
     let db_filename_fq_path = dataset_root_path.join(db_filename);
     let conn = Connection::open(db_filename_fq_path.to_str().unwrap())?;
 
-    let mut stmt = conn.prepare("SELECT id, timestamp, ocr_text, file_path FROM documents ORDER BY timestamp DESC")?;
-    let screenshots = stmt.query_map([], |row| {
+    let mut stmt = conn.prepare("SELECT id, timestamp, ocr_text, file_path FROM documents ORDER BY timestamp DESC LIMIT ?")?;
+    let screenshots = stmt.query_map(params![limit], |row| {
 
         // open the file_path and convert to base64
         let file_path: String = row.get(3)?;
@@ -132,7 +132,7 @@ pub fn get_all_screenshots(dataset_root: &str, db_filename: &str) -> Result<Vec<
 /**
  * Helper function to search screenshots in the db matching ocr term
  */
-pub fn search_screenshots_ocr(term: &str, dataset_root: &str, db_filename: &str) -> Result<Vec<ScreenshotRecord>, rusqlite::Error> {
+pub fn search_screenshots_ocr(term: &str, dataset_root: &str, db_filename: &str, limit: i8) -> Result<Vec<ScreenshotRecord>, rusqlite::Error> {
 
     let dataset_root_path = Path::new(dataset_root);
     let db_filename_fq_path = dataset_root_path.join(db_filename);
@@ -144,9 +144,10 @@ pub fn search_screenshots_ocr(term: &str, dataset_root: &str, db_filename: &str)
         JOIN documents d on d.id = ocr_text_index.rowid 
         WHERE ocr_text_index.ocr_text MATCH ?
         ORDER BY rank, d.timestamp DESC
+        LIMIT ?
     "#)?;
 
-    let screenshots = stmt.query_map([term], |row| {
+    let screenshots = stmt.query_map(params![term, limit], |row| {
 
         // open the file_path and convert to base64
         let file_path: String = row.get(3)?;
