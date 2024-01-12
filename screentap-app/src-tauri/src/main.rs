@@ -16,6 +16,9 @@ mod screenshot;
 
 const DATABASE_FILENAME: &str = "screentap.db";
 
+
+
+
 #[tauri::command]
 fn search_screenshots(app_handle: tauri::AppHandle, term: &str) -> Vec<HashMap<String, String>> {
 
@@ -95,13 +98,26 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
 
 }
 
+fn browse_screenshots(app: &tauri::AppHandle) -> tauri::Window {
+    let new_window = tauri::WindowBuilder::new(
+        app,
+        "browse",
+        tauri::WindowUrl::App("index.html".into())
+    ).build().expect("failed to build window");
+
+    new_window
+}
+
+
 fn main() {
 
     let quit = CustomMenuItem::new("quit".to_string(), "Quit").accelerator("Cmd+Q");
     let show_hide_window = CustomMenuItem::new("show_hide_window".to_string(), "Show/Hide Screentap");
+    let browse_screenshots_menu_item = CustomMenuItem::new("browse_screenshots".to_string(), "Browse");
 
     let system_tray_menu = SystemTrayMenu::new()
         .add_item(show_hide_window)
+        .add_item(browse_screenshots_menu_item)
         .add_native_item(SystemTrayMenuItem::Separator)
         .add_item(quit);
 
@@ -122,7 +138,10 @@ fn main() {
                     window.show().unwrap();
                     window.set_focus().unwrap();
                 }
-            }
+            },
+            "browse_screenshots" => {
+                let _ = browse_screenshots(&app);
+            },
             _ => {}
         },
         _ => {}
