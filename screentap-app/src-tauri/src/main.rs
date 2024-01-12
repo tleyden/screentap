@@ -157,9 +157,21 @@ fn main() {
                 std::process::exit(0);
             },
             "search" => {
-                let window = app.get_window("main").unwrap();
-                window.show().unwrap();
-                window.set_focus().unwrap();
+
+                let window = app.get_window("main");
+                match window { 
+                    Some(w) => {
+                        w.show().unwrap();
+                        w.set_focus().unwrap();
+                    },
+                    None => {
+                        let _ = tauri::WindowBuilder::new(
+                            app,
+                            "main",
+                            tauri::WindowUrl::App("index.html".into())
+                        ).build().expect("failed to build window");
+                    }
+                }
             },
             "browse_screenshots" => {
                 let window = app.get_window("browse");
