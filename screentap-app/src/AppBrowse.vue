@@ -8,7 +8,7 @@ import BrowseScreenshots from "./components/BrowseScreenshots.vue";
   <div class="container">
     <h1>Browse screenshots</h1>
     
-    <Browsecreenshots />
+    <BrowseScreenshots />
   </div>
 </template>
 

@@ -17,16 +17,16 @@ function formatTitle(item: { timestamp: number, ocr_text: string }): string {
   return `[${readableTimestamp}] OCR Text: ${truncatedText}`;
 }
 
-// function truncateText(text: string) {
-//   const maxLength = 500;
-//   return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-// }
+function truncateText(text: string) {
+  const maxLength = 500;
+  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+}
 
 function getBase64Image(dynamicBase64: string) {
   return dynamicBase64 ? `data:image/png;base64,${dynamicBase64}` : '';
 }
 
-// browseScreenshots()
+browseScreenshots()
 
 </script>
 

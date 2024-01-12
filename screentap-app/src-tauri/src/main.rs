@@ -44,6 +44,30 @@ fn search_screenshots(app_handle: tauri::AppHandle, term: &str) -> Vec<HashMap<S
     }
 }
 
+#[tauri::command]
+fn browse_screenshots(app_handle: tauri::AppHandle) -> Vec<HashMap<String, String>> {
+
+    println!("Browse screenshots invoked");
+
+    let app_data_dir = app_handle.path_resolver().app_data_dir().unwrap().to_str().unwrap().to_string();
+
+    let max_results = 1;
+
+    let screenshot_records_result = db::get_all_screenshots(app_data_dir.as_str(), DATABASE_FILENAME, max_results);
+
+    match screenshot_records_result {
+        Ok(screenshot_records) => {
+            db::create_hashmap_vector(screenshot_records.as_slice())
+        },
+        Err(e) => {
+            println!("Error searching screenshots: {}.  Returning empty result", e);
+            vec![]
+        },
+    }
+}
+
+
+
 fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error + 'static>> {
 
     let app_handle = app.handle();
@@ -158,7 +182,10 @@ fn main() {
         },
         _ => {}
     })
-    .invoke_handler(tauri::generate_handler![search_screenshots])
+    .invoke_handler(tauri::generate_handler![
+        search_screenshots, 
+        browse_screenshots]
+    )
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
     
