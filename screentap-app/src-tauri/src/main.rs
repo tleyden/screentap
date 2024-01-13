@@ -16,9 +16,6 @@ mod screenshot;
 
 const DATABASE_FILENAME: &str = "screentap.db";
 
-
-
-
 #[tauri::command]
 fn search_screenshots(app_handle: tauri::AppHandle, term: &str) -> Vec<HashMap<String, String>> {
 
@@ -115,7 +112,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
     thread::spawn(move || {
 
         loop {
-            let sleep_time_secs = 120;
+            let sleep_time_secs = 60;
             thread::sleep(Duration::from_secs(sleep_time_secs));
             let _ = screenshot::save_screenshot(app_data_dir.as_str(), DATABASE_FILENAME);
         }
