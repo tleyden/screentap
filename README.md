@@ -1,11 +1,11 @@
 
 Screentap lets you tap into the rich activity happening on your desktop screen.  
 
-If you know you looked at something but forgot where you saw it (was it web browsing, email, twitter?), you can pull up screentap and quickly search for it.
+Let's say you saw something a while back, but can't even remember where you saw it (was it web browsing, email, twitter?) and so you don't even know where to start searching.  Screentap provides a universal search where you can quickly find things by keyword across all apps.
 
-<img width="400" alt="Screenshot" src="https://github.com/tleyden/screentap/assets/296876/bd865946-68fb-4ff5-8982-024cc4d5bce0">
+<img width="500" alt="Screenshot" src="https://github.com/tleyden/screentap/assets/296876/bd865946-68fb-4ff5-8982-024cc4d5bce0">
 
-You can also "replay" your screenshots, essentially watching a movie of what you were doing.
+You can also "replay" your screenshots to see what you were doing on your computer in a given time period.
 
 **The Vision**
 
