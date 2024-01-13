@@ -3,9 +3,7 @@ Screentap lets you tap into the rich activity happening on your desktop screen.
 
 If you know you looked at something but forgot where you saw it (was it web browsing, email, twitter?), you can pull up screentap and quickly search for it.
 
-![Screenshot](https://github.com/tleyden/screentap/assets/296876/bd865946-68fb-4ff5-8982-024cc4d5bce0)
-
-<img src="Uhttps://github.com/tleyden/screentap/assets/296876/bd865946-68fb-4ff5-8982-024cc4d5bce0RL" alt="Screenshot" title="Screenshot" width="450"/>
+<img src="https://github.com/tleyden/screentap/assets/296876/bd865946-68fb-4ff5-8982-024cc4d5bce0" alt="Screenshot" width="300"/>
 
 
 You can also "replay" your screenshots, essentially watching a movie of what you were doing.
