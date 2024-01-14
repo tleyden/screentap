@@ -68,10 +68,18 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 cargo install create-tauri-app --locked
 ```
 
+Make sure you end up with the `tauri` binary on your system, you might have to do something like this:
+
+```
+cargo install tauri-cli
+ln -s ~/.cargo/bin/cargo-tauri ~/.cargo/bin/tauri
+```
+
 ## Build and run screentap
 
 ```
 cd screentap-app
+yarn install vite
 yarn tauri dev
 ```
 
