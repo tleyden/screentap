@@ -5,7 +5,9 @@ Suppose you saw something but can't even remember where you saw it - was it web 
 
 Screentap gives you a universal search interface to perform keyword searches across anything that has appeared on your screen.
 
-<img width="500" alt="Screenshot" src="https://github.com/tleyden/screentap/assets/296876/bd865946-68fb-4ff5-8982-024cc4d5bce0">
+<div align="center">
+    <img width="500" alt="Screenshot" src="https://github.com/tleyden/screentap/assets/296876/bd865946-68fb-4ff5-8982-024cc4d5bce0">
+</div>
 
 You can also browse your screenshot history to see what you were doing on your computer during a given time period.
 
@@ -15,7 +17,7 @@ The "tap" of your stream of screen activity is a very rich data source, especial
 
 The idea for screentap is to move beyond just searching and browsing your screenshot history, and provide an extensible platform that offers AI-powered plugins for use cases like:
 
-* **Habit/behavior tracking and alerting** - Get alerted when spending too much time on addictive sites such as X.com, but skip the alerts for content that is relevant for your work or hobbies
+* **Habit/behavior tracking and alerting** - Get alerted when spending too much time on addictive sites such as X.com, but skip the alerts for content that is relevant to your work or hobbies
 * **Billable hours tracking** - Freelancers and indie hackers that are juggling multiple projects could track billable hours
 * **Efficiency suggestions** - Spot inefficiences in your workflows and get suggestions for improvements 
 * **ADHD metrics** - Measure how much you are switching contexts and track your focus ability over time
