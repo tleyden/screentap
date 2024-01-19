@@ -22,14 +22,7 @@ jobs:
         components: clippy
         override: true
 
-    - name: Clippy1
-      run: cargo clippy
-      working-directory: ./screentap-app/src-tauri/
- 
-    - name: Build
-      run: cargo build
+    - name: Clippy
+      run: cargo clippy -- -D warnings
       working-directory: ./screentap-app/src-tauri/
 
-    - name: Clippy
-      run: cargo clippy
-      working-directory: ./screentap-app/src-tauri/
