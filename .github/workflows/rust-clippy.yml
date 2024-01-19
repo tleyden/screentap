@@ -22,15 +22,7 @@ jobs:
         components: clippy
         override: true
 
-    - name: Build
-      run: cargo build
+    - name: Clippy
+      run: cargo clippy -- -D warnings
       working-directory: ./screentap-app/src-tauri/
 
-    - name: Check with Clippy
-      uses: giraffate/clippy-action@v1
-      with:
-        reporter: 'github-pr-review'
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        workdir: screentap-app/src-tauri
-        clippy_flags: -- -Dwarnings
-        fail_on_error: true
