@@ -108,23 +108,8 @@ fn create_browse_screenshots_window(app: &tauri::AppHandle) -> tauri::Window {
     new_window
 }
 
-
-fn main() {
-
-    let quit = CustomMenuItem::new("quit".to_string(), "Quit").accelerator("Cmd+Q");
-    let show_hide_window = CustomMenuItem::new("search".to_string(), "Search");
-    let browse_screenshots_menu_item = CustomMenuItem::new("browse_screenshots".to_string(), "Browse");
-
-    let system_tray_menu = SystemTrayMenu::new()
-        .add_item(show_hide_window)
-        .add_item(browse_screenshots_menu_item)
-        .add_native_item(SystemTrayMenuItem::Separator)
-        .add_item(quit);
-
-    tauri::Builder::default()
-    .setup(setup_handler)
-    .system_tray(SystemTray::new().with_menu(system_tray_menu))
-    .on_system_tray_event(|app, event| match event {
+fn handle_system_tray_event(app: &tauri::AppHandle, event: tauri::SystemTrayEvent) {
+    match event {
         SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
             "quit" => {
                 std::process::exit(0);
@@ -161,7 +146,26 @@ fn main() {
             _ => {}
         },
         _ => {}
-    })
+    }
+}
+
+
+fn main() {
+
+    let quit = CustomMenuItem::new("quit".to_string(), "Quit").accelerator("Cmd+Q");
+    let show_hide_window = CustomMenuItem::new("search".to_string(), "Search");
+    let browse_screenshots_menu_item = CustomMenuItem::new("browse_screenshots".to_string(), "Browse");
+
+    let system_tray_menu = SystemTrayMenu::new()
+        .add_item(show_hide_window)
+        .add_item(browse_screenshots_menu_item)
+        .add_native_item(SystemTrayMenuItem::Separator)
+        .add_item(quit);
+
+    tauri::Builder::default()
+    .setup(setup_handler)
+    .system_tray(SystemTray::new().with_menu(system_tray_menu))
+    .on_system_tray_event(handle_system_tray_event)
     .invoke_handler(tauri::generate_handler![
         search_screenshots, 
         browse_screenshots]
