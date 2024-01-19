@@ -3,10 +3,10 @@ name: Rust Clippy Check
 on:
   push:
     paths:
-      - 'tauri-src/**'
+      - 'screentap-app/src-tauri/**'
   pull_request:
     paths:
-      - 'tauri-src/**'
+      - 'screentap-app/src-tauri/**'
 
 jobs:
   clippy:
@@ -27,4 +27,4 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         args: --all-features -- -D warnings
-        working-directory: tauri-src
+        working-directory: screentap-app/src-tauri

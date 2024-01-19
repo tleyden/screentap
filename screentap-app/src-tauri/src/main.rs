@@ -83,8 +83,8 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
     // Save one screenshot on startup so we never have an empty screen
     let _ = screenshot::save_screenshot(app_data_dir.as_str(), DATABASE_FILENAME);
 
-    // Spawn a thread to save screenshots in the background
-    // The move keyword is necessary to move app_data_dir into the thread
+    // Spawn a thread to save screenshots in the background.
+    // The move keyword is necessary to move app_data_dir into the thread.
     thread::spawn(move || {
 
         loop {
