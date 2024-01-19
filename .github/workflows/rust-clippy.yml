@@ -23,7 +23,7 @@ jobs:
         override: true
 
     - name: Build
-      run: cargo build --verbose
+      run: cargo build
       working-directory: ./screentap-app/src-tauri/
 
     - name: Check with Clippy
