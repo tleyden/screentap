@@ -22,6 +22,10 @@ jobs:
         components: clippy
         override: true
 
+    - name: Build
+      run: cargo build --verbose
+      working-directory: ./screentap-app/src-tauri/
+
     - name: Check with Clippy
       uses: giraffate/clippy-action@v1
       with:
