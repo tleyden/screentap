@@ -18,7 +18,7 @@ const DATABASE_FILENAME: &str = "screentap.db";
 #[tauri::command]
 fn search_screenshots(app_handle: tauri::AppHandle, term: &str) -> Vec<HashMap<String, String>> {
 
-    let app_data_dir = app_handle.path_resolver().app_data_dir().unwrap().to_str().unwrap().to_string();
+    let app_data_dir = app_handle.path_resolver().app_data_dir().unwrap().to_str().unwrap().to_string().unwrap();
 
     // Cap the max results until we implement techniques to reduce memory footprint
     let max_results = 25;
