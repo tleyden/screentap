@@ -13,7 +13,6 @@ mod db;
 mod utils; 
 mod screenshot;
 
-
 const DATABASE_FILENAME: &str = "screentap.db";
 
 #[tauri::command]
@@ -62,7 +61,6 @@ fn browse_screenshots(app_handle: tauri::AppHandle) -> Vec<HashMap<String, Strin
 }
 
 
-
 fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error + 'static>> {
 
     let app_handle = app.handle();
@@ -109,8 +107,9 @@ fn create_browse_screenshots_window(app: &tauri::AppHandle) -> tauri::Window {
 }
 
 fn handle_system_tray_event(app: &tauri::AppHandle, event: tauri::SystemTrayEvent) {
-    match event {
-        SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
+
+    if let SystemTrayEvent::MenuItemClick{ id, .. } = event {
+        match id.as_str() {
             "quit" => {
                 std::process::exit(0);
             },
@@ -139,14 +138,14 @@ fn handle_system_tray_event(app: &tauri::AppHandle, event: tauri::SystemTrayEven
                         w.set_focus().unwrap();
                     },
                     None => {
-                        let _ = create_browse_screenshots_window(&app);
+                        let _ = create_browse_screenshots_window(app);
                     }
                 }   
             },
             _ => {}
-        },
-        _ => {}
+        }
     }
+
 }
 
 
