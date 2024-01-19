@@ -23,7 +23,8 @@ jobs:
         override: true
 
     - name: Check with Clippy
-      uses: LoliGothick/clippy-check@master
+      uses: giraffate/clippy-action@v1
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        working-directory: screentap-app/src-tauri
+        reporter: 'github-pr-review'
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        workdir: screentap-app/src-tauri
