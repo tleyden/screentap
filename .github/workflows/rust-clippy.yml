@@ -29,3 +29,4 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         workdir: screentap-app/src-tauri
         clippy_flags: -- -Dwarnings
+        fail_on_error: true
