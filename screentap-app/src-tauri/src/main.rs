@@ -15,11 +15,6 @@ mod screenshot;
 
 const DATABASE_FILENAME: &str = "screentap.db";
 
-fn foo() -> String {
-    let x = String::new();
-    x
-}
-
 #[tauri::command]
 fn search_screenshots(app_handle: tauri::AppHandle, term: &str) -> Vec<HashMap<String, String>> {
 
