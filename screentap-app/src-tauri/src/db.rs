@@ -118,8 +118,8 @@ pub fn get_all_screenshots(dataset_root: &str, db_filename: &str, limit: i8) -> 
             id: row.get(0)?,
             timestamp: row.get(1)?,
             ocr_text: row.get(2)?,
-            file_path: file_path,
-            base64_image: base64_image,
+            file_path,
+            base64_image,
         })
     })?
     .collect::<Result<Vec<_>, _>>()?;
@@ -156,8 +156,8 @@ pub fn search_screenshots_ocr(term: &str, dataset_root: &str, db_filename: &str,
             id: row.get(0)?,
             timestamp: row.get(1)?,
             ocr_text: row.get(2)?,
-            file_path: file_path,
-            base64_image: base64_image,
+            file_path,
+            base64_image,
         })
     })?
     .collect::<Result<Vec<_>, _>>()?;
@@ -170,6 +170,5 @@ fn load_file_as_base_64(file_path: &str, dataset_root: &str) -> String {
     let dataset_root_path = Path::new(dataset_root);
     let file_path_fq = dataset_root_path.join(file_path);
     let file_contents = std::fs::read(file_path_fq).unwrap();
-    let base64_image = BASE64.encode(file_contents);
-    base64_image
+    BASE64.encode(file_contents)
 }

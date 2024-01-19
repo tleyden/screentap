@@ -31,10 +31,9 @@ pub fn save_screenshot(dataset_root: &str, db_filename: &str) -> String {
     );
 
     let current_time_formatted = now.format("%Y-%m-%d %H:%M:%S").to_string();
-    let result = match save_result {
+    match save_result {
         Ok(()) => format!("Screenshot saved to DB successfully at {}", current_time_formatted),
         Err(e) => format!("Error occurred: {} at {}", e, current_time_formatted),
-    };
-
-    result  // TODO: return the save_result instead of this string
+    }
+    
 }
