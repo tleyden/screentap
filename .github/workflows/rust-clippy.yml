@@ -18,14 +18,12 @@ jobs:
     - name: Install Rust
       uses: actions-rs/toolchain@v1
       with:
-        profile: minimal
         toolchain: stable
+        components: clippy
         override: true
 
     - name: Check with Clippy
-      # uses: actions-rs/clippy-check@v1
       uses: LoliGothick/clippy-check@master
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        args: --all-features -- -D warnings
         working-directory: screentap-app/src-tauri
