@@ -28,3 +28,5 @@ jobs:
         reporter: 'github-pr-review'
         github_token: ${{ secrets.GITHUB_TOKEN }}
         workdir: screentap-app/src-tauri
+        clippy_flags: -- -Dwarnings
+        level: info
