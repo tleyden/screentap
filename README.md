@@ -46,7 +46,7 @@ To delete your history screenshot, navigate to `/Users/<username>/Library/Applic
 
 ## Security risks
 
-Screenshots may contain secrets.  If leaked, this could allow an attacker to infiltrate your other logins.  (TODO: add a retention policy to minimize the chance of this happening)
+Screenshots may contain secrets.  If leaked, this could allow an attacker to infiltrate your other logins.  There is a [task](issue) to add a retention policy to minimize the chance of this happening.
 
 # Running screentap
 

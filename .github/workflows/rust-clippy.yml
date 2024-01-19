@@ -1,0 +1,30 @@
+name: Rust Clippy Check
+
+on:
+  push:
+    paths:
+      - 'tauri-src/**'
+  pull_request:
+    paths:
+      - 'tauri-src/**'
+
+jobs:
+  clippy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+
+    - name: Check with Clippy
+      uses: actions-rs/clippy-check@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        args: --all-features -- -D warnings
+        working-directory: tauri-src
