@@ -4,11 +4,12 @@
 import { ref } from "vue";
 import { invoke } from "@tauri-apps/api/tauri";
 
+// Keep this as an array because eventually we might request 
+// these in blocks
 const browseScreenshotsResult = ref([]);
 
 async function browseScreenshots() {
-  // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-  browseScreenshotsResult.value = await invoke("browse_screenshots", { });
+  browseScreenshotsResult.value = await invoke("browse_screenshots", { curId: 3050, direction: "backward" });
 }
 
 function formatTitle(item: { timestamp: number, ocr_text: string }): string {
