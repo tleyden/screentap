@@ -10,7 +10,7 @@ use super::db;
 /**
  * Helper function to save a screenshot and OCR text to the dataset directory and DB
  */
-pub fn save_screenshot(dataset_root: &str, db_filename: &str) -> String {
+pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> String {
 
     let now = Local::now().naive_utc();
 
@@ -23,7 +23,7 @@ pub fn save_screenshot(dataset_root: &str, db_filename: &str) -> String {
 
     // Save screenshot meta to the DB
     let save_result = db::save_screenshot_meta(
-        timestamp_png_filename.clone().to_str().unwrap(), 
+        timestamp_png_filename.as_path(), 
         ocr_text.to_string().as_str(),
         dataset_root,
         db_filename,

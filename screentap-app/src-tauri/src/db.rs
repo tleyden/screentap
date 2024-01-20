@@ -1,6 +1,6 @@
 use rusqlite::{params, Connection, Result};
 use chrono::NaiveDateTime;
-use std::{path::Path, collections::HashMap};
+use std::{path::Path, collections::HashMap, path::PathBuf};
 use base64::engine::Engine as _;
 use base64::engine::general_purpose::STANDARD as BASE64;
 
@@ -39,10 +39,9 @@ pub fn screenshot_record_to_hashmap(record: &ScreenshotRecord) -> HashMap<String
 /**
  * Helper function to create the DB if it doesn't exist
  */
-pub fn create_db(dataset_root: &str, db_filename: &str) -> Result<()> {
+pub fn create_db(dataset_root: &Path, db_filename: &Path) -> Result<()> {
 
-    let dataset_root_path = Path::new(dataset_root);
-    let db_filename_fq_path = dataset_root_path.join(db_filename);
+    let db_filename_fq_path = dataset_root.join(db_filename);
 
     let conn = Connection::open(db_filename_fq_path.to_str().unwrap())?;
 
@@ -75,17 +74,15 @@ pub fn create_db(dataset_root: &str, db_filename: &str) -> Result<()> {
 /**
  * Helper function to save screenshot meta to the DB
  */
-pub fn save_screenshot_meta(screenshot_file_path: &str, ocr_text: &str, dataset_root: &str, db_filename: &str, now: NaiveDateTime) -> Result<()> {
+pub fn save_screenshot_meta(screenshot_file_path: &Path, ocr_text: &str, dataset_root: &Path, db_filename: &Path, now: NaiveDateTime) -> Result<()> {
 
-    let dataset_root_path = Path::new(dataset_root);
-    let db_filename_fq_path = dataset_root_path.join(db_filename);
+    let db_filename_fq_path = dataset_root.join(db_filename);
     let conn = Connection::open(db_filename_fq_path.to_str().unwrap())?;
-
-    // let now = Utc::now().naive_utc();
+    let screenshot_file_path_str = screenshot_file_path.to_str().unwrap();
 
     conn.execute(
         "INSERT INTO documents (timestamp, ocr_text, file_path) VALUES (?1, ?2, ?3)",
-        params![now.timestamp(), ocr_text, screenshot_file_path],
+        params![now.timestamp(), ocr_text, screenshot_file_path_str],
     )?;
 
     // Insert the OCR text into the full-text search index
@@ -101,24 +98,24 @@ pub fn save_screenshot_meta(screenshot_file_path: &str, ocr_text: &str, dataset_
 /**
  * Helper function to get all screenshots from the DB
  */
-pub fn get_all_screenshots(dataset_root: &str, db_filename: &str, limit: i8) -> Result<Vec<ScreenshotRecord>, rusqlite::Error> {
+pub fn get_all_screenshots(dataset_root: &Path, db_filename: &Path, limit: i8) -> Result<Vec<ScreenshotRecord>, rusqlite::Error> {
 
-    let dataset_root_path = Path::new(dataset_root);
-    let db_filename_fq_path = dataset_root_path.join(db_filename);
+    let db_filename_fq_path = dataset_root.join(db_filename);
     let conn = Connection::open(db_filename_fq_path.to_str().unwrap())?;
 
     let mut stmt = conn.prepare("SELECT id, timestamp, ocr_text, file_path FROM documents ORDER BY timestamp DESC LIMIT ?")?;
     let screenshots = stmt.query_map(params![limit], |row| {
 
         // open the file_path and convert to base64
-        let file_path: String = row.get(3)?;
-        let base64_image: String = load_file_as_base_64(&file_path, dataset_root);
+        let file_path_str: String = row.get(3).expect("Failed to get file_path");
+        let file_path = PathBuf::from(file_path_str.clone());
+        let base64_image: String = load_file_as_base_64(file_path.as_path(), dataset_root);
 
         Ok(ScreenshotRecord {
             id: row.get(0)?,
             timestamp: row.get(1)?,
             ocr_text: row.get(2)?,
-            file_path,
+            file_path: file_path_str,
             base64_image,
         })
     })?
@@ -131,7 +128,7 @@ pub fn get_all_screenshots(dataset_root: &str, db_filename: &str, limit: i8) -> 
 /**
  * Helper function to search screenshots in the db matching ocr term
  */
-pub fn search_screenshots_ocr(term: &str, dataset_root: &str, db_filename: &str, limit: i8) -> Result<Vec<ScreenshotRecord>, rusqlite::Error> {
+pub fn search_screenshots_ocr(term: &str, dataset_root: &Path, db_filename: &Path, limit: i8) -> Result<Vec<ScreenshotRecord>, rusqlite::Error> {
 
     let dataset_root_path = Path::new(dataset_root);
     let db_filename_fq_path = dataset_root_path.join(db_filename);
@@ -149,14 +146,15 @@ pub fn search_screenshots_ocr(term: &str, dataset_root: &str, db_filename: &str,
     let screenshots = stmt.query_map(params![term, limit], |row| {
 
         // open the file_path and convert to base64
-        let file_path: String = row.get(3)?;
-        let base64_image: String = load_file_as_base_64(&file_path, dataset_root);
+        let file_path_str: String = row.get(3).expect("Failed to get file_path");
+        let file_path = PathBuf::from(file_path_str.clone());
+        let base64_image: String = load_file_as_base_64(file_path.as_path(), dataset_root);
 
         Ok(ScreenshotRecord {
             id: row.get(0)?,
             timestamp: row.get(1)?,
             ocr_text: row.get(2)?,
-            file_path,
+            file_path: file_path_str,
             base64_image,
         })
     })?
@@ -166,8 +164,8 @@ pub fn search_screenshots_ocr(term: &str, dataset_root: &str, db_filename: &str,
 
 }
 
-fn load_file_as_base_64(file_path: &str, dataset_root: &str) -> String {
-    let dataset_root_path = Path::new(dataset_root);
+fn load_file_as_base_64(file_path: &Path, dataset_root: &Path) -> String {
+    let dataset_root_path = Path::new(dataset_root);  // no longer needed
     let file_path_fq = dataset_root_path.join(file_path);
     let file_contents = std::fs::read(file_path_fq).unwrap();
     BASE64.encode(file_contents)
