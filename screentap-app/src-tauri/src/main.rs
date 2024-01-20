@@ -74,7 +74,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
     // If app_data_dir doesn't exist, create it
     if !app_data_dir.exists() {
         println!("Creating app_data_dir: {}", app_data_dir.as_path().to_str().unwrap());
-        std::fs::create_dir_all(&app_data_dir.as_path())?;
+        std::fs::create_dir_all(app_data_dir.as_path())?;
     }
 
     // Create the database if it doesn't exist
@@ -175,6 +175,6 @@ fn main() {
         browse_screenshots]
     )
     .run(tauri::generate_context!())
-    .expect("error while running tauri application");
+    .expect("Error while starting screentap");
     
 }
