@@ -8,25 +8,27 @@ use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, CustomMenuItem
 use std::collections::HashMap;
 use std::thread;
 use std::time::Duration;
+use std::path::Path;
 
 mod db;
 mod utils; 
 mod screenshot;
 
-const DATABASE_FILENAME: &str = "screentap.db";
+static DATABASE_FILENAME: &str = "screentap.db";
 
 #[tauri::command]
 fn search_screenshots(app_handle: tauri::AppHandle, term: &str) -> Vec<HashMap<String, String>> {
 
-    let app_data_dir = app_handle.path_resolver().app_data_dir().unwrap().to_str().unwrap().to_string();
+    let app_data_dir = app_handle.path_resolver().app_data_dir().expect("Failed to get app_data_dir");
+    let db_filename_path = Path::new(DATABASE_FILENAME);
 
     // Cap the max results until we implement techniques to reduce memory footprint
     let max_results = 25;
 
     let screenshot_records_result = if term.is_empty() {
-        db::get_all_screenshots(app_data_dir.as_str(), DATABASE_FILENAME, max_results)
+        db::get_all_screenshots(app_data_dir.as_path(), db_filename_path, max_results)
     } else {
-        db::search_screenshots_ocr(term, app_data_dir.as_str(), DATABASE_FILENAME, max_results)
+        db::search_screenshots_ocr(term, app_data_dir.as_path(), db_filename_path, max_results)
     };
 
     match screenshot_records_result {
@@ -43,11 +45,13 @@ fn search_screenshots(app_handle: tauri::AppHandle, term: &str) -> Vec<HashMap<S
 #[tauri::command]
 fn browse_screenshots(app_handle: tauri::AppHandle) -> Vec<HashMap<String, String>> {
 
-    let app_data_dir = app_handle.path_resolver().app_data_dir().unwrap().to_str().unwrap().to_string();
+    let app_data_dir = app_handle.path_resolver().app_data_dir().expect("Failed to get app_data_dir");
 
     let max_results = 1;
 
-    let screenshot_records_result = db::get_all_screenshots(app_data_dir.as_str(), DATABASE_FILENAME, max_results);
+    let db_filename_path = Path::new(DATABASE_FILENAME);
+
+    let screenshot_records_result = db::get_all_screenshots(app_data_dir.as_path(), db_filename_path, max_results);
 
     match screenshot_records_result {
         Ok(screenshot_records) => {
@@ -64,22 +68,23 @@ fn browse_screenshots(app_handle: tauri::AppHandle) -> Vec<HashMap<String, Strin
 fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error + 'static>> {
 
     let app_handle = app.handle();
+    let db_filename_path = Path::new(DATABASE_FILENAME);
 
-    let app_data_dir = app_handle.path_resolver().app_data_dir().unwrap().to_str().unwrap().to_string();
+    let app_data_dir = app_handle.path_resolver().app_data_dir().expect("Failed to get app_data_dir");
     // If app_data_dir doesn't exist, create it
-    if !std::path::Path::new(&app_data_dir).exists() {
-        println!("Creating app_data_dir: {}", app_data_dir);
-        std::fs::create_dir_all(&app_data_dir)?;
+    if !app_data_dir.exists() {
+        println!("Creating app_data_dir: {}", app_data_dir.as_path().to_str().unwrap());
+        std::fs::create_dir_all(&app_data_dir.as_path())?;
     }
 
     // Create the database if it doesn't exist
-    match db::create_db(app_data_dir.as_str(), DATABASE_FILENAME) {
+    match db::create_db(app_data_dir.as_path(), db_filename_path) {
         Ok(()) => (),
         Err(e) => eprintln!("Failed to create db: {}", e),
     }
 
     // Save one screenshot on startup so we never have an empty screen
-    let _ = screenshot::save_screenshot(app_data_dir.as_str(), DATABASE_FILENAME);
+    let _ = screenshot::save_screenshot(app_data_dir.as_path(), db_filename_path);
 
     // Spawn a thread to save screenshots in the background.
     // The move keyword is necessary to move app_data_dir into the thread.
@@ -88,7 +93,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
         loop {
             let sleep_time_secs = 60;
             thread::sleep(Duration::from_secs(sleep_time_secs));
-            let _ = screenshot::save_screenshot(app_data_dir.as_str(), DATABASE_FILENAME);
+            let _ = screenshot::save_screenshot(app_data_dir.as_path(), db_filename_path);
         }
     });
 
