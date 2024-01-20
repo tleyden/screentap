@@ -9,7 +9,7 @@ import { invoke } from "@tauri-apps/api/tauri";
 const browseScreenshotsResult = ref([]);
 
 async function browseScreenshots() {
-  browseScreenshotsResult.value = await invoke("browse_screenshots", { curId: 3050, direction: "backward" });
+  browseScreenshotsResult.value = await invoke("browse_screenshots", { curId: 0, direction: "backward" });
 }
 
 function formatTitle(item: { timestamp: number, ocr_text: string }): string {
@@ -29,19 +29,16 @@ function getBase64Image(dynamicBase64: string) {
 
 async function getNextPrevScreenshot(direction: string) {
 
-  let curId = null;
+  // Default to the latest screenshot
+  let curId = 0;
 
   // Check if the array is not empty and get the first object's id
   if (browseScreenshotsResult.value.length > 0) {
     curId = parseInt(browseScreenshotsResult.value[0]['id']);
   }
 
-  if (curId !== null) {
-    browseScreenshotsResult.value = await invoke("browse_screenshots", { curId, direction: direction });
-  } else {
-    console.log('No ID found or browseScreenshotsResult is empty');
-  }
-
+  browseScreenshotsResult.value = await invoke("browse_screenshots", { curId, direction: direction });
+  
 }
 
 async function onPrevButtonClick() {
