@@ -12,15 +12,9 @@ async function searchscreenshots() {
   searchScreenshotsResult.value = await invoke("search_screenshots", { term: searchKeyword.value });
 }
 
-function formatTitle(item: { timestamp: number, ocr_text: string }): string {
+function formatTitle(item: { timestamp: number }): string {
   const readableTimestamp = new Date(item.timestamp * 1000).toLocaleString();
-  const truncatedText = truncateText(item.ocr_text);
-  return `[${readableTimestamp}] OCR Text: ${truncatedText}`;
-}
-
-function truncateText(text: string) {
-  const maxLength = 500;
-  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  return `${readableTimestamp}`;
 }
 
 function getBase64Image(dynamicBase64: string) {

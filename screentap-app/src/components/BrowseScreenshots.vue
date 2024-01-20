@@ -56,22 +56,25 @@ browseScreenshots()
 <!-- Vue.js template -->
 <template>
 
-  <div class="flex-container">
+  <!-- Flex container for the buttons and header -->
+  <div class="flex-container-header">
 
     <!-- Left Button with "<" (&lt;) -->
-    <button class="flex-button-left" @click="onPrevButtonClick">&lt;</button>
+    <button class="flex-button-left light-blue-button" @click="onPrevButtonClick">&lt;</button>
 
+    <!-- Header -->
+    <h1>Browse screenshots</h1>  
+
+    <!-- Right Button with ">" (&gt;) -->
+    <button class="flex-button-right light-blue-button" @click="onNextButtonClick">&gt;</button>
+
+  </div>
+
+  <!-- Flex container for the screenshot -->
+  <div class="flex-container">
     <div v-if="browseScreenshotsResult && browseScreenshotsResult.length > 0" class="flex-item">
       <img :src="getBase64Image(browseScreenshotsResult[0]['base64_image'])" alt="Screenshot" :title="formatTitle(browseScreenshotsResult[0])">
     </div>
-
-    <!-- <div v-for="(item, index) in browseScreenshotsResult" :key="index" class="flex-item">
-      <img :src="getBase64Image(item['base64_image'])" alt="Screenshot" :title="formatTitle(item)">
-    </div> -->
-  
-    <!-- Right Button with ">" (&gt;) -->
-    <button class="flex-button-right" @click="onNextButtonClick">&gt;</button>
-  
   </div>
 
 </template>
@@ -86,15 +89,27 @@ browseScreenshots()
     justify-content: space-around; /* or any other justification you prefer */
   }
 
+  .flex-container-header {
+    display: flex;
+    flex-direction: row; /* or column, depending on how you want to display items */
+    flex-wrap: nowrap; /* allows items to wrap to the next line */
+    justify-content: space-around; /* or any other justification you prefer */
+  }
+
   .flex-item {
     margin: 10px; /* adjust as needed for spacing */
     /* additional styles for the flex items */
   }
 
   .flex-item img {
-    width: 95%; /* or any specific size */
+    width: 100%; /* or any specific size */
     height: auto; /* maintains the aspect ratio */
     /* additional styles for the images */
   }
+
+  .light-blue-button {
+    background-color: #c8ecfc; /* Very light blue */
+    /* Add other styling as needed */
+}
 
 </style>
