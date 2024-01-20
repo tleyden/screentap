@@ -36,14 +36,18 @@ pub fn screenshot_record_to_hashmap(record: &ScreenshotRecord) -> HashMap<String
     map
 }
 
+fn get_db_conn(dataset_root: &Path, db_filename: &Path) -> Connection {
+    let db_filename_fq_path = dataset_root.join(db_filename);
+    let path_str = db_filename_fq_path.to_str().expect("Failed to get db_filename_fq_path");
+    Connection::open(path_str).expect("Failed to open db connection")
+}
+
 /**
  * Helper function to create the DB if it doesn't exist
  */
 pub fn create_db(dataset_root: &Path, db_filename: &Path) -> Result<()> {
 
-    let db_filename_fq_path = dataset_root.join(db_filename);
-
-    let conn = Connection::open(db_filename_fq_path.to_str().unwrap())?;
+    let conn = get_db_conn(dataset_root, db_filename);
 
     // Create a table with the desired columns
     conn.execute(
@@ -76,9 +80,9 @@ pub fn create_db(dataset_root: &Path, db_filename: &Path) -> Result<()> {
  */
 pub fn save_screenshot_meta(screenshot_file_path: &Path, ocr_text: &str, dataset_root: &Path, db_filename: &Path, now: NaiveDateTime) -> Result<()> {
 
-    let db_filename_fq_path = dataset_root.join(db_filename);
-    let conn = Connection::open(db_filename_fq_path.to_str().unwrap())?;
-    let screenshot_file_path_str = screenshot_file_path.to_str().unwrap();
+    let conn = get_db_conn(dataset_root, db_filename);
+
+    let screenshot_file_path_str = screenshot_file_path.to_str().expect("Failed to get screenshot_file_path_str");
 
     conn.execute(
         "INSERT INTO documents (timestamp, ocr_text, file_path) VALUES (?1, ?2, ?3)",
@@ -100,8 +104,7 @@ pub fn save_screenshot_meta(screenshot_file_path: &Path, ocr_text: &str, dataset
  */
 pub fn get_all_screenshots(dataset_root: &Path, db_filename: &Path, limit: i8) -> Result<Vec<ScreenshotRecord>, rusqlite::Error> {
 
-    let db_filename_fq_path = dataset_root.join(db_filename);
-    let conn = Connection::open(db_filename_fq_path.to_str().unwrap())?;
+    let conn = get_db_conn(dataset_root, db_filename);
 
     let mut stmt = conn.prepare("SELECT id, timestamp, ocr_text, file_path FROM documents ORDER BY timestamp DESC LIMIT ?")?;
     let screenshots = stmt.query_map(params![limit], |row| {
@@ -130,9 +133,7 @@ pub fn get_all_screenshots(dataset_root: &Path, db_filename: &Path, limit: i8) -
  */
 pub fn search_screenshots_ocr(term: &str, dataset_root: &Path, db_filename: &Path, limit: i8) -> Result<Vec<ScreenshotRecord>, rusqlite::Error> {
 
-    let dataset_root_path = Path::new(dataset_root);
-    let db_filename_fq_path = dataset_root_path.join(db_filename);
-    let conn = Connection::open(db_filename_fq_path.to_str().unwrap())?;
+    let conn = get_db_conn(dataset_root, db_filename);
 
     let mut stmt = conn.prepare(r#"
         SELECT ocr_text_index.rowid, d.timestamp, d.ocr_text, d.file_path 
