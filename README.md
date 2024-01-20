@@ -11,12 +11,8 @@ Screentap gives you a universal search interface to perform keyword searches acr
 
 You can also browse your screenshot history to see what you were doing on your computer during a given time period.
 
-<details>
-<summary><b>Table of Contents</b></summary>
-
-- [Current status + limitations](#Current status + limitations)
-- [How it works](#How it works)
-</details>
+<!-- START doctoc -->
+<!-- END doctoc -->
 
 **The Vision**
 
