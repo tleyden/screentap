@@ -3,6 +3,7 @@ import SwiftRs
 import Vision
 import ScreenCaptureKit
 import CoreGraphics
+import AVFoundation
 
 @_cdecl("screen_capture_swift")
 @available(macOS 10.15, *)
@@ -79,4 +80,13 @@ public func perform_ocr(path: SRString) -> SRString? {
         print("Error: \(error)")
         return nil
     }
+}
+
+/**
+ * Capture a few creenshots and write them to an mp4 file
+ */
+@_cdecl("cap_screenshot_to_mp4_swift")
+@available(macOS 10.15, *)
+public func cap_screenshot_to_mp4() -> SRString? {
+    return SRString("Not implemented yet")
 }

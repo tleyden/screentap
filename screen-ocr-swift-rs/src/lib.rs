@@ -7,6 +7,12 @@ use std::io::BufWriter;
 
 swift!(fn perform_ocr_swift(path: &SRString) -> Option<SRString>);
 swift!(fn screen_capture_swift() -> Option<SRData>);
+swift!(fn cap_screenshot_to_mp4_swift() -> Option<SRString>);
+
+pub fn cap_screenshot_to_mp4() -> String {
+    let result = unsafe { cap_screenshot_to_mp4_swift() };
+    String::from(result.unwrap().as_str())
+}
 
 /**
  * Given a path to an image, extract the text from it using OCR
