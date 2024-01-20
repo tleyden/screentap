@@ -117,27 +117,14 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
 
 }
 
-fn get_primary_monitor_size(app: &tauri::AppHandle) -> (u32, u32) {
-    let main_window = app.get_window("main").expect("Cannot get main window");
-    let primary_monitor = main_window.primary_monitor().unwrap().unwrap();
-    let physical_size = primary_monitor.size();
-    (physical_size.width, physical_size.height)
-}
 
 fn create_browse_screenshots_window(app: &tauri::AppHandle) -> tauri::Window {
  
-    let (width, height) = get_primary_monitor_size(app);
-
     let new_window = tauri::WindowBuilder::new(
         app,
         "browse",
         tauri::WindowUrl::App("index_browse.html".into())
     ).maximized(true).build().expect("failed to build window");
-
-    // let main_window = app.get_window("main").expect("Cannot get main window");
-    // let primary_monitor = main_window.primary_monitor().unwrap().unwrap();
-    // let physical_size = primary_monitor.size();
-    // println!("Primary monitor size: {}x{}", physical_size.width, physical_size.height);
 
     new_window
 }
