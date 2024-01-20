@@ -100,6 +100,35 @@ pub fn save_screenshot_meta(screenshot_file_path: &Path, ocr_text: &str, dataset
 }
 
 /**
+ * Helper function to get a screenshot from the DB by ID
+ */
+pub fn get_screenshot_by_id(dataset_root: &Path, db_filename: &Path, target_id: i32) -> Result<Vec<ScreenshotRecord>, rusqlite::Error> {
+
+    let conn = get_db_conn(dataset_root, db_filename);
+
+    let mut stmt = conn.prepare("SELECT id, timestamp, ocr_text, file_path FROM documents WHERE id = ? ORDER BY timestamp DESC")?;
+    let screenshots = stmt.query_map(params![target_id], |row| {
+
+        // open the file_path and convert to base64
+        let file_path_str: String = row.get(3).expect("Failed to get file_path");
+        let file_path = PathBuf::from(file_path_str.clone());
+        let base64_image: String = load_file_as_base_64(file_path.as_path(), dataset_root);
+
+        Ok(ScreenshotRecord {
+            id: row.get(0)?,
+            timestamp: row.get(1)?,
+            ocr_text: row.get(2)?,
+            file_path: file_path_str,
+            base64_image,
+        })
+    })?
+    .collect::<Result<Vec<_>, _>>()?;
+
+    Ok(screenshots)
+
+}
+
+/**
  * Helper function to get all screenshots from the DB
  */
 pub fn get_all_screenshots(dataset_root: &Path, db_filename: &Path, limit: i8) -> Result<Vec<ScreenshotRecord>, rusqlite::Error> {

@@ -4,11 +4,12 @@
 import { ref } from "vue";
 import { invoke } from "@tauri-apps/api/tauri";
 
+// Keep this as an array because eventually we might request 
+// these in blocks
 const browseScreenshotsResult = ref([]);
 
 async function browseScreenshots() {
-  // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-  browseScreenshotsResult.value = await invoke("browse_screenshots", { });
+  browseScreenshotsResult.value = await invoke("browse_screenshots", { curId: 0, direction: "backward" });
 }
 
 function formatTitle(item: { timestamp: number, ocr_text: string }): string {
@@ -26,6 +27,28 @@ function getBase64Image(dynamicBase64: string) {
   return dynamicBase64 ? `data:image/png;base64,${dynamicBase64}` : '';
 }
 
+async function getNextPrevScreenshot(direction: string) {
+
+  // Default to the latest screenshot
+  let curId = 0;
+
+  // Check if the array is not empty and get the first object's id
+  if (browseScreenshotsResult.value.length > 0) {
+    curId = parseInt(browseScreenshotsResult.value[0]['id']);
+  }
+
+  browseScreenshotsResult.value = await invoke("browse_screenshots", { curId, direction: direction });
+  
+}
+
+async function onPrevButtonClick() {
+  getNextPrevScreenshot("backward");
+}
+
+async function onNextButtonClick() {
+  getNextPrevScreenshot("forward");
+}
+
 browseScreenshots()
 
 </script>
@@ -34,9 +57,21 @@ browseScreenshots()
 <template>
 
   <div class="flex-container">
-    <div v-for="(item, index) in browseScreenshotsResult" :key="index" class="flex-item">
-      <img :src="getBase64Image(item['base64_image'])" alt="Screenshot" :title="formatTitle(item)">
+
+    <!-- Left Button with "<" (&lt;) -->
+    <button class="flex-button-left" @click="onPrevButtonClick">&lt;</button>
+
+    <div v-if="browseScreenshotsResult && browseScreenshotsResult.length > 0" class="flex-item">
+      <img :src="getBase64Image(browseScreenshotsResult[0]['base64_image'])" alt="Screenshot" :title="formatTitle(browseScreenshotsResult[0])">
     </div>
+
+    <!-- <div v-for="(item, index) in browseScreenshotsResult" :key="index" class="flex-item">
+      <img :src="getBase64Image(item['base64_image'])" alt="Screenshot" :title="formatTitle(item)">
+    </div> -->
+  
+    <!-- Right Button with ">" (&gt;) -->
+    <button class="flex-button-right" @click="onNextButtonClick">&gt;</button>
+  
   </div>
 
 </template>
@@ -47,7 +82,7 @@ browseScreenshots()
   .flex-container {
     display: flex;
     flex-direction: row; /* or column, depending on how you want to display items */
-    flex-wrap: wrap; /* allows items to wrap to the next line */
+    flex-wrap: nowrap; /* allows items to wrap to the next line */
     justify-content: space-around; /* or any other justification you prefer */
   }
 
@@ -57,7 +92,7 @@ browseScreenshots()
   }
 
   .flex-item img {
-    width: 100%; /* or any specific size */
+    width: 95%; /* or any specific size */
     height: auto; /* maintains the aspect ratio */
     /* additional styles for the images */
   }

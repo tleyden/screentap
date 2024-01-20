@@ -43,15 +43,37 @@ fn search_screenshots(app_handle: tauri::AppHandle, term: &str) -> Vec<HashMap<S
 }
 
 #[tauri::command]
-fn browse_screenshots(app_handle: tauri::AppHandle) -> Vec<HashMap<String, String>> {
+fn browse_screenshots(app_handle: tauri::AppHandle, cur_id: i32, direction: &str) -> Vec<HashMap<String, String>> {
+
+    println!("browse_screenshots: cur_id: {}, direction: {}", cur_id, direction);
 
     let app_data_dir = app_handle.path_resolver().app_data_dir().expect("Failed to get app_data_dir");
 
-    let max_results = 1;
-
     let db_filename_path = Path::new(DATABASE_FILENAME);
 
-    let screenshot_records_result = db::get_all_screenshots(app_data_dir.as_path(), db_filename_path, max_results);
+    let screenshot_records_result = match cur_id {
+        0 => {
+            // If the user passed 0 as the cur_id, get the most recent screenshot in the DB
+            db::get_all_screenshots(
+                app_data_dir.as_path(), 
+                db_filename_path, 
+                1
+            )
+        },
+        _ => {
+            // Otherwise, get the next screenshot by id, depending on direction
+            let target_id = match direction {
+                "forward" => cur_id + 1,
+                "backward" => cur_id - 1,
+                _ => cur_id,
+            };
+            db::get_screenshot_by_id(
+                app_data_dir.as_path(), 
+                db_filename_path, 
+                target_id
+            )
+        }
+    };
 
     match screenshot_records_result {
         Ok(screenshot_records) => {
@@ -75,6 +97,8 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
     if !app_data_dir.exists() {
         println!("Creating app_data_dir: {}", app_data_dir.as_path().to_str().unwrap());
         std::fs::create_dir_all(app_data_dir.as_path())?;
+    } else {
+        println!("Found existing app_data_dir: {}", app_data_dir.as_path().to_str().unwrap());
     }
 
     // Create the database if it doesn't exist
