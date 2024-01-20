@@ -131,6 +131,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
                     println!("Error maximizing window: {}", e);
                 }
             }
+            _ = w.set_title("Screenstap: search");
         },
         None => {
             println!("Cannot get main window to maximize it");
@@ -148,7 +149,7 @@ fn create_browse_screenshots_window(app: &tauri::AppHandle) -> tauri::Window {
         app,
         "browse",
         tauri::WindowUrl::App("index_browse.html".into())
-    ).maximized(true).build().expect("failed to build window");
+    ).maximized(true).title("Screentap: browse").build().expect("failed to build window");
 
     new_window
 }
@@ -173,7 +174,7 @@ fn handle_system_tray_event(app: &tauri::AppHandle, event: tauri::SystemTrayEven
                             app,
                             "main",
                             tauri::WindowUrl::App("index.html".into())
-                        ).maximized(true).build().expect("failed to build window");
+                        ).maximized(true).title("Screentap: search").build().expect("failed to build window");
                     }
                 }
             },
