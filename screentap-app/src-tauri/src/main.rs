@@ -97,16 +97,34 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
         }
     });
 
+    // Maximize the main window
+    match app.get_window("main") {
+        Some(w) => {
+            let maximize_result = w.maximize();
+            match maximize_result {
+                Ok(_) => {},
+                Err(e) => {
+                    println!("Error maximizing window: {}", e);
+                }
+            }
+        },
+        None => {
+            println!("Cannot get main window to maximize it");
+        }
+    }
+
     Ok(())
 
 }
 
+
 fn create_browse_screenshots_window(app: &tauri::AppHandle) -> tauri::Window {
+ 
     let new_window = tauri::WindowBuilder::new(
         app,
         "browse",
         tauri::WindowUrl::App("index_browse.html".into())
-    ).build().expect("failed to build window");
+    ).maximized(true).build().expect("failed to build window");
 
     new_window
 }
@@ -131,7 +149,7 @@ fn handle_system_tray_event(app: &tauri::AppHandle, event: tauri::SystemTrayEven
                             app,
                             "main",
                             tauri::WindowUrl::App("index.html".into())
-                        ).build().expect("failed to build window");
+                        ).maximized(true).build().expect("failed to build window");
                     }
                 }
             },
