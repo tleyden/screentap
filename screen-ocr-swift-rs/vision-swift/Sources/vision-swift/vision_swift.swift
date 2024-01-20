@@ -5,6 +5,76 @@ import ScreenCaptureKit
 import CoreGraphics
 import AVFoundation
 
+/**
+ * Capture a few screenshots and write them to an mp4 file
+ */
+@_cdecl("cap_screenshot_to_mp4_swift")
+@available(macOS 10.15, *)
+public func cap_screenshot_to_mp4() -> SRString? {
+
+    do {
+
+        let displayID = CGMainDisplayID()
+
+        // Setup video writer and settings
+        let outputPath = "/tmp/filename.mp4"
+        let outputURL = URL(fileURLWithPath: outputPath)
+        guard let videoWriter = try? AVAssetWriter(outputURL: outputURL, fileType: .mp4) else {
+            return SRString("Failed to create AVAssetWriter")
+        }
+
+        let videoSettings: [String: Any] = [
+            AVVideoCodecKey: AVVideoCodecType.h264,
+            AVVideoWidthKey: 3456,
+            AVVideoHeightKey: 2234
+        ]
+
+        let videoWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
+        let pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: videoWriterInput, sourcePixelBufferAttributes: nil)
+
+        // Add input and start writing
+        videoWriter.add(videoWriterInput)
+        videoWriter.startWriting()
+        videoWriter.startSession(atSourceTime: .zero)
+
+
+        var frameCount = 0
+
+        let frameDuration = CMTimeMake(value: 1, timescale: 1)
+
+        // Do a for loop to capture a few screenshots
+        for _ in 0...10 {
+            
+            guard let cgImage = CGDisplayCreateImage(displayID) else {
+                // Handle the nil case and return or break
+                return SRString("Failed to CGDisplayCreateImage")
+            }
+
+            let presentationTime = CMTimeMake(value: Int64(frameCount), timescale: 1)
+            appendPixelBuffer(forImage: cgImage, pixelBufferAdaptor: pixelBufferAdaptor, presentationTime: presentationTime)
+            frameCount += 1
+            print("Frame \(frameCount) added")
+
+        }
+
+        videoWriterInput.markAsFinished()
+
+        videoWriter.finishWriting() {
+            print("Finished writing video")
+        }
+
+        return SRString("Video written to file")
+
+    } catch {
+        // This block is executed if an error is thrown in the do block
+        // You can handle the error here
+        // For example, you can return a string indicating the error
+        return SRString("An error occurred: \(error)")
+    }
+
+
+}
+
 @_cdecl("screen_capture_swift")
 @available(macOS 10.15, *)
 public func screen_capture() -> SRData? {
@@ -82,11 +152,22 @@ public func perform_ocr(path: SRString) -> SRString? {
     }
 }
 
-/**
- * Capture a few creenshots and write them to an mp4 file
- */
-@_cdecl("cap_screenshot_to_mp4_swift")
-@available(macOS 10.15, *)
-public func cap_screenshot_to_mp4() -> SRString? {
-    return SRString("Not implemented yet")
+private func appendPixelBuffer(forImage image: CGImage, pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor, presentationTime: CMTime) {
+    guard let pixelBufferPool = pixelBufferAdaptor.pixelBufferPool else { return }
+
+    var pixelBufferOut: CVPixelBuffer?
+    CVPixelBufferPoolCreatePixelBuffer(nil, pixelBufferPool, &pixelBufferOut)
+
+    guard let pixelBuffer = pixelBufferOut else { return }
+
+    CVPixelBufferLockBaseAddress(pixelBuffer, [])
+    let pixelData = CVPixelBufferGetBaseAddress(pixelBuffer)
+
+    let context = CGContext(data: pixelData, width: image.width, height: image.height, bitsPerComponent: 8, bytesPerRow: CVPixelBufferGetBytesPerRow(pixelBuffer), space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue)
+
+    context?.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+
+    pixelBufferAdaptor.append(pixelBuffer, withPresentationTime: presentationTime)
+
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
 }
