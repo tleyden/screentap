@@ -7,34 +7,45 @@ import CoreGraphics
 import AVFoundation
 
 
-print("Hello, World!")
-
-
-var imageBatch: [CGImage] = []
-
-var frameNumber: Int32 = 0
-var batchNumber: Int32 = 0
-
-while true {
+func main() {
     
-    if let image = swiftCaptureImage(frameNumber: frameNumber) {
-        imageBatch.append(image)
-    }
-    
-    frameNumber += 1
-    
-    Thread.sleep(forTimeInterval: 1.0)
+    var imageBatch: [CGImage] = []
 
-    if imageBatch.count > 5 {
-        let targetFilename = "/tmp/screencapture_\(batchNumber).mp4" // Specify your target file name here
-        swiftWriteImagesToMp4(imageBatch, targetFilename: targetFilename)
-        imageBatch.removeAll() // Clear the batch after writing
+    var frameNumber: Int32 = 0
+    var batchNumber: Int32 = 0
+
+    // Get a datestring to create unique mp4 filenames
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyyMMdd_HHmmss" // Example format: '20230121_115959'
+    let dateString = dateFormatter.string(from: Date())
+
+    while true {
         
-        batchNumber += 1
+        if let image = swiftCaptureImage(frameNumber: frameNumber) {
+            imageBatch.append(image)
+        }
+        frameNumber += 1
+
+        print("Cpatured image \(frameNumber)")
+                
+        // TODO: make this configurable.  Sync the frameDuration = CMTime(..) with it to match
+        Thread.sleep(forTimeInterval: 1.0)
+
+        if imageBatch.count >= 5 {
+            
+            let targetFilename = "/tmp/screencapture_\(dateString)_\(batchNumber).mp4"
+            
+            swiftWriteImagesToMp4(imageBatch, targetFilename: targetFilename)
+                        
+            imageBatch.removeAll() // Clear the batch after writing
+            
+            batchNumber += 1
+        }
+        
     }
-    
     
 }
+
 
 // Define swiftCaptureImage() returning an optional UIImage
 func swiftCaptureImage(frameNumber: Int32) -> CGImage? {
@@ -50,24 +61,7 @@ func swiftCaptureImage(frameNumber: Int32) -> CGImage? {
             print("Unexpected image format")
             return nil
         }
-        
-        guard let imageData = bitmapRep.representation(using: .png, properties: [:]) else {
-            print("Failed to convert image to PNG data")
-            return nil
-        }
-        
-        // Specify the file path and name
-        let fileURL = URL(fileURLWithPath: "/tmp/capture_\(frameNumber).png")
 
-        do {
-            try imageData.write(to: fileURL)
-            print("Image successfully written to \(fileURL.path)")
-        } catch {
-            print("Error writing image to file: \(error)")
-            return nil
-        }
-        
-        
         return image
         
     } else {
@@ -88,8 +82,8 @@ func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String) {
         return
     }
     
-    
     guard let videoWriter = try? AVAssetWriter(outputURL: outputURL, fileType: .mp4) else {
+        print("Unable to create videoWriter for \(targetFilename)")
         return
     }
     
@@ -117,17 +111,16 @@ func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String) {
         sourcePixelBufferAttributes: pixelBufferAttributes
     )
     
-
     // Add input and start writing
     videoWriter.add(videoWriterInput)
     videoWriter.startWriting()
     videoWriter.startSession(atSourceTime: .zero)
 
-    //  var frameCount = 0
     let frameDuration = CMTime(seconds: 1, preferredTimescale: 1)
+    
     var currentPresentationTime = CMTime.zero
     
-    for cgImage in images {  // Assuming 'frames' is your collection of screenshots
+    for cgImage in images {
         
         appendPixelBuffer(
             forImage: cgImage,
@@ -143,40 +136,55 @@ func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String) {
     videoWriterInput.markAsFinished()
 
     videoWriter.finishWriting() {
-        print("Finished writing video")
+        // TODO: invoke callback fn that is passed in
+        print("Finished writing video to \(targetFilename) with \(images.count) images")
     }
-
 
 }
 
-private func appendPixelBuffer(forImage image: CGImage, pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor, presentationTime: CMTime) {
+private func appendPixelBuffer(
+    forImage image: CGImage,
+    pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor,
+    presentationTime: CMTime) {
     
     guard let pixelBufferPool = pixelBufferAdaptor.pixelBufferPool else {
         print("Cannot get pixelBufferPool")
         return
-        
     }
 
     var pixelBufferOut: CVPixelBuffer?
     CVPixelBufferPoolCreatePixelBuffer(nil, pixelBufferPool, &pixelBufferOut)
 
-    guard let pixelBuffer = pixelBufferOut else { return }
+    guard let pixelBuffer = pixelBufferOut else {
+        // TODO: Return error
+        print("pixelBufferOut is empty")
+        return
+        
+    }
 
     CVPixelBufferLockBaseAddress(pixelBuffer, [])
     let pixelData = CVPixelBufferGetBaseAddress(pixelBuffer)
 
-    print("appendPixelBuffer \(image.width) x \(image.height)")
-    
     let bitsPerComponent = image.bitsPerComponent
-    print("Bits per component: \(bitsPerComponent)")
-    
-    
-//    bitmap = CGBitmapContextCreate(NULL, targetWidth, targetHeight, CGImageGetBitsPerComponent(imageRef), 0, colorSpaceInfo, bitmapInfo);
+    let context = CGContext(
+        data: pixelData,
+        width: image.width,
+        height: image.height,
+        bitsPerComponent: bitsPerComponent,
+        bytesPerRow: CVPixelBufferGetBytesPerRow(pixelBuffer),
+        space: CGColorSpaceCreateDeviceRGB(),
+        bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue
+    )
 
-
-    let context = CGContext(data: pixelData, width: image.width, height: image.height, bitsPerComponent: 8, bytesPerRow: CVPixelBufferGetBytesPerRow(pixelBuffer), space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue)
-
-    context?.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+    context?.draw(
+        image,
+        in: CGRect(
+            x: 0,
+            y: 0,
+            width: image.width,
+            height: image.height
+        )
+    )
 
     pixelBufferAdaptor.append(pixelBuffer, withPresentationTime: presentationTime)
 
@@ -184,6 +192,7 @@ private func appendPixelBuffer(forImage image: CGImage, pixelBufferAdaptor: AVAs
 }
 
 func isImage32ARGB(_ cgImage: CGImage) -> Bool {
+    
     // Check bits per component
     let bitsPerComponent = cgImage.bitsPerComponent
     if bitsPerComponent != 8 {
@@ -210,3 +219,5 @@ func isImage32ARGB(_ cgImage: CGImage) -> Bool {
 
     return true
 }
+
+main()
