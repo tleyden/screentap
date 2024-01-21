@@ -2,4 +2,5 @@ dataset
 dataset.old
 **/.DS_Store
 test-image-gallery
-swift-prototyping/**
+swift-prototyping/ScreenRecorderMacOS-main
+swift-prototyping/WritingFragmentedMPEG4FilesForHTTPLiveStreaming

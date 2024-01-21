@@ -1,0 +1,1062 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "AF1DF9B8-CB80-4651-BF02-543CBE06CCCD"
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "EF473688-0E44-4B57-BA3F-72FB61F0950B"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "10"
+            endingLineNumber = "10"
+            landmarkName = "unknown"
+            landmarkType = "0">
+            <Locations>
+               <Location
+                  uuid = "EF473688-0E44-4B57-BA3F-72FB61F0950B - f72cd98d4075edc5"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "main"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "10"
+                  endingLineNumber = "10"
+                  offsetFromSymbolStart = "36">
+               </Location>
+               <Location
+                  uuid = "EF473688-0E44-4B57-BA3F-72FB61F0950B - f72cd98d4075edc5"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "main"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "10"
+                  endingLineNumber = "10"
+                  offsetFromSymbolStart = "52">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "46E32CD0-DB24-47C9-B1BE-B0F785A496F7"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "21"
+            endingLineNumber = "21"
+            landmarkName = "unknown"
+            landmarkType = "0">
+            <Locations>
+               <Location
+                  uuid = "46E32CD0-DB24-47C9-B1BE-B0F785A496F7 - f72cd98d4075e293"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "main"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "20"
+                  endingLineNumber = "20"
+                  offsetFromSymbolStart = "316">
+               </Location>
+               <Location
+                  uuid = "46E32CD0-DB24-47C9-B1BE-B0F785A496F7 - f72cd98d4075e293"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "main"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "20"
+                  endingLineNumber = "20"
+                  offsetFromSymbolStart = "376">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "6F34B1AD-E4D2-462E-A33A-D982230C18DF"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "29"
+            endingLineNumber = "29"
+            landmarkName = "unknown"
+            landmarkType = "0">
+            <Locations>
+               <Location
+                  uuid = "6F34B1AD-E4D2-462E-A33A-D982230C18DF - f72cd98d4075e3d5"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "main"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "26"
+                  endingLineNumber = "26"
+                  offsetFromSymbolStart = "560">
+               </Location>
+               <Location
+                  uuid = "6F34B1AD-E4D2-462E-A33A-D982230C18DF - f72cd98d4075e3d5"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "main"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "26"
+                  endingLineNumber = "26"
+                  offsetFromSymbolStart = "696">
+               </Location>
+               <Location
+                  uuid = "6F34B1AD-E4D2-462E-A33A-D982230C18DF - f72cd98d4075e39b"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "main"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "28"
+                  endingLineNumber = "28"
+                  offsetFromSymbolStart = "732">
+               </Location>
+               <Location
+                  uuid = "6F34B1AD-E4D2-462E-A33A-D982230C18DF - f72cd98d4075e3ba"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "main"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "29"
+                  endingLineNumber = "29"
+                  offsetFromSymbolStart = "744">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "B39CEB8B-44DB-442C-B0F9-EA1219C4D4D5"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "74"
+            endingLineNumber = "74"
+            landmarkName = "swiftCaptureImage(frameNumber:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "5E56D4F5-D8F9-4CCC-8CBA-5363D807CC09"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "28"
+            endingLineNumber = "28"
+            landmarkName = "unknown"
+            landmarkType = "0">
+            <Locations>
+               <Location
+                  uuid = "5E56D4F5-D8F9-4CCC-8CBA-5363D807CC09 - f72cd98d4075e336"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "main"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "25"
+                  endingLineNumber = "25"
+                  offsetFromSymbolStart = "460">
+               </Location>
+               <Location
+                  uuid = "5E56D4F5-D8F9-4CCC-8CBA-5363D807CC09 - f72cd98d4075e336"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "main"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "25"
+                  endingLineNumber = "25"
+                  offsetFromSymbolStart = "596">
+               </Location>
+               <Location
+                  uuid = "5E56D4F5-D8F9-4CCC-8CBA-5363D807CC09 - f72cd98d4075e3f4"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "main"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "27"
+                  endingLineNumber = "27"
+                  offsetFromSymbolStart = "632">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "1073B08E-8010-49DC-825D-CB6F05CDD09F"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "44"
+            endingLineNumber = "44"
+            landmarkName = "swiftCaptureImage(frameNumber:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "F28E07CB-41A8-41B1-968A-EDFF75613AB0"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "77"
+            endingLineNumber = "77"
+            landmarkName = "swiftCaptureImage(frameNumber:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "77FA6A68-4B4B-4162-A5E0-886BAF270EE7"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "47"
+            endingLineNumber = "47"
+            landmarkName = "swiftCaptureImage(frameNumber:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "38AD05DA-8909-4C17-A1E5-BFE8FA09660A"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "130"
+            endingLineNumber = "130"
+            landmarkName = "swiftWriteImagesToMp4(_:targetFilename:)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "38AD05DA-8909-4C17-A1E5-BFE8FA09660A - 9f6b7670cbdd5ef6"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.swiftWriteImagesToMp4(_: Swift.Array&lt;__C.CGImageRef&gt;, targetFilename: Swift.String) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "101"
+                  endingLineNumber = "101"
+                  offsetFromSymbolStart = "1136">
+               </Location>
+               <Location
+                  uuid = "38AD05DA-8909-4C17-A1E5-BFE8FA09660A - 9f6b7670cbdd5ef6"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.swiftWriteImagesToMp4(_: Swift.Array&lt;__C.CGImageRef&gt;, targetFilename: Swift.String) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "101"
+                  endingLineNumber = "101"
+                  offsetFromSymbolStart = "1128">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "DEA67C86-D6AE-4E5D-9069-2FCD7CA23918"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "143"
+            endingLineNumber = "143"
+            landmarkName = "swiftWriteImagesToMp4(_:targetFilename:)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "DEA67C86-D6AE-4E5D-9069-2FCD7CA23918 - 9e055bc6b8b8f51b"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "130"
+                  endingLineNumber = "130"
+                  offsetFromSymbolStart = "216">
+               </Location>
+               <Location
+                  uuid = "DEA67C86-D6AE-4E5D-9069-2FCD7CA23918 - 9f6b7670cbdd5b49"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.swiftWriteImagesToMp4(_: Swift.Array&lt;__C.CGImageRef&gt;, targetFilename: Swift.String) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "130"
+                  endingLineNumber = "130"
+                  offsetFromSymbolStart = "2044">
+               </Location>
+               <Location
+                  uuid = "DEA67C86-D6AE-4E5D-9069-2FCD7CA23918 - 9f6b7670cbdd5590"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.swiftWriteImagesToMp4(_: Swift.Array&lt;__C.CGImageRef&gt;, targetFilename: Swift.String) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "139"
+                  endingLineNumber = "139"
+                  offsetFromSymbolStart = "2116">
+               </Location>
+               <Location
+                  uuid = "DEA67C86-D6AE-4E5D-9069-2FCD7CA23918 - 9f6b7670cbdd5498"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.swiftWriteImagesToMp4(_: Swift.Array&lt;__C.CGImageRef&gt;, targetFilename: Swift.String) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "147"
+                  endingLineNumber = "147"
+                  offsetFromSymbolStart = "2808">
+               </Location>
+               <Location
+                  uuid = "DEA67C86-D6AE-4E5D-9069-2FCD7CA23918 - 9f6b7670cbdd551c"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.swiftWriteImagesToMp4(_: Swift.Array&lt;__C.CGImageRef&gt;, targetFilename: Swift.String) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "143"
+                  endingLineNumber = "143"
+                  offsetFromSymbolStart = "2740">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "C0120F46-4683-404C-8BE3-8767D4B90CBC"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "30"
+            endingLineNumber = "30"
+            landmarkName = "unknown"
+            landmarkType = "0">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "70EA6526-E93D-400E-B085-F7E903286A29"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "139"
+            endingLineNumber = "139"
+            landmarkName = "swiftWriteImagesToMp4(_:targetFilename:)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "70EA6526-E93D-400E-B085-F7E903286A29 - 9f6b7670cbdd59dd"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.swiftWriteImagesToMp4(_: Swift.Array&lt;__C.CGImageRef&gt;, targetFilename: Swift.String) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "110"
+                  endingLineNumber = "110"
+                  offsetFromSymbolStart = "1348">
+               </Location>
+               <Location
+                  uuid = "70EA6526-E93D-400E-B085-F7E903286A29 - 9f6b7670cbdd59dd"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.swiftWriteImagesToMp4(_: Swift.Array&lt;__C.CGImageRef&gt;, targetFilename: Swift.String) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "110"
+                  endingLineNumber = "110"
+                  offsetFromSymbolStart = "1340">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "02D8079B-4958-4C77-A71D-291D81FD6223"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "177"
+            endingLineNumber = "177"
+            landmarkName = "appendPixelBuffer(forImage:pixelBufferAdaptor:presentationTime:)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "02D8079B-4958-4C77-A71D-291D81FD6223 - f5920b73f947308a"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.isImage32ARGB(__C.CGImageRef) -&gt; Swift.Bool"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "164"
+                  endingLineNumber = "164"
+                  offsetFromSymbolStart = "56">
+               </Location>
+               <Location
+                  uuid = "02D8079B-4958-4C77-A71D-291D81FD6223 - 9e055bc6b8b8f885"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "164"
+                  endingLineNumber = "164"
+                  offsetFromSymbolStart = "1220">
+               </Location>
+               <Location
+                  uuid = "02D8079B-4958-4C77-A71D-291D81FD6223 - 9e055bc6b8b8ff6c"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "173"
+                  endingLineNumber = "173"
+                  offsetFromSymbolStart = "1220">
+               </Location>
+               <Location
+                  uuid = "02D8079B-4958-4C77-A71D-291D81FD6223 - 9e055bc6b8b8fe74"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "181"
+                  endingLineNumber = "181"
+                  offsetFromSymbolStart = "1220">
+               </Location>
+               <Location
+                  uuid = "02D8079B-4958-4C77-A71D-291D81FD6223 - 9e055bc6b8b8fee8"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "177"
+                  endingLineNumber = "177"
+                  offsetFromSymbolStart = "1220">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "1EB3876B-9EFC-4281-93A4-E1588E3264CF"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "160"
+            endingLineNumber = "160"
+            landmarkName = "appendPixelBuffer(forImage:pixelBufferAdaptor:presentationTime:)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "1EB3876B-9EFC-4281-93A4-E1588E3264CF - 9e055bc6b8b8faca"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "147"
+                  endingLineNumber = "147"
+                  offsetFromSymbolStart = "900">
+               </Location>
+               <Location
+                  uuid = "1EB3876B-9EFC-4281-93A4-E1588E3264CF - 9e055bc6b8b8faca"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "147"
+                  endingLineNumber = "147"
+                  offsetFromSymbolStart = "280">
+               </Location>
+               <Location
+                  uuid = "1EB3876B-9EFC-4281-93A4-E1588E3264CF - 9e055bc6b8b8f9bd"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "156"
+                  endingLineNumber = "156"
+                  offsetFromSymbolStart = "280">
+               </Location>
+               <Location
+                  uuid = "1EB3876B-9EFC-4281-93A4-E1588E3264CF - 9e055bc6b8b8f885"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "164"
+                  endingLineNumber = "164"
+                  offsetFromSymbolStart = "280">
+               </Location>
+               <Location
+                  uuid = "1EB3876B-9EFC-4281-93A4-E1588E3264CF - 9e055bc6b8b8f939"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "160"
+                  endingLineNumber = "160"
+                  offsetFromSymbolStart = "280">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "C185DA6D-9255-4B17-BDA7-6959DF6B1FA9"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "171"
+            endingLineNumber = "171"
+            landmarkName = "appendPixelBuffer(forImage:pixelBufferAdaptor:presentationTime:)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "C185DA6D-9255-4B17-BDA7-6959DF6B1FA9 - 9e055bc6b8b8f95e"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "159"
+                  endingLineNumber = "159"
+                  offsetFromSymbolStart = "1580">
+               </Location>
+               <Location
+                  uuid = "C185DA6D-9255-4B17-BDA7-6959DF6B1FA9 - 9e055bc6b8b8f97f"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "158"
+                  endingLineNumber = "158"
+                  offsetFromSymbolStart = "900">
+               </Location>
+               <Location
+                  uuid = "C185DA6D-9255-4B17-BDA7-6959DF6B1FA9 - 9e055bc6b8b8f826"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "167"
+                  endingLineNumber = "167"
+                  offsetFromSymbolStart = "900">
+               </Location>
+               <Location
+                  uuid = "C185DA6D-9255-4B17-BDA7-6959DF6B1FA9 - 9e055bc6b8b8ff2e"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "175"
+                  endingLineNumber = "175"
+                  offsetFromSymbolStart = "900">
+               </Location>
+               <Location
+                  uuid = "C185DA6D-9255-4B17-BDA7-6959DF6B1FA9 - 9e055bc6b8b8ffa2"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "171"
+                  endingLineNumber = "171"
+                  offsetFromSymbolStart = "900">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "DD7C5F75-3E6C-4451-92C7-0C3D0F030D18"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "132"
+            endingLineNumber = "132"
+            landmarkName = "swiftWriteImagesToMp4(_:targetFilename:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "8AE15B90-76AB-4870-B8FE-FD05E46A594A"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "155"
+            endingLineNumber = "155"
+            landmarkName = "appendPixelBuffer(forImage:pixelBufferAdaptor:presentationTime:)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "8AE15B90-76AB-4870-B8FE-FD05E46A594A - 9e055bc6b8b8fb6f"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "142"
+                  endingLineNumber = "142"
+                  offsetFromSymbolStart = "428">
+               </Location>
+               <Location
+                  uuid = "8AE15B90-76AB-4870-B8FE-FD05E46A594A - 9e055bc6b8b8fb6f"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "142"
+                  endingLineNumber = "142"
+                  offsetFromSymbolStart = "1688">
+               </Location>
+               <Location
+                  uuid = "8AE15B90-76AB-4870-B8FE-FD05E46A594A - 9e055bc6b8b8fa56"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "151"
+                  endingLineNumber = "151"
+                  offsetFromSymbolStart = "1688">
+               </Location>
+               <Location
+                  uuid = "8AE15B90-76AB-4870-B8FE-FD05E46A594A - 9e055bc6b8b8f95e"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "159"
+                  endingLineNumber = "159"
+                  offsetFromSymbolStart = "1688">
+               </Location>
+               <Location
+                  uuid = "8AE15B90-76AB-4870-B8FE-FD05E46A594A - 9e055bc6b8b8f9d2"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.appendPixelBuffer(forImage: __C.CGImageRef, pixelBufferAdaptor: __C.AVAssetWriterInputPixelBufferAdaptor, presentationTime: __C.CMTime) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "155"
+                  endingLineNumber = "155"
+                  offsetFromSymbolStart = "1688">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "DA4B2C8E-3EBA-43E1-8665-F128944A4B77"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "49"
+            endingLineNumber = "49"
+            landmarkName = "swiftCaptureImage(frameNumber:)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "DA4B2C8E-3EBA-43E1-8665-F128944A4B77 - 267ca67f291006c1"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.swiftCaptureImage(frameNumber: Swift.Int32) -&gt; Swift.Optional&lt;__C.CGImageRef&gt;"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "49"
+                  endingLineNumber = "49"
+                  offsetFromSymbolStart = "400">
+               </Location>
+               <Location
+                  uuid = "DA4B2C8E-3EBA-43E1-8665-F128944A4B77 - 267ca67f291006c1"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.swiftCaptureImage(frameNumber: Swift.Int32) -&gt; Swift.Optional&lt;__C.CGImageRef&gt;"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "49"
+                  endingLineNumber = "49"
+                  offsetFromSymbolStart = "392">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "02900D9E-87D1-4578-B13D-A538D8A91680"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "87"
+            endingLineNumber = "87"
+            landmarkName = "swiftWriteImagesToMp4(_:targetFilename:)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "02900D9E-87D1-4578-B13D-A538D8A91680 - 9f6b7670cbdd5cc4"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.swiftWriteImagesToMp4(_: Swift.Array&lt;__C.CGImageRef&gt;, targetFilename: Swift.String) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "87"
+                  endingLineNumber = "87"
+                  offsetFromSymbolStart = "600">
+               </Location>
+               <Location
+                  uuid = "02900D9E-87D1-4578-B13D-A538D8A91680 - 9f6b7670cbdd5cc4"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.swiftWriteImagesToMp4(_: Swift.Array&lt;__C.CGImageRef&gt;, targetFilename: Swift.String) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "87"
+                  endingLineNumber = "87"
+                  offsetFromSymbolStart = "596">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "18084095-5EC7-4277-B6AD-34E4723B94CB"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "86"
+            endingLineNumber = "86"
+            landmarkName = "swiftWriteImagesToMp4(_:targetFilename:)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "18084095-5EC7-4277-B6AD-34E4723B94CB - 9f6b7670cbdd5ce5"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.swiftWriteImagesToMp4(_: Swift.Array&lt;__C.CGImageRef&gt;, targetFilename: Swift.String) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "86"
+                  endingLineNumber = "86"
+                  offsetFromSymbolStart = "408">
+               </Location>
+               <Location
+                  uuid = "18084095-5EC7-4277-B6AD-34E4723B94CB - 9f6b7670cbdd5ce5"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.swiftWriteImagesToMp4(_: Swift.Array&lt;__C.CGImageRef&gt;, targetFilename: Swift.String) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "86"
+                  endingLineNumber = "86"
+                  offsetFromSymbolStart = "404">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "F43D22B4-BF13-4ED7-835A-050CDF3BD104"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "146"
+            endingLineNumber = "146"
+            landmarkName = "swiftWriteImagesToMp4(_:targetFilename:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>
