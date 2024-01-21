@@ -18,7 +18,7 @@ pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> String {
     let dataset_root_path = Path::new(dataset_root);
     let target_png_file_path = dataset_root_path.join(timestamp_png_filename.clone());
 
-    screen_ocr_swift_rs::screen_capture(target_png_file_path.to_str().unwrap());
+    screen_ocr_swift_rs::screen_capture_to_file(target_png_file_path.to_str().unwrap());
     let ocr_text = screen_ocr_swift_rs::extract_text(target_png_file_path.to_str().unwrap());
 
     // Save screenshot meta to the DB
@@ -37,3 +37,12 @@ pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> String {
     }
     
 }
+
+
+// pub fn prototype_cap_screenshot_to_mp4() -> () {
+
+//     // let screen_cap = screen_ocr_swift_rs::screen_capture();
+//     screen_ocr_swift_rs::cap_screenshot_to_mp4();
+
+// }
+

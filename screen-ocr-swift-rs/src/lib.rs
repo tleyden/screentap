@@ -7,10 +7,23 @@ use std::io::BufWriter;
 
 swift!(fn perform_ocr_swift(path: &SRString) -> Option<SRString>);
 swift!(fn screen_capture_swift() -> Option<SRData>);
-swift!(fn cap_screenshot_to_mp4_swift() -> Option<SRString>);
+swift!(fn cap_screenshot_to_mp4_swift(srdata: SRData) -> Option<SRString>);
 
 pub fn cap_screenshot_to_mp4() -> String {
-    let result = unsafe { cap_screenshot_to_mp4_swift() };
+
+    let screen_capture_opt = unsafe { screen_capture_swift() };
+    let screen_capture = screen_capture_opt.expect("Failed to get screen capture");
+
+    // Create an array of SRData
+    // let mut screen_capture_vec = Vec::new();
+    // screen_capture_vec.push(screen_capture);
+    // let screen_capture_array = screen_capture_vec.as_slice();
+
+    // let screen_capture_array = SRArray::from_vec(vec![screen_capture]);
+
+
+
+    let result = unsafe { cap_screenshot_to_mp4_swift(screen_capture) };
     String::from(result.unwrap().as_str())
 }
 
@@ -26,14 +39,21 @@ pub fn extract_text(path: &str) -> String {
 }
 
 /**
- * Capture the screen and return a byte array
+ * Capture the screen and write to a file
  */
-pub fn screen_capture(dest_file: &str) -> () {
+pub fn screen_capture_to_file(dest_file: &str) -> () {
     let result = unsafe { screen_capture_swift() };
     let result_vec = result.unwrap().to_vec();
     // Print the length of the vector
     let _ = write_png_to_file(result_vec, dest_file);
-    
+}
+
+/**
+ * Capture the screen and return the raw image data
+ */
+pub fn screen_capture() -> Option<SRData> {
+    let result = unsafe { screen_capture_swift() };
+    result
 }
 
 
