@@ -26,7 +26,7 @@ func main() {
         }
         frameNumber += 1
 
-        print("Cpatured image \(frameNumber)")
+        print("Captured image \(frameNumber)")
                 
         // TODO: make this configurable.  Sync the frameDuration = CMTime(..) with it to match
         Thread.sleep(forTimeInterval: 1.0)
