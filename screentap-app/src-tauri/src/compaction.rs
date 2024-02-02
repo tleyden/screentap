@@ -27,19 +27,33 @@ impl CompactionHelper {
     }
 
     fn count_png_files(&self) -> u32 {
-        let mut count = 0;
+        let png_files = self.get_png_files();
+        png_files.len() as u32
+    }
+
+    fn get_png_files(&self) -> Vec<PathBuf> {
+        let mut png_files = Vec::new();
         for entry in std::fs::read_dir(&self.app_data_dir).unwrap() {
             let entry = entry.unwrap();
             let path = entry.path();
             if path.is_file() {
                 if let Some(ext) = path.extension() {
                     if ext == "png" {
-                        count += 1;
+                        png_files.push(path);
                     }
                 }
             }
         }
-        count
+        png_files
+    }
+
+    /**
+     * Get the .png files in the app_data_dir ordered chronologically, oldest to newest
+     */
+    fn get_png_files_chronologically(&self) -> Vec<PathBuf> {
+        let mut png_files = self.get_png_files();
+        png_files.sort_by(|a, b| a.metadata().unwrap().modified().unwrap().cmp(&b.metadata().unwrap().modified().unwrap()));
+        png_files
     }
 
     pub fn should_compact_screenshots(&self) -> bool {
@@ -58,10 +72,33 @@ impl CompactionHelper {
      *     1. Set IS_MP4 = True
      *     2. Add the Frame ID
      *     3. Update the filename to the MP4 file
-     *     4. Delete all entries in the incoming dir
+     * 5. Delete all entries in the incoming dir
      */
     pub fn compact_screenshots_to_mp4(&self) -> () {
-        // TODO
+
+        if self.should_compact_screenshots() {
+            return;
+        }
+
+        // TODO: create the MP4 file in a subdirectory divided by date (year/month/day/hour)
+        //       but for now, just keep it flat
+
+        // Get the list of png files in the app dir ordered chronologically.
+        // Even though we don't pass this in to the swift function, due to limitations
+        // of the rust->swift interface that cannot pass arrays of params, we can
+        // be assured that this list won't change because this is happening on 
+        // the same thread that is writing the screenshots to disk.
+        let png_files = self.get_png_files_chronologically();
+
+        // Create an MP4 file for the png files in the directory
+        
+
+        
+
+        // Update the DB
+
+        // Delete all png files in the incoming dir
+
     }
 
 }
