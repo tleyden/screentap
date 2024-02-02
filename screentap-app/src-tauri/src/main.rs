@@ -13,6 +13,7 @@ use std::path::Path;
 mod db;
 mod utils; 
 mod screenshot;
+mod compaction;
 
 static DATABASE_FILENAME: &str = "screentap.db";
 
@@ -107,8 +108,6 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
         Err(e) => eprintln!("Failed to create db: {}", e),
     }
 
-
-
     // Save one screenshot on startup so we never have an empty screen
     let _ = screenshot::save_screenshot(app_data_dir.as_path(), db_filename_path);
 
@@ -116,12 +115,22 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
     let cap_screenshot_to_mp4_result = screen_ocr_swift_rs::cap_screenshot_to_mp4();
     println!("cap_screenshot_to_mp4 result: {}", cap_screenshot_to_mp4_result);
 
+    // Create a compaction helper
+    // TODO: still a WIP
+    let compaction_helper = compaction::CompactionHelper::new(app_data_dir.clone(), db_filename_path.to_path_buf());
 
     // Spawn a thread to save screenshots in the background.
     // The move keyword is necessary to move app_data_dir into the thread.
     thread::spawn(move || {
 
         loop {
+
+            // Compact screenshots to mp4 if necessary
+            // TODO: still a WIP
+            if compaction_helper.should_compact_screenshots() {
+                compaction_helper.compact_screenshots_to_mp4();
+            }
+
             let sleep_time_secs = 60;
             thread::sleep(Duration::from_secs(sleep_time_secs));
             let _ = screenshot::save_screenshot(app_data_dir.as_path(), db_filename_path);

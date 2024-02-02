@@ -2449,6 +2449,7 @@ dependencies = [
  "base64 0.21.6",
  "chrono",
  "image",
+ "rand 0.8.5",
  "rusqlite",
  "screen-ocr-swift-rs",
  "serde",
