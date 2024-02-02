@@ -5,6 +5,7 @@ import Vision
 import ScreenCaptureKit
 import CoreGraphics
 import AVFoundation
+import ImageIO
 
 
 func main() {
@@ -23,6 +24,24 @@ func main() {
         
         if let image = swiftCaptureImage(frameNumber: frameNumber) {
             imageBatch.append(image)
+            
+            let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            let fileName = "image_\(frameNumber).png" // Customize the file name as needed
+            let fileURL = documentsDirectory.appendingPathComponent(fileName)
+
+            // Create the destination using the file URL
+            if let destination = CGImageDestinationCreateWithURL(fileURL as CFURL, kUTTypePNG, 1, nil) {
+                // Add the CGImage to the destination
+                CGImageDestinationAddImage(destination, image, nil)
+                
+                // Finalize the destination to actually write the image to disk
+                if !CGImageDestinationFinalize(destination) {
+                    print("Failed to write image to \(fileURL)")
+                } else {
+                    print("Image successfully written to \(fileURL)")
+                }
+            }
+            
         }
         frameNumber += 1
 
@@ -35,7 +54,12 @@ func main() {
             
             let targetFilename = "/tmp/screencapture_\(dateString)_\(batchNumber).mp4"
             
-            swiftWriteImagesToMp4(imageBatch, targetFilename: targetFilename)
+            let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            let images = fetchSortedPngImages(from: documentsDirectory)
+            
+            swiftWriteImagesToMp4(images, targetFilename: targetFilename)
+            
+            // swiftWriteImagesToMp4(imageBatch, targetFilename: targetFilename)
                         
             imageBatch.removeAll() // Clear the batch after writing
             
@@ -45,6 +69,39 @@ func main() {
     }
     
 }
+
+
+func fetchSortedPngImages(from directory: URL) -> [CGImage] {
+    do {
+        // Get the list of files in the documents directory
+        let fileManager = FileManager.default
+        let files = try fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: [.creationDateKey], options: [.skipsHiddenFiles])
+        
+        // Filter PNG files and sort them by creation date
+        let pngFiles = files.filter { $0.pathExtension == "png" }
+        let sortedPngFiles = pngFiles.sorted {
+            let creationDate1 = try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate
+            let creationDate2 = try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate
+            return creationDate1 ?? Date.distantPast < creationDate2 ?? Date.distantFuture
+        }
+        
+        // Convert sorted PNG files to CGImage
+        var images: [CGImage] = []
+        for fileUrl in sortedPngFiles {
+            if let imageSource = CGImageSourceCreateWithURL(fileUrl as CFURL, nil),
+               let image = CGImageSourceCreateImageAtIndex(imageSource, 0, nil) {
+                images.append(image)
+            }
+        }
+        
+        return images
+    } catch {
+        print("Error fetching PNG files: \(error)")
+        return []
+    }
+}
+
+
 
 
 // Define swiftCaptureImage() returning an optional UIImage
