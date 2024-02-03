@@ -24,7 +24,7 @@ fn search_screenshots(app_handle: tauri::AppHandle, term: &str) -> Vec<HashMap<S
     let db_filename_path = Path::new(DATABASE_FILENAME);
 
     // Cap the max results until we implement techniques to reduce memory footprint
-    let max_results = 25;
+    let max_results: i32 = 25;
 
     let screenshot_records_result = if term.is_empty() {
         db::get_all_screenshots(app_data_dir.as_path(), db_filename_path, max_results)

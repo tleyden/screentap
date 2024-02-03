@@ -174,7 +174,8 @@ mod test {
 
         // Create a DB with the image file paths
         create_db_with_image_files(
-            image_file_paths,
+            &image_file_paths,
+            &app_data_dir, 
             &db_filename_path
         );
 
@@ -196,9 +197,15 @@ mod test {
         let mp4_file_size = metadata.len();
         assert!(mp4_file_size > 0);
 
+        // Assert that the DB was updated to point to the MP4 file with the correct frame IDs
+        assert_screenshots_point_to_mp4_in_db(
+            image_file_paths, 
+            &app_data_dir, 
+            &db_filename_path
+        )
+
         // Assert that png files were deleted
 
-        // Assert that the DB was updated to point to the MP4 file with the correct frame IDs
 
 
 
@@ -271,17 +278,64 @@ mod test {
         assert_eq!(result, true);
     }
 
-    fn create_db_with_image_files(image_file_paths: Vec<PathBuf>, db_filename_path: &PathBuf) {
+
+    fn assert_screenshots_point_to_mp4_in_db(image_file_paths: Vec<PathBuf>, app_data_dir: &PathBuf, db_filename_path: &PathBuf) {
+
+        let screenshot_records_result = db::get_all_screenshots(
+            app_data_dir.as_path(), 
+            db_filename_path, 
+            1000
+        );
+
+        let screenshot_records = match screenshot_records_result {
+            Ok(screenshot_records) => screenshot_records,
+            Err(e) => {
+                assert!(false, "Error getting screenshots from DB: {}", e);
+                vec![]
+            },
+        };
+
+        // Build a hashmap of the screenshot_records, using image path as key and record as value
+        let screenshot_records_map: std::collections::HashMap<String, db::ScreenshotRecord> = 
+            screenshot_records.iter().cloned().map(
+                |record| 
+                    (String::from(record.get_file_path()), record)
+            ).collect();
+        
+
+        // Loop over the image file paths, for each one
+        for image_file_path in image_file_paths {
+
+            println!("image_file_path: {:?}", image_file_path);
+
+            // Check that its record exists in the screenshot_records_map
+            let record = screenshot_records_map.get(image_file_path.to_str().unwrap());
+            assert!(record.is_some(), "Record not found for image file path: {:?}", image_file_path);
+
+
+        }
+
+        //   Query the DB to get the screenshot record for the image file path
+
+        //   Assert that the path points to the MP4 file (maybe each record can have both an image path and an mp4 path?)
+
+        //   Assert that the frame ID is set
+
+        //   Assert that the frame ID corresponds to the index in the image file paths list
+
+
+    }
+
+    fn create_db_with_image_files(image_file_paths: &Vec<PathBuf>, app_data_dir: &PathBuf, db_filename_path: &PathBuf) {
 
         // Deelte the db file if it exists
-        let dataset_root = PathBuf::from("/tmp");
-        let db_filename_fq_path = dataset_root.join(db_filename_path);
+        let db_filename_fq_path = app_data_dir.join(db_filename_path);
         if db_filename_fq_path.exists() {
             std::fs::remove_file(db_filename_fq_path.as_path()).unwrap();
         }
 
         // Create the database if it doesn't exist
-        match db::create_db(&dataset_root, db_filename_path) {
+        match db::create_db(&app_data_dir, db_filename_path) {
             Ok(()) => (),
             Err(e) => assert!(false, "Failed to create db: {}", e),
         }
@@ -295,7 +349,7 @@ mod test {
             let save_result = db::save_screenshot_meta(
                 image_file_path.as_path(), 
                 "fake ocr text",
-                &dataset_root,
+                &app_data_dir,
                 db_filename_path,
                 now
             );

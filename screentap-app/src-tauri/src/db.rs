@@ -6,7 +6,10 @@ use base64::engine::general_purpose::STANDARD as BASE64;
 
 /**
  * Struct to represent screenshot records in the DB
+ * 
+ * The derived Clone trait is used to create a copy of the struct
  */
+#[derive(Clone)]
 pub struct ScreenshotRecord {
     id: i32,
     // timestamp: NaiveDateTime,  // TODO: use this instead of i32.  Currently panics with called `Result::unwrap()` on an `Err` value: InvalidColumnType(1, "timestamp", Integer)
@@ -14,6 +17,12 @@ pub struct ScreenshotRecord {
     ocr_text: String,
     file_path: String,
     base64_image: String,
+}
+
+impl ScreenshotRecord {
+    pub fn get_file_path(&self) -> &str {
+        &self.file_path
+    }
 }
 
 /**
@@ -131,7 +140,7 @@ pub fn get_screenshot_by_id(dataset_root: &Path, db_filename: &Path, target_id: 
 /**
  * Helper function to get all screenshots from the DB
  */
-pub fn get_all_screenshots(dataset_root: &Path, db_filename: &Path, limit: i8) -> Result<Vec<ScreenshotRecord>, rusqlite::Error> {
+pub fn get_all_screenshots(dataset_root: &Path, db_filename: &Path, limit: i32) -> Result<Vec<ScreenshotRecord>, rusqlite::Error> {
 
     let conn = get_db_conn(dataset_root, db_filename);
 
@@ -160,7 +169,7 @@ pub fn get_all_screenshots(dataset_root: &Path, db_filename: &Path, limit: i8) -
 /**
  * Helper function to search screenshots in the db matching ocr term
  */
-pub fn search_screenshots_ocr(term: &str, dataset_root: &Path, db_filename: &Path, limit: i8) -> Result<Vec<ScreenshotRecord>, rusqlite::Error> {
+pub fn search_screenshots_ocr(term: &str, dataset_root: &Path, db_filename: &Path, limit: i32) -> Result<Vec<ScreenshotRecord>, rusqlite::Error> {
 
     let conn = get_db_conn(dataset_root, db_filename);
 
