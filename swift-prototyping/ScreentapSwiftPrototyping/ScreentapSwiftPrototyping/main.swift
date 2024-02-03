@@ -54,10 +54,12 @@ func main() {
             
             let targetFilename = "/tmp/screencapture_\(dateString)_\(batchNumber).mp4"
          
-            // let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-            let documentsDirectory = "/tmp"
+            let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
             
-            swiftWriteImagesInDirToMp4(documentsDirectory, targetFilename: targetFilename)
+            let documentsDirectoryStr = "/tmp"
+            // let documentsDirectoryStr = documentsDirectory.path
+            
+            swiftWriteImagesInDirToMp4(documentsDirectoryStr, targetFilename: targetFilename)
                         
             imageBatch.removeAll() // Clear the batch after writing
             

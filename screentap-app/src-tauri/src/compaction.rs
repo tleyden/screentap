@@ -171,7 +171,9 @@ mod test {
         for i in 0..num_files {
             let filename = format!("{}.png", i);
             let target_file = target_dir.join(filename);
-            let mut img = ImageBuffer::<Rgba<u8>, Vec<u8>>::new(10, 10);
+            // let mut img = ImageBuffer::<Rgba<u8>, Vec<u8>>::new(10, 10);
+            let mut img = ImageBuffer::<Rgba<u8>, Vec<u8>>::new(3456, 2234);
+
             let mut rng = thread_rng();
             for (_, _, pixel) in img.enumerate_pixels_mut() {
                 // Generate random values for RGBA components
