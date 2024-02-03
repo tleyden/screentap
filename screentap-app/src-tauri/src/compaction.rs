@@ -1,3 +1,4 @@
+extern crate screen_ocr_swift_rs;
 
 use std::path::PathBuf;
 
@@ -65,6 +66,19 @@ impl CompactionHelper {
     }
 
     /**
+     * Given a directory of images, write them to an mp4
+     * TODO: return a Result<>
+     */
+    pub fn compact_screenshots_in_dir_to_mp4(&self, target_mp4_fn: PathBuf) -> () {  
+        
+        screen_ocr_swift_rs::write_images_in_dir_to_mp4(
+            self.app_data_dir.to_str().unwrap(), 
+            target_mp4_fn.to_str().unwrap()
+        );
+
+    }
+
+    /**
      * 1. Check if incoming is full (>= 150 images.  30 images per min, 5 mins)
      * 2. Create target dir if it doesn’t exist
      * 3. Create the MP4 file
@@ -87,8 +101,11 @@ impl CompactionHelper {
         // Even though we don't pass this in to the swift function, due to limitations
         // of the rust->swift interface that cannot pass arrays of params, we can
         // be assured that this list won't change because this is happening on 
-        // the same thread that is writing the screenshots to disk.
+        // the same thread that is writing the screenshots to disk.  We can use this
+        // list for updating the DB
         let png_files = self.get_png_files_chronologically();
+
+        println!("png_files: {:?}", png_files);
 
         // Create an MP4 file for the png files in the directory
         
@@ -115,6 +132,24 @@ mod test {
     use rand::{Rng, thread_rng};
 
     
+    #[test]
+    fn test_compact_screenshots_in_dir_to_mp4() {
+        let app_data_dir = PathBuf::from("/tmp");
+        let db_filename_path = PathBuf::from("test.db");
+
+        create_dummy_image_files(&app_data_dir, MAX_IMAGE_FILES + 1);
+    
+        let compaction_helper = CompactionHelper::new(
+            app_data_dir.clone(), 
+            db_filename_path.to_path_buf()
+        );
+
+        compaction_helper.compact_screenshots_in_dir_to_mp4(
+            PathBuf::from("/tmp/test.mp4")
+        );
+
+    }
+
     #[test]
     fn test_should_compact_screenshots() {
         

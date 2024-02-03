@@ -5,6 +5,23 @@ import ScreenCaptureKit
 import CoreGraphics
 import AVFoundation
 
+
+/**
+ * Write all of the PNG images in a directory into an mp4 file given by 
+ * targetFilename
+ */
+@_cdecl("write_images_in_dir_to_mp4_swift")
+@available(macOS 10.15, *)
+func swiftWriteImagesInDirToMp4(_ directoryPath: SRString, targetFilename: SRString) {  
+    
+    let directoryURL = URL(fileURLWithPath: directoryPath.toString())
+
+    let images = fetchSortedPngImages(from: directoryURL)
+    
+    swiftWriteImagesToMp4(images, targetFilename: targetFilename.toString())
+    
+}
+
 /**
  * Capture a few screenshots and write them to an mp4 file
  */
@@ -195,6 +212,40 @@ func swiftCaptureImage(frameNumber: Int32) -> CGImage? {
     return nil
 }
 
+
+func fetchSortedPngImages(from directory: URL) -> [CGImage] {
+    do {
+        // Get the list of files in the documents directory
+        let fileManager = FileManager.default
+        let files = try fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: [.creationDateKey], options: [.skipsHiddenFiles])
+        
+        // Filter PNG files and sort them by creation date
+        let pngFiles = files.filter { $0.pathExtension == "png" }
+        let sortedPngFiles = pngFiles.sorted {
+            let creationDate1 = try? $0.resourceValues(forKeys: [.creationDateKey]).creationDate
+            let creationDate2 = try? $1.resourceValues(forKeys: [.creationDateKey]).creationDate
+            return creationDate1 ?? Date.distantPast < creationDate2 ?? Date.distantFuture
+        }
+        
+        // Convert sorted PNG files to CGImage
+        var images: [CGImage] = []
+        for fileUrl in sortedPngFiles {
+            if let imageSource = CGImageSourceCreateWithURL(fileUrl as CFURL, nil),
+               let image = CGImageSourceCreateImageAtIndex(imageSource, 0, nil) {
+                images.append(image)
+            }
+        }
+        
+        return images
+    } catch {
+        print("Error fetching PNG files: \(error)")
+        return []
+    }
+}
+
+
+
+
 // Define swiftWriteImagesToMp4
 func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String) {
 
@@ -310,7 +361,14 @@ private func appendPixelBuffer(
         )
     )
 
-    pixelBufferAdaptor.append(pixelBuffer, withPresentationTime: presentationTime)
+    if pixelBufferAdaptor.assetWriterInput.isReadyForMoreMediaData {
+        print("Wrote pixelBufferAdaptor, isReadyForMoreMediaData is true.")
+        pixelBufferAdaptor.append(pixelBuffer, withPresentationTime: presentationTime)
+    } else {
+        // This means images are dropped
+        // TODO: handle this better
+        print("Cannot write to pixelBufferAdaptor because isReadyForMoreMediaData is false.")
+    }
 
     CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
 }

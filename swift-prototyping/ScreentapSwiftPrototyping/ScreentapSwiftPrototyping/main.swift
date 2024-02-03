@@ -54,15 +54,10 @@ func main() {
             
             let targetFilename = "/tmp/screencapture_\(dateString)_\(batchNumber).mp4"
          
-            let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-            swiftWriteImagesInDirToMp4(documentsDirectory, targetFilename: targetFilename)
-            
             // let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-            // let images = fetchSortedPngImages(from: documentsDirectory)
+            let documentsDirectory = "/tmp"
             
-            // swiftWriteImagesToMp4(images, targetFilename: targetFilename)
-            
-            // swiftWriteImagesToMp4(imageBatch, targetFilename: targetFilename)
+            swiftWriteImagesInDirToMp4(documentsDirectory, targetFilename: targetFilename)
                         
             imageBatch.removeAll() // Clear the batch after writing
             
@@ -131,13 +126,25 @@ func swiftCaptureImage(frameNumber: Int32) -> CGImage? {
     return nil
 }
 
-func swiftWriteImagesInDirToMp4(_ directory: URL, targetFilename: String) {
+func swiftWriteImagesInDirToMp4(_ directoryPath: String, targetFilename: String) {
     
-    let images = fetchSortedPngImages(from: directory)
+
+    let directoryURL = URL(fileURLWithPath: directoryPath)
+
+    let images = fetchSortedPngImages(from: directoryURL)
     
     swiftWriteImagesToMp4(images, targetFilename: targetFilename)
     
+    
 }
+
+//func swiftWriteImagesInDirToMp4(_ directory: URL, targetFilename: String) {
+//
+//    let images = fetchSortedPngImages(from: directory)
+//
+//    swiftWriteImagesToMp4(images, targetFilename: targetFilename)
+//
+//}
 
 // Define swiftWriteImagesToMp4
 func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String) {
@@ -254,7 +261,13 @@ private func appendPixelBuffer(
         )
     )
 
-    pixelBufferAdaptor.append(pixelBuffer, withPresentationTime: presentationTime)
+    if pixelBufferAdaptor.assetWriterInput.isReadyForMoreMediaData {
+        pixelBufferAdaptor.append(pixelBuffer, withPresentationTime: presentationTime)
+    } else {
+        // This means images are dropped
+        // TODO: handle this better
+        print("Cannot write to pixelBufferAdaptor because isReadyForMoreMediaData is false.")
+    }
 
     CVPixelBufferUnlockBaseAddress(pixelBuffer, [])
 }
