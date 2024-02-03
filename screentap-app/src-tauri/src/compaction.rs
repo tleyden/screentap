@@ -206,7 +206,7 @@ mod test {
             let filename = format!("{}.png", i);
             let target_file = target_dir.join(filename);
             // let mut img = ImageBuffer::<Rgba<u8>, Vec<u8>>::new(10, 10);
-            let mut img = ImageBuffer::<Rgba<u8>, Vec<u8>>::new(1500, 1000);
+            let mut img = ImageBuffer::<Rgba<u8>, Vec<u8>>::new(800, 600);
 
             // If with_random_pixels is true, fill the image with random pixels
             if with_random_pixels {

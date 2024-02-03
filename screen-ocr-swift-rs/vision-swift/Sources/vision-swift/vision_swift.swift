@@ -388,6 +388,9 @@ private func appendPixelBuffer(
     } else {
         // This means images are dropped.  I was seeing this consistently with 10x10 images,
         // but I have no idea why.  Using larger images (3000x2000) made the issue go away.
+        // Then after some other changes, like adding the semaphor to block the thread until
+        // the video writer finished, I can no longer reproduce the issue and it works with
+        // 10x10 images.
         print("WARNING: Cannot write to pixelBufferAdaptor because isReadyForMoreMediaData is false.")
     }
 
