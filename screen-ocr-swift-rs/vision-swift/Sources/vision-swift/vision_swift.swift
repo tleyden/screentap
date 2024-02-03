@@ -15,10 +15,16 @@ import AVFoundation
 func swiftWriteImagesInDirToMp4(_ directoryPath: SRString, targetFilename: SRString) {  
     
     let directoryURL = URL(fileURLWithPath: directoryPath.toString())
+    print("Directory URL: \(directoryURL)")
 
     let images = fetchSortedPngImages(from: directoryURL)
-    
+    print("Number of images: \(images.count)")
+
+    print("swiftWriteImagesToMp4 to: \(targetFilename.toString())")
+
     swiftWriteImagesToMp4(images, targetFilename: targetFilename.toString())
+
+    print("swiftWriteImagesToMp4 finished")
     
 }
 
@@ -249,6 +255,9 @@ func fetchSortedPngImages(from directory: URL) -> [CGImage] {
 // Define swiftWriteImagesToMp4
 func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String) {
 
+    print("swiftWriteImagesToMp4 running...")
+
+
     let outputURL = URL(fileURLWithPath: targetFilename)
 
     // The targetFilename should not exist
@@ -310,10 +319,21 @@ func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String) {
     
     videoWriterInput.markAsFinished()
 
+    // Need to use a semaphore to wait for the video to finish writing, otherwise when calling from
+    // rust it seems to return before the video is finished writing, and variables are deallocated / GC'd
+    // (this doesn't happen when running directly from swift, only when calling from rust)
+    let semaphore = DispatchSemaphore(value: 0)
+
+    print("Call videoWriter.finishWriting()")
     videoWriter.finishWriting() {
         // TODO: invoke callback fn that is passed in
         print("Finished writing video to \(targetFilename) with \(images.count) images")
+        semaphore.signal() // Signal the semaphore to end waiting
     }
+
+    print("Call semaphore.wait()")
+    semaphore.wait() // Wait for the signal
+    print("Semaphore.wait() returned")
 
 }
 

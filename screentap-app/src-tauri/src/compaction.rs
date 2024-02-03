@@ -135,7 +135,7 @@ mod test {
 
     // Use a small number of image files for testing, because I have to make
     // the images relatively big to avoid the isReadyForMoreMediaData=False error
-    const MAX_IMAGE_FILES: u32 = 3;
+    const MAX_IMAGE_FILES: u32 = 1;
 
     
     #[test]
@@ -143,7 +143,15 @@ mod test {
         let app_data_dir = PathBuf::from("/tmp");
         let db_filename_path = PathBuf::from("test.db");
 
-        create_dummy_image_files(&app_data_dir, MAX_IMAGE_FILES + 1);
+        let target_mp4_file = PathBuf::from("/tmp/test.mp4");
+        if target_mp4_file.exists() {
+            std::fs::remove_file(target_mp4_file.as_path()).unwrap();
+        }
+
+        create_dummy_image_files(
+            &app_data_dir, 
+            MAX_IMAGE_FILES + 1
+        );
     
         let compaction_helper = CompactionHelper::new(
             app_data_dir.clone(), 
@@ -152,14 +160,19 @@ mod test {
         );
 
         compaction_helper.compact_screenshots_in_dir_to_mp4(
-            PathBuf::from("/tmp/test.mp4")
+            target_mp4_file.clone()
         );
 
-        // TODO: assert that the mp4 file was created
+        // Assert that the mp4 file was created
+        assert!(target_mp4_file.exists());
 
-        // TODO: assert that the mp4 file has nonzero size
+        // Assert that the mp4 has nonzero size
+        let metadata = std::fs::metadata(target_mp4_file.as_path()).unwrap();
+        let mp4_file_size = metadata.len();
+        assert!(mp4_file_size > 0);
 
-        // TODO: assert that the mp4 file has expected number of frames
+        // TODO: assert that the mp4 file has expected number of frames.  Could use 
+        // a swift bridge for this
 
 
 

@@ -9,7 +9,7 @@ swift!(fn perform_ocr_swift(path: &SRString) -> Option<SRString>);
 swift!(fn screen_capture_swift() -> Option<SRData>);    
 swift!(fn cap_screenshot_to_mp4_swift(srdata: SRData) -> Option<SRString>);
 swift!(fn write_images_in_dir_to_mp4_swift(directory_path: &SRString, target_filename: &SRString) -> ());
-    
+
 /**
  * Given a path to a directory of images, write them to an mp4
  */
@@ -18,6 +18,7 @@ pub fn write_images_in_dir_to_mp4(directory_path: &str, target_filename: &str) -
     let target_filename_str: SRString = target_filename.into();
     println!("Calling write_images_in_dir_to_mp4_swift with dirpath: {} and target_filename: {}", dirpath_str.as_str(), target_filename_str.as_str());
     unsafe { write_images_in_dir_to_mp4_swift(&dirpath_str, &target_filename_str) };
+    println!("Finished call to write_images_in_dir_to_mp4_swift ");
 }
 
 pub fn cap_screenshot_to_mp4() -> String {
