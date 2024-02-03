@@ -201,7 +201,8 @@ mod test {
         assert_screenshots_point_to_mp4_in_db(
             image_file_paths, 
             &app_data_dir, 
-            &db_filename_path
+            &db_filename_path,
+            &target_mp4_file
         )
 
         // Assert that png files were deleted
@@ -279,7 +280,7 @@ mod test {
     }
 
 
-    fn assert_screenshots_point_to_mp4_in_db(image_file_paths: Vec<PathBuf>, app_data_dir: &PathBuf, db_filename_path: &PathBuf) {
+    fn assert_screenshots_point_to_mp4_in_db(image_file_paths: Vec<PathBuf>, app_data_dir: &PathBuf, db_filename_path: &PathBuf, target_mp4_file: &PathBuf) {
 
         let screenshot_records_result = db::get_all_screenshots(
             app_data_dir.as_path(), 
@@ -312,16 +313,16 @@ mod test {
             let record = screenshot_records_map.get(image_file_path.to_str().unwrap());
             assert!(record.is_some(), "Record not found for image file path: {:?}", image_file_path);
 
+            //   Assert that the path points to the MP4 file (maybe each record can have both an image path and an mp4 path until switching to uuids?)
+            let mp4_file_path = record.unwrap().get_mp4_file_path();
+            assert_eq!(mp4_file_path, target_mp4_file.to_str().unwrap(), "The paths do not match: expected {}, got {}", mp4_file_path, target_mp4_file.to_str().unwrap());
+
+
+            //   Assert that the frame ID is set
+
+            //   Assert that the frame ID corresponds to the index in the image file paths list
 
         }
-
-        //   Query the DB to get the screenshot record for the image file path
-
-        //   Assert that the path points to the MP4 file (maybe each record can have both an image path and an mp4 path?)
-
-        //   Assert that the frame ID is set
-
-        //   Assert that the frame ID corresponds to the index in the image file paths list
 
 
     }
