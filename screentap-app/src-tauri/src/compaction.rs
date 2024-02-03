@@ -1,6 +1,7 @@
 extern crate screen_ocr_swift_rs;
 
 use std::path::PathBuf;
+use crate::db;
 
 // The maximum number of image files allowed to accumulate before compacting to an MP4
 pub const DEFAULT_MAX_IMAGE_FILES: u32 = 150;
@@ -91,7 +92,7 @@ impl CompactionHelper {
      *     3. Update the filename to the MP4 file
      * 5. Delete all entries in the incoming dir
      */
-    pub fn compact_screenshots_to_mp4(&self) -> () {
+    pub fn compact_screenshots_to_mp4(&self, target_mp4_fn: PathBuf) -> () {
 
         if self.should_compact_screenshots() {
             return;
@@ -107,17 +108,17 @@ impl CompactionHelper {
         // the same thread that is writing the screenshots to disk.  We can use this
         // list for updating the DB
         let png_files = self.get_png_files_chronologically();
-
         println!("png_files: {:?}", png_files);
 
+        // Make sure these files are in the DB, otherwise throw an error
+
         // Create an MP4 file for the png files in the directory
+        self.compact_screenshots_in_dir_to_mp4(target_mp4_fn.clone());
         
-
-        
-
         // Update the DB
 
         // Delete all png files in the incoming dir
+
 
     }
 
@@ -132,12 +133,88 @@ mod test {
     use std::path::PathBuf;
     use image::{ImageBuffer, Rgba};
     use rand::{Rng, thread_rng};
+    use crate::db;
+    use chrono::Local;
+    use tempfile::tempdir;
 
     // Use a small number of image files for testing, because I have to make
     // the images relatively big to avoid the isReadyForMoreMediaData=False error
     const MAX_IMAGE_FILES: u32 = 1;
 
+    // compact_screenshots_to_mp4
+
+    /**
+     * This tests the compact_screenshots_to_mp4() method
+     */
+    #[test]
+    fn test_compact_screenshots_to_mp4() {
+
+        // Generate a random temp directory
+        let tmp_dir = tempdir().unwrap();
+        let app_data_dir = PathBuf::from(tmp_dir.path());
+
+        // Create the app_data_dir if it doesn't exist
+        if !app_data_dir.exists() {
+            std::fs::create_dir_all(app_data_dir.as_path()).unwrap();
+        }
+
+        println!("tmp app_data_dir: {:?}", app_data_dir);
+
+        let db_filename_path = PathBuf::from("test.db");
+
+        let target_mp4_file = app_data_dir.join("test_compact_screenshots_to_mp4.mp4");
+
+        // Delete the target mp4 file if it exists
+        // let target_mp4_file = PathBuf::from("/tmp/test_compact_screenshots_to_mp4.mp4");
+        if target_mp4_file.exists() {
+            std::fs::remove_file(target_mp4_file.as_path()).unwrap();
+        }
+
     
+        // Create a bunch of image files
+        let image_file_paths = create_dummy_image_files(
+            &app_data_dir, 
+            MAX_IMAGE_FILES + 1,
+            false
+        );
+
+        // Create a DB with the image file paths
+        create_db_with_image_files(
+            image_file_paths,
+            &db_filename_path
+        );
+
+        // Create a compaction helper
+        let compaction_helper = CompactionHelper::new(
+            app_data_dir.clone(), 
+            db_filename_path.to_path_buf(),
+            MAX_IMAGE_FILES
+        );
+
+        // Run compaction
+        println!("Running compaction and saving to {:?}", target_mp4_file.as_path());
+        compaction_helper.compact_screenshots_to_mp4(
+            target_mp4_file.clone()
+        );
+
+        // Assert that the mp4 file was created and has non-zero size
+        let metadata = std::fs::metadata(target_mp4_file.as_path()).unwrap();
+        let mp4_file_size = metadata.len();
+        assert!(mp4_file_size > 0);
+
+        // Assert that png files were deleted
+
+        // Assert that the DB was updated to point to the MP4 file with the correct frame IDs
+
+
+
+
+    }
+
+
+    /**
+     * This is an isolated test on the compact_screenshots_in_dir_to_mp4() method
+     */
     #[test]
     fn test_compact_screenshots_in_dir_to_mp4() {
         let app_data_dir = PathBuf::from("/tmp");
@@ -200,7 +277,48 @@ mod test {
         assert_eq!(result, true);
     }
 
-    fn create_dummy_image_files(target_dir: &PathBuf, num_files: u32, with_random_pixels: bool) -> () {
+    fn create_db_with_image_files(image_file_paths: Vec<PathBuf>, db_filename_path: &PathBuf) {
+
+        // Deelte the db file if it exists
+        let dataset_root = PathBuf::from("/tmp");
+        let db_filename_fq_path = dataset_root.join(db_filename_path);
+        if db_filename_fq_path.exists() {
+            std::fs::remove_file(db_filename_fq_path.as_path()).unwrap();
+        }
+
+        // Create the database if it doesn't exist
+        match db::create_db(&dataset_root, db_filename_path) {
+            Ok(()) => (),
+            Err(e) => assert!(false, "Failed to create db: {}", e),
+        }
+
+        // Loop over image file paths and save each one to DB
+        for image_file_path in image_file_paths {
+            
+            let now = Local::now().naive_utc();
+
+            // Save screenshot meta to the DB
+            let save_result = db::save_screenshot_meta(
+                image_file_path.as_path(), 
+                "fake ocr text",
+                &dataset_root,
+                db_filename_path,
+                now
+            );
+        
+            match save_result {
+                Ok(()) => println!("Screenshot saved to DB successfully"),
+                Err(e) => assert!(false, "Failed to save screenshot to db: {}", e),
+            }
+
+        }
+
+    }
+
+    fn create_dummy_image_files(target_dir: &PathBuf, num_files: u32, with_random_pixels: bool) -> Vec<PathBuf> {
+
+        let mut image_files = Vec::new();
+
         // Create real image files because we eventually want to test the actual compaction into mp4
         for i in 0..num_files {
             let filename = format!("{}.png", i);
@@ -223,9 +341,12 @@ mod test {
                 }
             }
 
-            // img.put_pixel(0, 0, Rgba([255, 0, 0, 255]));
-            img.save(target_file).unwrap();
+            img.save(target_file.clone());
+            image_files.push(target_file);
         }
+
+        // Return the list of image files
+        image_files
 
     }
 

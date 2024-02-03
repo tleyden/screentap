@@ -8,7 +8,7 @@ use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, CustomMenuItem
 use std::collections::HashMap;
 use std::thread;
 use std::time::Duration;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 mod db;
 mod utils; 
@@ -132,7 +132,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
             // Compact screenshots to mp4 if necessary
             // TODO: still a WIP
             if compaction_helper.should_compact_screenshots() {
-                compaction_helper.compact_screenshots_to_mp4();
+                compaction_helper.compact_screenshots_to_mp4(PathBuf::from("/tmp/screentap.mp4"));
             }
 
             let sleep_time_secs = 60;
