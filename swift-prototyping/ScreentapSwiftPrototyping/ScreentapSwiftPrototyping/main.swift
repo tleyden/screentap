@@ -53,11 +53,14 @@ func main() {
         if imageBatch.count >= 5 {
             
             let targetFilename = "/tmp/screencapture_\(dateString)_\(batchNumber).mp4"
-            
+         
             let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-            let images = fetchSortedPngImages(from: documentsDirectory)
+            swiftWriteImagesInDirToMp4(documentsDirectory, targetFilename: targetFilename)
             
-            swiftWriteImagesToMp4(images, targetFilename: targetFilename)
+            // let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            // let images = fetchSortedPngImages(from: documentsDirectory)
+            
+            // swiftWriteImagesToMp4(images, targetFilename: targetFilename)
             
             // swiftWriteImagesToMp4(imageBatch, targetFilename: targetFilename)
                         
@@ -126,6 +129,14 @@ func swiftCaptureImage(frameNumber: Int32) -> CGImage? {
     }
     
     return nil
+}
+
+func swiftWriteImagesInDirToMp4(_ directory: URL, targetFilename: String) {
+    
+    let images = fetchSortedPngImages(from: directory)
+    
+    swiftWriteImagesToMp4(images, targetFilename: targetFilename)
+    
 }
 
 // Define swiftWriteImagesToMp4
