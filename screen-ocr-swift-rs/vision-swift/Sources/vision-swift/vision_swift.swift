@@ -253,7 +253,7 @@ func fetchSortedPngImages(from directory: URL) -> [CGImage] {
 
 
 // Define swiftWriteImagesToMp4
-func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String) {
+func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String, blockUntilFinished: Bool = true) {
 
     print("swiftWriteImagesToMp4 running...")
 
@@ -331,9 +331,11 @@ func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String) {
         semaphore.signal() // Signal the semaphore to end waiting
     }
 
-    print("Call semaphore.wait()")
-    semaphore.wait() // Wait for the signal
-    print("Semaphore.wait() returned")
+    if blockUntilFinished {
+        print("Call semaphore.wait()")
+        semaphore.wait() // Wait for the signal
+        print("Semaphore.wait() returned")
+    }
 
 }
 

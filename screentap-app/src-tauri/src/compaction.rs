@@ -150,7 +150,8 @@ mod test {
 
         create_dummy_image_files(
             &app_data_dir, 
-            MAX_IMAGE_FILES + 1
+            MAX_IMAGE_FILES + 1,
+            false
         );
     
         let compaction_helper = CompactionHelper::new(
@@ -184,7 +185,11 @@ mod test {
         let app_data_dir = PathBuf::from("/tmp");
         let db_filename_path = PathBuf::from("test.db");
 
-        create_dummy_image_files(&app_data_dir, MAX_IMAGE_FILES + 1);
+        create_dummy_image_files(
+            &app_data_dir, 
+            MAX_IMAGE_FILES + 1,
+            false,
+    );
     
         let compaction_helper = CompactionHelper::new(
             app_data_dir.clone(), 
@@ -195,25 +200,29 @@ mod test {
         assert_eq!(result, true);
     }
 
-    fn create_dummy_image_files(target_dir: &PathBuf, num_files: u32) -> () {
+    fn create_dummy_image_files(target_dir: &PathBuf, num_files: u32, with_random_pixels: bool) -> () {
         // Create real image files because we eventually want to test the actual compaction into mp4
         for i in 0..num_files {
             let filename = format!("{}.png", i);
             let target_file = target_dir.join(filename);
             // let mut img = ImageBuffer::<Rgba<u8>, Vec<u8>>::new(10, 10);
-            let mut img = ImageBuffer::<Rgba<u8>, Vec<u8>>::new(3456, 2234);
+            let mut img = ImageBuffer::<Rgba<u8>, Vec<u8>>::new(1500, 1000);
 
-            let mut rng = thread_rng();
-            for (_, _, pixel) in img.enumerate_pixels_mut() {
-                // Generate random values for RGBA components
-                let red = rng.gen_range(0..=255);
-                let green = rng.gen_range(0..=255);
-                let blue = rng.gen_range(0..=255);
-                let alpha = 255; // Full opacity
-        
-                // Set the pixel to a random color
-                *pixel = Rgba([red, green, blue, alpha]);
+            // If with_random_pixels is true, fill the image with random pixels
+            if with_random_pixels {
+                let mut rng = thread_rng();
+                for (_, _, pixel) in img.enumerate_pixels_mut() {
+                    // Generate random values for RGBA components
+                    let red = rng.gen_range(0..=255);
+                    let green = rng.gen_range(0..=255);
+                    let blue = rng.gen_range(0..=255);
+                    let alpha = 255; // Full opacity
+            
+                    // Set the pixel to a random color
+                    *pixel = Rgba([red, green, blue, alpha]);
+                }
             }
+
             // img.put_pixel(0, 0, Rgba([255, 0, 0, 255]));
             img.save(target_file).unwrap();
         }

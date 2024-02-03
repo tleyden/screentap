@@ -14,9 +14,9 @@
             filePath = "ScreentapSwiftPrototyping/main.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "123"
-            endingLineNumber = "123"
-            landmarkName = "swiftWriteImagesToMp4(_:targetFilename:)"
+            startingLineNumber = "207"
+            endingLineNumber = "207"
+            landmarkName = "swiftWriteImagesToMp4(_:targetFilename:blockUntilFinished:)"
             landmarkType = "9">
             <Locations>
                <Location
@@ -62,9 +62,89 @@
             filePath = "ScreentapSwiftPrototyping/main.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "125"
-            endingLineNumber = "125"
-            landmarkName = "swiftWriteImagesToMp4(_:targetFilename:)"
+            startingLineNumber = "209"
+            endingLineNumber = "209"
+            landmarkName = "swiftWriteImagesToMp4(_:targetFilename:blockUntilFinished:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "E68DED8D-DC82-46D2-B0B2-8D68C64C1525"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "152"
+            endingLineNumber = "152"
+            landmarkName = "unknown"
+            landmarkType = "0">
+            <Locations>
+               <Location
+                  uuid = "E68DED8D-DC82-46D2-B0B2-8D68C64C1525 - 7d35bb5e021652ca"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.swiftWriteImagesInDirToMp4(_: Foundation.URL, targetFilename: Swift.String) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "136"
+                  endingLineNumber = "136"
+                  offsetFromSymbolStart = "52">
+               </Location>
+               <Location
+                  uuid = "E68DED8D-DC82-46D2-B0B2-8D68C64C1525 - 9f6b7670cbdd5425"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ScreentapSwiftPrototyping.swiftWriteImagesToMp4(_: Swift.Array&lt;__C.CGImageRef&gt;, targetFilename: Swift.String) -&gt; ()"
+                  moduleName = "ScreentapSwiftPrototyping"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/tleyden/Development/screentap/swift-prototyping/ScreentapSwiftPrototyping/ScreentapSwiftPrototyping/main.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "150"
+                  endingLineNumber = "150"
+                  offsetFromSymbolStart = "404">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "7188C8FD-8BED-48A1-B246-57953CE113D2"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "140"
+            endingLineNumber = "140"
+            landmarkName = "swiftWriteImagesInDirToMp4(_:targetFilename:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "D7038775-29DE-4E67-B0AA-4E89C554FE67"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ScreentapSwiftPrototyping/main.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "271"
+            endingLineNumber = "271"
+            landmarkName = "appendPixelBuffer(forImage:pixelBufferAdaptor:presentationTime:)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
