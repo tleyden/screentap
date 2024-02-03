@@ -156,11 +156,11 @@ mod test {
             std::fs::create_dir_all(app_data_dir.as_path()).unwrap();
         }
 
+        // Create paths to test assets
         let db_filename_path = PathBuf::from("test.db");
         let target_mp4_file = app_data_dir.join("test_compact_screenshots_to_mp4.mp4");
 
         // Delete the target mp4 file if it exists
-        // let target_mp4_file = PathBuf::from("/tmp/test_compact_screenshots_to_mp4.mp4");
         if target_mp4_file.exists() {
             std::fs::remove_file(target_mp4_file.as_path()).unwrap();
         }
@@ -205,7 +205,7 @@ mod test {
             &target_mp4_file
         )
 
-        // Assert that png files were deleted
+        // TODO: Assert that png files were deleted
 
 
 
