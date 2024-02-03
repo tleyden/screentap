@@ -117,7 +117,11 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
 
     // Create a compaction helper
     // TODO: still a WIP
-    let compaction_helper = compaction::CompactionHelper::new(app_data_dir.clone(), db_filename_path.to_path_buf());
+    let compaction_helper = compaction::CompactionHelper::new(
+        app_data_dir.clone(), 
+        db_filename_path.to_path_buf(),
+        compaction::DEFAULT_MAX_IMAGE_FILES,
+    );
 
     // Spawn a thread to save screenshots in the background.
     // The move keyword is necessary to move app_data_dir into the thread.

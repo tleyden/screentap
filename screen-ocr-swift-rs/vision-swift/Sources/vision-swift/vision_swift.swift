@@ -362,12 +362,11 @@ private func appendPixelBuffer(
     )
 
     if pixelBufferAdaptor.assetWriterInput.isReadyForMoreMediaData {
-        print("Wrote pixelBufferAdaptor, isReadyForMoreMediaData is true.")
         pixelBufferAdaptor.append(pixelBuffer, withPresentationTime: presentationTime)
     } else {
-        // This means images are dropped
-        // TODO: handle this better
-        print("Cannot write to pixelBufferAdaptor because isReadyForMoreMediaData is false.")
+        // This means images are dropped.  I was seeing this consistently with 10x10 images,
+        // but I have no idea why.  Using larger images (3000x2000) made the issue go away.
+        print("WARNING: Cannot write to pixelBufferAdaptor because isReadyForMoreMediaData is false.")
     }
 
     CVPixelBufferUnlockBaseAddress(pixelBuffer, [])

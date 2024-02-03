@@ -2,7 +2,8 @@ extern crate screen_ocr_swift_rs;
 
 use std::path::PathBuf;
 
-pub const MAX_IMAGE_FILES: u32 = 10;
+// The maximum number of image files allowed to accumulate before compacting to an MP4
+pub const DEFAULT_MAX_IMAGE_FILES: u32 = 150;
 
 
 /**
@@ -11,11 +12,12 @@ pub const MAX_IMAGE_FILES: u32 = 10;
 pub struct CompactionHelper {
     app_data_dir: PathBuf,
     db_filename_path: PathBuf,
+    max_image_files: u32,
 }
 
 impl CompactionHelper {
 
-    pub fn new(app_data_dir: PathBuf, db_filename_path: PathBuf) -> Self {
+    pub fn new(app_data_dir: PathBuf, db_filename_path: PathBuf, max_image_files: u32) -> Self {
 
         if !app_data_dir.is_dir() {
             panic!("app_data_dir is not a directory");
@@ -24,6 +26,7 @@ impl CompactionHelper {
         Self {
             app_data_dir,
             db_filename_path,
+            max_image_files,
         }
     }
 
@@ -62,7 +65,7 @@ impl CompactionHelper {
         // Count the number of .png files in self.app_data_dir
         let num_png_files = self.count_png_files();
 
-        num_png_files > MAX_IMAGE_FILES
+        num_png_files > self.max_image_files
     }
 
     /**
@@ -126,10 +129,13 @@ impl CompactionHelper {
 mod test {
 
     use super::CompactionHelper;
-    use super::MAX_IMAGE_FILES;
     use std::path::PathBuf;
     use image::{ImageBuffer, Rgba};
     use rand::{Rng, thread_rng};
+
+    // Use a small number of image files for testing, because I have to make
+    // the images relatively big to avoid the isReadyForMoreMediaData=False error
+    const MAX_IMAGE_FILES: u32 = 3;
 
     
     #[test]
@@ -141,12 +147,21 @@ mod test {
     
         let compaction_helper = CompactionHelper::new(
             app_data_dir.clone(), 
-            db_filename_path.to_path_buf()
+            db_filename_path.to_path_buf(),
+            MAX_IMAGE_FILES
         );
 
         compaction_helper.compact_screenshots_in_dir_to_mp4(
             PathBuf::from("/tmp/test.mp4")
         );
+
+        // TODO: assert that the mp4 file was created
+
+        // TODO: assert that the mp4 file has nonzero size
+
+        // TODO: assert that the mp4 file has expected number of frames
+
+
 
     }
 
@@ -160,7 +175,8 @@ mod test {
     
         let compaction_helper = CompactionHelper::new(
             app_data_dir.clone(), 
-            db_filename_path.to_path_buf()
+            db_filename_path.to_path_buf(),
+            MAX_IMAGE_FILES
         );
         let result = compaction_helper.should_compact_screenshots();
         assert_eq!(result, true);
