@@ -107,8 +107,8 @@ impl CompactionHelper {
         // be assured that this list won't change because this is happening on 
         // the same thread that is writing the screenshots to disk.  We can use this
         // list for updating the DB
-        // let png_files = self.get_png_files_chronologically();
-        // println!("png_files: {:?}", png_files);
+        let png_files = self.get_png_files_chronologically();
+        println!("png_files: {:?}", png_files);
 
         // Make sure these files are in the DB, otherwise throw an error
 
@@ -135,12 +135,11 @@ mod test {
     use rand::{Rng, thread_rng};
     use crate::db;
     use chrono::Local;
+    use tempfile::tempdir;
 
     // Use a small number of image files for testing, because I have to make
     // the images relatively big to avoid the isReadyForMoreMediaData=False error
     const MAX_IMAGE_FILES: u32 = 1;
-
-    // compact_screenshots_to_mp4
 
     /**
      * This tests the compact_screenshots_to_mp4() method
@@ -148,14 +147,17 @@ mod test {
     #[test]
     fn test_compact_screenshots_to_mp4() {
 
-        let app_data_dir = PathBuf::from("/tmp");
+        // Generate a random temp directory
+        let tmp_dir = tempdir().unwrap();
+        let app_data_dir = PathBuf::from(tmp_dir.path());
 
-        let target_mp4_file = PathBuf::from("/tmp/test_compact_screenshots_to_mp4.mp4");
-        if target_mp4_file.exists() {
-            std::fs::remove_file(target_mp4_file.as_path()).unwrap();
+        // Create the app_data_dir if it doesn't exist
+        if !app_data_dir.exists() {
+            std::fs::create_dir_all(app_data_dir.as_path()).unwrap();
         }
 
         let db_filename_path = PathBuf::from("test.db");
+        let target_mp4_file = app_data_dir.join("test_compact_screenshots_to_mp4.mp4");
 
         // Delete the target mp4 file if it exists
         // let target_mp4_file = PathBuf::from("/tmp/test_compact_screenshots_to_mp4.mp4");
@@ -163,7 +165,6 @@ mod test {
             std::fs::remove_file(target_mp4_file.as_path()).unwrap();
         }
 
-    
         // Create a bunch of image files
         let image_file_paths = create_dummy_image_files(
             &app_data_dir, 
