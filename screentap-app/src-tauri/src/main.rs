@@ -111,10 +111,6 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
     // Save one screenshot on startup so we never have an empty screen
     let _ = screenshot::save_screenshot(app_data_dir.as_path(), db_filename_path);
 
-    // Prototyping saving screenshot to mp4
-    let cap_screenshot_to_mp4_result = screen_ocr_swift_rs::cap_screenshot_to_mp4();
-    println!("cap_screenshot_to_mp4 result: {}", cap_screenshot_to_mp4_result);
-
     // Create a compaction helper
     // TODO: still a WIP
     let compaction_helper = compaction::CompactionHelper::new(

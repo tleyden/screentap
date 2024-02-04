@@ -15,90 +15,13 @@ import AVFoundation
 func swiftWriteImagesInDirToMp4(_ directoryPath: SRString, targetFilename: SRString) {  
     
     let directoryURL = URL(fileURLWithPath: directoryPath.toString())
-    print("Directory URL: \(directoryURL)")
 
     let images = fetchSortedPngImages(from: directoryURL)
-    print("Number of images: \(images.count)")
 
     print("swiftWriteImagesToMp4 to: \(targetFilename.toString())")
 
     swiftWriteImagesToMp4(images, targetFilename: targetFilename.toString())
-
-    print("swiftWriteImagesToMp4 finished")
     
-}
-
-/**
- * Capture a few screenshots and write them to an mp4 file
- */
-@_cdecl("cap_screenshot_to_mp4_swift")
-@available(macOS 10.15, *)
-public func cap_screenshot_to_mp4(screenshot: SRData) -> SRString? {
-
-    do {
-
-        var imageBatch: [CGImage] = []
-
-        var frameNumber: Int32 = 0
-        var batchNumber: Int32 = 0
-
-        // Get a datestring to create unique mp4 filenames
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyyMMdd_HHmmss" // Example format: '20230121_115959'
-        let dateString = dateFormatter.string(from: Date())
-
-        // Convert the SwiftRs array of SRData to an array of CGImages
-        // for screenshot in screenshots {
-        //     if let cgImage = byteArrayToCGImage(byteArray: screenshot.toArray()) {
-        //         imageBatch.append(cgImage)
-        //     }
-        // }
-        
-        if let cgImage = byteArrayToCGImage(byteArray: screenshot.toArray()) {
-            imageBatch.append(cgImage)
-        }
-
-        let targetFilename = "/tmp/screencapture_\(dateString)_\(batchNumber).mp4"
-                
-        swiftWriteImagesToMp4(imageBatch, targetFilename: targetFilename)
-
-
-        // while true {
-            
-        //     if let image = swiftCaptureImage(frameNumber: frameNumber) {
-        //         imageBatch.append(image)
-        //     }
-        //     frameNumber += 1
-
-        //     print("Captured image \(frameNumber)")
-                    
-        //     // TODO: make this configurable.  Sync the frameDuration = CMTime(..) with it to match
-        //     Thread.sleep(forTimeInterval: 1.0)
-
-        //     if imageBatch.count >= 5 {
-                
-        //         let targetFilename = "/tmp/screencapture_\(dateString)_\(batchNumber).mp4"
-                
-        //         swiftWriteImagesToMp4(imageBatch, targetFilename: targetFilename)
-                            
-        //         imageBatch.removeAll() // Clear the batch after writing
-                
-        //         batchNumber += 1
-        //     }
-            
-        // }
-
-
-        return SRString("Video written to file")
-
-    } catch {
-        // This block is executed if an error is thrown in the do block
-        // You can handle the error here
-        // For example, you can return a string indicating the error
-        return SRString("An error occurred: \(error)")
-    }
-
-
 }
 
 func byteArrayToCGImage(byteArray: [UInt8]) -> CGImage? {

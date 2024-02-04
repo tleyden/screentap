@@ -39,10 +39,3 @@ pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> String {
 }
 
 
-// pub fn prototype_cap_screenshot_to_mp4() -> () {
-
-//     // let screen_cap = screen_ocr_swift_rs::screen_capture();
-//     screen_ocr_swift_rs::cap_screenshot_to_mp4();
-
-// }
-

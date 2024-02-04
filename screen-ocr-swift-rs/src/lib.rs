@@ -4,10 +4,8 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufWriter;
 
-
 swift!(fn perform_ocr_swift(path: &SRString) -> Option<SRString>);
 swift!(fn screen_capture_swift() -> Option<SRData>);    
-swift!(fn cap_screenshot_to_mp4_swift(srdata: SRData) -> Option<SRString>);
 swift!(fn write_images_in_dir_to_mp4_swift(directory_path: &SRString, target_filename: &SRString) -> ());
 
 /**
@@ -21,23 +19,6 @@ pub fn write_images_in_dir_to_mp4(directory_path: &str, target_filename: &str) -
     println!("Finished call to write_images_in_dir_to_mp4_swift ");
 }
 
-pub fn cap_screenshot_to_mp4() -> String {
-
-    let screen_capture_opt = unsafe { screen_capture_swift() };
-    let screen_capture = screen_capture_opt.expect("Failed to get screen capture");
-
-    // Create an array of SRData
-    // let mut screen_capture_vec = Vec::new();
-    // screen_capture_vec.push(screen_capture);
-    // let screen_capture_array = screen_capture_vec.as_slice();
-
-    // let screen_capture_array = SRArray::from_vec(vec![screen_capture]);
-
-
-
-    let result = unsafe { cap_screenshot_to_mp4_swift(screen_capture) };
-    String::from(result.unwrap().as_str())
-}
 
 /**
  * Given a path to an image, extract the text from it using OCR
