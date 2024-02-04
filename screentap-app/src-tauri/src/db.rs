@@ -5,6 +5,8 @@ use chrono::NaiveDateTime;
 use std::{path::Path, collections::HashMap, path::PathBuf};
 use base64::engine::Engine as _;
 use base64::engine::general_purpose::STANDARD as BASE64;
+use backtrace::Backtrace;
+
 
 /**
  * Struct to represent screenshot records in the DB
@@ -82,6 +84,7 @@ pub fn screenshot_record_to_hashmap(record: &ScreenshotRecord) -> HashMap<String
 pub fn get_db_conn(dataset_root: &Path, db_filename: &Path) -> Connection {
     let db_filename_fq_path = dataset_root.join(db_filename);
     let path_str = db_filename_fq_path.to_str().expect("Failed to get db_filename_fq_path");
+    println!("get_db_conn: path_str: {}", path_str);
     Connection::open(path_str).expect("Failed to open db connection")
 }
 
@@ -168,7 +171,16 @@ pub fn get_screenshot_by_id(dataset_root: &Path, db_filename: &Path, target_id: 
         // let file_path = PathBuf::from(file_path_str.clone());
         // let base64_image: String = load_file_as_base_64(file_path.as_path(), dataset_root);
 
-        let base64_image: String = get_screenshot_as_base64_string(&file_path_str, &mp4_file_path_str, mp4_frame_id);
+
+        println!("get_all_screenshots: file_path_str: {}", file_path_str);
+        let fully_qualified_file_path = dataset_root.join(file_path_str.clone());
+        println!("get_all_screenshots: fully_qualified_file_path: {}", fully_qualified_file_path.to_str().unwrap());
+
+        let base64_image: String = get_screenshot_as_base64_string(
+            fully_qualified_file_path.to_str().unwrap(), 
+            &mp4_file_path_str, 
+            mp4_frame_id
+        );
 
         Ok(ScreenshotRecord {
             id: row.get(0)?,
@@ -203,9 +215,18 @@ pub fn get_all_screenshots(dataset_root: &Path, db_filename: &Path, limit: i32) 
 
         // OLD CODE
         // let file_path = PathBuf::from(file_path_str.clone());
-        // let base64_image: String = load_file_as_base_64(file_path.as_path(), dataset_root);
+        // let base64_image: String = load_file_as_base_64(file_path    .as_path(), dataset_root);
 
-        let base64_image: String = get_screenshot_as_base64_string(&file_path_str, &mp4_file_path_str, mp4_frame_id);
+        println!("get_all_screenshots: file_path_str: {}", file_path_str);
+        let fully_qualified_file_path = dataset_root.join(file_path_str.clone());
+        println!("get_all_screenshots: fully_qualified_file_path: {}", fully_qualified_file_path.to_str().unwrap());
+
+
+        let base64_image: String = get_screenshot_as_base64_string(
+            fully_qualified_file_path.to_str().unwrap(), 
+            &mp4_file_path_str, 
+            mp4_frame_id
+        );
 
         Ok(ScreenshotRecord {
             id: row.get(0)?,
@@ -250,7 +271,16 @@ pub fn search_screenshots_ocr(term: &str, dataset_root: &Path, db_filename: &Pat
         // let file_path = PathBuf::from(file_path_str.clone());
         // let base64_image: String = load_file_as_base_64(file_path.as_path(), dataset_root);
 
-        let base64_image = get_screenshot_as_base64_string(&file_path_str, &mp4_file_path_str, mp4_frame_id);
+
+        println!("get_all_screenshots: file_path_str: {}", file_path_str);
+        let fully_qualified_file_path = dataset_root.join(file_path_str.clone());
+        println!("get_all_screenshots: fully_qualified_file_path: {}", fully_qualified_file_path.to_str().unwrap());
+
+        let base64_image = get_screenshot_as_base64_string(
+            fully_qualified_file_path.to_str().unwrap(), 
+            &mp4_file_path_str, 
+            mp4_frame_id
+        );
 
 
         Ok(ScreenshotRecord {
@@ -271,10 +301,23 @@ pub fn search_screenshots_ocr(term: &str, dataset_root: &Path, db_filename: &Pat
 
 pub fn get_screenshot_as_base64_string(file_path: &str, mp4_file_path: &str, mp4_frame_id: i32) -> String {
 
+    println!("get_screenshot_as_base64_string: file_path: {}, mp4_file_path: {}, mp4_frame_id: {}", file_path, mp4_file_path, mp4_frame_id);
     // If there is a non-empty mp4_file_path, then the screenshot has been compacted into an mp4
     if !mp4_file_path.is_empty() {
         get_screenshot_base64_from_mp4(mp4_file_path, mp4_frame_id)
     } else {
+
+        // Does the file_path exists?
+        let file_path_check = PathBuf::from(file_path);
+        if !file_path_check.exists() {
+            let bt = Backtrace::new();
+
+            // If this happens, the screenshot file will not be shown in the UI
+            println!("Error: get_screenshot_as_base64_string() called with non-existent file.  Returning empty data for file.  Stack trace:\n{:?}", bt);
+
+            return String::from("");
+        }
+        
         let file_contents = std::fs::read(file_path).unwrap();
         BASE64.encode(file_contents)    
     }

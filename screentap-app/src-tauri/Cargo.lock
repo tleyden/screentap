@@ -2446,6 +2446,7 @@ dependencies = [
 name = "screentap-app"
 version = "0.0.0"
 dependencies = [
+ "backtrace",
  "base64 0.21.6",
  "chrono",
  "image",

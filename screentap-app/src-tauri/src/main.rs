@@ -5,10 +5,16 @@ extern crate screen_ocr_swift_rs;
 
 use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, CustomMenuItem, SystemTrayMenuItem};
 
+use core::time;
 use std::collections::HashMap;
 use std::thread;
 use std::time::Duration;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::env;
+use std::path::PathBuf;
+use chrono::Local;
+
+
 
 mod db;
 mod utils; 
@@ -20,7 +26,9 @@ static DATABASE_FILENAME: &str = "screentap.db";
 #[tauri::command]
 fn search_screenshots(app_handle: tauri::AppHandle, term: &str) -> Vec<HashMap<String, String>> {
 
-    let app_data_dir = app_handle.path_resolver().app_data_dir().expect("Failed to get app_data_dir");
+    // let app_data_dir = app_handle.path_resolver().app_data_dir().expect("Failed to get app_data_dir");
+    let app_data_dir = get_effective_app_dir(app_handle);
+
     let db_filename_path = Path::new(DATABASE_FILENAME);
 
     // Cap the max results until we implement techniques to reduce memory footprint
@@ -48,7 +56,7 @@ fn browse_screenshots(app_handle: tauri::AppHandle, cur_id: i32, direction: &str
 
     println!("browse_screenshots: cur_id: {}, direction: {}", cur_id, direction);
 
-    let app_data_dir = app_handle.path_resolver().app_data_dir().expect("Failed to get app_data_dir");
+    let app_data_dir = get_effective_app_dir(app_handle);
 
     let db_filename_path = Path::new(DATABASE_FILENAME);
 
@@ -88,12 +96,41 @@ fn browse_screenshots(app_handle: tauri::AppHandle, cur_id: i32, direction: &str
 }
 
 
+fn get_effective_app_dir(app_handle: tauri::AppHandle) -> PathBuf {
+    // Attempt to get the "screentap_app_data_dir" environment variable
+    let app_data_dir = match env::var("SCREENTAP_APP_DATA_DIR") {
+        Ok(value) => {
+            // If the environment variable exists, use its value
+            Path::new(&value).to_path_buf()
+        },
+        Err(_) => {
+            // If the environment variable does not exist, fall back to the default app data directory
+            app_handle.path_resolver().app_data_dir().expect("Failed to get app_data_dir")
+        }
+    };
+    app_data_dir
+}
+
 fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error + 'static>> {
 
     let app_handle = app.handle();
     let db_filename_path = Path::new(DATABASE_FILENAME);
 
-    let app_data_dir = app_handle.path_resolver().app_data_dir().expect("Failed to get app_data_dir");
+    // Attempt to get the "screentap_app_data_dir" environment variable
+    // let app_data_dir = match env::var("SCREENTAP_APP_DATA_DIR") {
+    //     Ok(value) => {
+    //         // If the environment variable exists, use its value
+    //         Path::new(&value).to_path_buf()
+    //     },
+    //     Err(_) => {
+    //         // If the environment variable does not exist, fall back to the default app data directory
+    //         app_handle.path_resolver().app_data_dir().expect("Failed to get app_data_dir")
+    //     }
+    // };
+    let app_data_dir = get_effective_app_dir(app_handle);
+
+    // let app_data_dir = app_handle.path_resolver().app_data_dir().expect("Failed to get app_data_dir");
+    
     // If app_data_dir doesn't exist, create it
     if !app_data_dir.exists() {
         println!("Creating app_data_dir: {}", app_data_dir.as_path().to_str().unwrap());
@@ -127,11 +164,14 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
 
             // Compact screenshots to mp4 if necessary
             // TODO: enable this once its complete
-            // if compaction_helper.should_compact_screenshots() {
-            //     compaction_helper.compact_screenshots_to_mp4(PathBuf::from("/tmp/screentap.mp4"));
-            // }
+            if compaction_helper.should_compact_screenshots() {
+                let now = Local::now().naive_utc();
+                let timestamp_mp4_filename = utils::generate_filename(now, "mp4");
+                let timestamp_mp4_filename_fq = app_data_dir.join(timestamp_mp4_filename);
+                compaction_helper.compact_screenshots_to_mp4(PathBuf::from(timestamp_mp4_filename_fq));
+            }
 
-            let sleep_time_secs = 60;
+            let sleep_time_secs = 10;  // TODO: set back to 60
             thread::sleep(Duration::from_secs(sleep_time_secs));
             let _ = screenshot::save_screenshot(app_data_dir.as_path(), db_filename_path);
         }

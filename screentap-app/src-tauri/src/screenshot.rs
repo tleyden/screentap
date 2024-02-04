@@ -23,7 +23,7 @@ pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> String {
 
     // Save screenshot meta to the DB
     let save_result = db::save_screenshot_meta(
-        timestamp_png_filename.as_path(), 
+        target_png_file_path.as_path(), 
         ocr_text.to_string().as_str(),
         dataset_root,
         db_filename,

@@ -77,6 +77,8 @@ impl CompactionHelper {
 
             let png_file_str = png_file.to_str().unwrap();
 
+            println!("UPDATE documents where png_file_str: {}.  Set mp4_file_path: {}", png_file_str, target_mp4_fn);     
+
             // Update the row to set the mp4_file_path to the target_mp4_fn for each matching row
             let update_result = conn.execute(
                 "UPDATE documents SET mp4_file_path = ?, mp4_frame_id = ? WHERE file_path = ?",
