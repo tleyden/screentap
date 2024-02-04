@@ -2,7 +2,7 @@ extern crate screen_ocr_swift_rs;
 
 use std::path::PathBuf;
 use crate::db;
-use rusqlite::{params, Connection, Result};
+use rusqlite::params;
 
 
 // The maximum number of image files allowed to accumulate before compacting to an MP4

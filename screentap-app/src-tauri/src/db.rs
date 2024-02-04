@@ -74,8 +74,8 @@ pub fn create_db(dataset_root: &Path, db_filename: &Path) -> Result<()> {
                 timestamp TIMESTAMP NOT NULL,
                 ocr_text TEXT NOT NULL,
                 file_path TEXT NOT NULL,
-                mp4_file_path TEXT NOT NULL,
-                mp4_frame_id INTEGER
+                mp4_file_path TEXT NOT NULL DEFAULT '',
+                mp4_frame_id INTEGER NOT NULL DEFAULT -1
             )",
         [],
     )?;
@@ -89,7 +89,11 @@ pub fn create_db(dataset_root: &Path, db_filename: &Path) -> Result<()> {
         [],
     )?;
 
-
+    // Create a UNIQUE index on the file_path column
+    conn.execute(
+        "CREATE UNIQUE INDEX IF NOT EXISTS file_path_index ON documents (file_path)",
+        [],
+    )?;
 
     Ok(())
 
@@ -114,12 +118,6 @@ pub fn save_screenshot_meta(screenshot_file_path: &Path, ocr_text: &str, dataset
     conn.execute(
         "INSERT INTO ocr_text_index (ocr_text) VALUES (?1)",
         [ocr_text],
-    )?;
-
-    // Create a UNIQUE index on the file_path column
-    conn.execute(
-        "CREATE UNIQUE INDEX IF NOT EXISTS file_path_index ON documents (file_path)",
-        [],
     )?;
 
     Ok(())

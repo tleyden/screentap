@@ -219,6 +219,8 @@ fn handle_system_tray_event(app: &tauri::AppHandle, event: tauri::SystemTrayEven
 
 fn main() {
 
+    println!("Starting screentap...");
+
     let quit = CustomMenuItem::new("quit".to_string(), "Quit").accelerator("Cmd+Q");
     let show_hide_window = CustomMenuItem::new("search".to_string(), "Search");
     let browse_screenshots_menu_item = CustomMenuItem::new("browse_screenshots".to_string(), "Browse");
