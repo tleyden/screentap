@@ -154,8 +154,16 @@ impl CompactionHelper {
         self.update_db_rows_with_mp4_file(&png_files, target_mp4_fn.to_str().unwrap());
 
         // Delete all png files in the incoming dir
+        // TODO: only enable this after we know we can access the images from the mp4 files
+        // self.cleanup_screenshot_images(&png_files)
 
 
+    }
+
+    fn cleanup_screenshot_images(&self, png_files: &Vec<PathBuf>) -> () {
+        for png_file in png_files {
+            std::fs::remove_file(png_file.as_path()).unwrap();
+        }
     }
 
 }
@@ -172,6 +180,8 @@ mod test {
     use crate::db;
     use chrono::Local;
     use tempfile::tempdir;
+    use std::collections::HashMap;
+
 
     // Use a small number of image files for testing, because I have to make
     // the images relatively big to avoid the isReadyForMoreMediaData=False error
@@ -193,7 +203,7 @@ mod test {
         }
 
         // Create paths to test assets
-        let db_filename_path = PathBuf::from("test.db");
+        let db_filename = PathBuf::from("test.db");
         let target_mp4_file = app_data_dir.join("test_compact_screenshots_to_mp4.mp4");
 
         // Delete the target mp4 file if it exists
@@ -208,17 +218,39 @@ mod test {
             false
         );
 
+        // Get the base64 string value of each of the images for comparison later
+        // let base64_images: Vec<String> = image_file_paths.iter().map(
+        //     |image_file_path| {
+        //         db::get_screenshot_as_base64_string(
+        //             image_file_path.as_path().to_str().unwrap(),
+        //             "",
+        //             -1
+        //         )
+        //     }
+        // ).collect();
+
+        let base64_images: HashMap<String, String> = image_file_paths.iter().map(
+            |image_file_path| {
+                let base64_string = db::get_screenshot_as_base64_string(
+                    image_file_path.as_path().to_str().unwrap(), // Convert PathBuf to &str
+                    "", // Placeholder for any additional parameters
+                    -1  // Placeholder for any additional parameters
+                );
+                (image_file_path.as_path().to_str().unwrap().to_string(), base64_string)
+            }
+        ).collect();
+
         // Create a DB with the image file paths
         create_db_with_image_files(
             &image_file_paths,
             &app_data_dir, 
-            &db_filename_path
+            &db_filename
         );
 
         // Create a compaction helper
         let compaction_helper = CompactionHelper::new(
             app_data_dir.clone(), 
-            db_filename_path.to_path_buf(),
+            db_filename.to_path_buf(),
             MAX_IMAGE_FILES
         );
 
@@ -237,12 +269,29 @@ mod test {
         assert_screenshots_point_to_mp4_in_db(
             &image_file_paths, 
             &app_data_dir, 
-            &db_filename_path,
+            &db_filename,
             &target_mp4_file
         );
 
         // Assert that the screenshot png files were deleted
-        assert_screenshot_files_deleted(&image_file_paths);
+        // TODO: uncomment this after this functionality is enabled
+        // assert_screenshot_files_deleted(&image_file_paths);
+
+        // Get all the screenshots, and ensure that the base64 of the images
+        // are what should be expected 
+        let all_screenshots = db::get_all_screenshots(
+            app_data_dir.as_path(), 
+            db_filename.as_path(), 
+            1000
+        );
+
+        // Loop over screenshots and compare base64 images to values stored in base64_images
+        for (_, screenshot) in all_screenshots.unwrap().iter().enumerate() {
+            let expected_base_64 = base64_images.get(screenshot.get_file_path()).unwrap().as_str();
+            let actual_base_64 = screenshot.get_base64_image();
+            assert_eq!(expected_base_64, actual_base_64, "Base64 images do not match for screenshot {}", screenshot.get_file_path());
+            
+        }
 
 
     }
