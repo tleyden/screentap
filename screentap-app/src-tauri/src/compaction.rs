@@ -90,11 +90,6 @@ impl CompactionHelper {
 
         }
 
-
-
-
-        
-
     }
 
 
@@ -240,16 +235,14 @@ mod test {
 
         // Assert that the DB was updated to point to the MP4 file with the correct frame IDs
         assert_screenshots_point_to_mp4_in_db(
-            image_file_paths, 
+            &image_file_paths, 
             &app_data_dir, 
             &db_filename_path,
             &target_mp4_file
-        )
+        );
 
-        // TODO: Assert that png files were deleted
-
-
-
+        // Assert that the screenshot png files were deleted
+        assert_screenshot_files_deleted(&image_file_paths);
 
 
     }
@@ -321,7 +314,7 @@ mod test {
     }
 
 
-    fn assert_screenshots_point_to_mp4_in_db(image_file_paths: Vec<PathBuf>, app_data_dir: &PathBuf, db_filename_path: &PathBuf, target_mp4_file: &PathBuf) {
+    fn assert_screenshots_point_to_mp4_in_db(image_file_paths: &Vec<PathBuf>, app_data_dir: &PathBuf, db_filename_path: &PathBuf, target_mp4_file: &PathBuf) {
 
         let screenshot_records_result = db::get_all_screenshots(
             app_data_dir.as_path(), 
@@ -436,6 +429,12 @@ mod test {
         // Return the list of image files
         image_files
 
+    }
+
+    fn assert_screenshot_files_deleted(image_file_paths: &Vec<PathBuf>) {
+        for image_file_path in image_file_paths {
+            assert!(!image_file_path.exists(), "Image file still exists: {:?}", image_file_path);
+        }
     }
 
 }
