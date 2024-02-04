@@ -40,6 +40,55 @@ func byteArrayToCGImage(byteArray: [UInt8]) -> CGImage? {
     return cgImage
 }
 
+func convertCGImageToByteArray(image: CGImage) -> [UInt8]? {
+    // Convert the CGImage to NSData
+    let bitmapRep = NSBitmapImageRep(cgImage: image)
+    guard let imageData = bitmapRep.representation(using: .png, properties: [:]) else {
+        print("Failed to convert image to PNG data")
+        return nil
+    }
+
+    // Convert NSData to Byte Array
+    let byteArray = [UInt8](imageData)
+    return byteArray
+}
+
+
+@_cdecl("extract_frame_from_mp4_swift")
+@available(macOS 10.15, *)
+public func extract_frame_from_mp4(mp4_path: SRString, frame_id: Int) -> SRData? {
+
+    let mp4Url = URL(fileURLWithPath: mp4_path.toString())
+
+    if let fps = getVideoFPS(from: mp4Url) {
+        print("FPS: \(fps)")
+        
+        if let extractedCGImage = getCGImageFromMP4Frame(url: mp4Url, fps: fps, frameID: frame_id) {
+            
+            // for validating the image
+            // let path = "/tmp/cgimage_extracted.png"
+            // writeCGImage(extractedCGImage, toPath: path)
+            // print("Wrote extracted cgimage frame to \(path)")
+
+            if let byteArray = convertCGImageToByteArray(image: extractedCGImage) {
+                return SRData(byteArray)
+            } else {
+                print("Failed to convert CGImage to byte array")
+            }
+
+        } else {
+            print("Failed to extract CGImage.")
+        }
+        
+        
+    } else {
+        print("Failed to retrieve FPS")
+    }
+
+    // TODO: add code
+    return nil
+}
+
 @_cdecl("screen_capture_swift")
 @available(macOS 10.15, *)
 public func screen_capture() -> SRData? {
@@ -347,4 +396,55 @@ func isImage32ARGB(_ cgImage: CGImage) -> Bool {
     }
 
     return true
+}
+
+
+func getVideoFPS(from url: URL) -> Float? {
+    let asset = AVAsset(url: url)
+    let tracks = asset.tracks(withMediaType: .video)
+    
+    guard let track = tracks.first else {
+        return nil
+    }
+    
+    return track.nominalFrameRate
+}
+
+func getCGImageFromMP4Frame(url: URL, fps: Float, frameID: Int) -> CGImage? {
+    let asset = AVAsset(url: url)
+
+    // Create an AVAssetImageGenerator
+    let imageGenerator = AVAssetImageGenerator(asset: asset)
+    imageGenerator.appliesPreferredTrackTransform = true
+    imageGenerator.requestedTimeToleranceBefore = .zero
+    imageGenerator.requestedTimeToleranceAfter = .zero
+
+    // Calculate the CMTime for the specified frameID
+    let frameTime = CMTime(value: Int64(frameID), timescale: Int32(fps))
+    
+    do {
+        // Generate the CGImage for the specified frame
+        let cgImage = try imageGenerator.copyCGImage(at: frameTime, actualTime: nil)
+        // Here you can process the CGImage (e.g., save to file)
+        return cgImage
+    } catch {
+        print("Error generating image for frameID \(frameID): \(error)")
+        return nil
+    }
+}
+
+func writeCGImage(_ image: CGImage, toPath path: String) {
+    let url = URL(fileURLWithPath: path)
+    guard let destination = CGImageDestinationCreateWithURL(url as CFURL, kUTTypePNG, 1, nil) else {
+        print("Failed to create CGImageDestination for \(url)")
+        return
+    }
+    
+    CGImageDestinationAddImage(destination, image, nil)
+    
+    if !CGImageDestinationFinalize(destination) {
+        print("Failed to write image to \(path)")
+    } else {
+        print("Successfully wrote image to \(path)")
+    }
 }

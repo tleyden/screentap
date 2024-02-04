@@ -68,7 +68,7 @@ func main() {
                 // iterateOverMP4Frames(url: targetFilenameUrl, fps: fps)
                 
                 let extractFrameID = 4
-                if let extractedCGImage = getCGImageFromMP4Frame(url: targetFilenameUrl, fps: fps, frameID: extractFrameID) {
+                if let extractedCGImage = getCGImageFromMP4Frame(url: targetFilenameUrl, fps: fps, frameID: ) {
                     let path = "/tmp/cgimage_extracted.png"
                     writeCGImage(extractedCGImage, toPath: path)
                     print("Wrote extracted cgimage frame to \(path)")

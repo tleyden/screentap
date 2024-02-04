@@ -1,4 +1,4 @@
-use swift_rs::{swift, SRString, SRData};
+use swift_rs::{swift, SRString, SRData, Int};
 
 use std::fs::File;
 use std::io::prelude::*;
@@ -7,6 +7,18 @@ use std::io::BufWriter;
 swift!(fn perform_ocr_swift(path: &SRString) -> Option<SRString>);
 swift!(fn screen_capture_swift() -> Option<SRData>);    
 swift!(fn write_images_in_dir_to_mp4_swift(directory_path: &SRString, target_filename: &SRString) -> ());
+swift!(fn extract_frame_from_mp4_swift(mp4_path: &SRString, frame_id: Int) -> Option<SRData>);    
+
+
+
+pub fn extract_frame_from_mp4(mp4_path: &str, frame_id: isize) -> Option<SRData> {
+    let mp4_path_str: SRString = mp4_path.into();
+    // let frame_id_int: Int = frame_id.into();
+    let result = unsafe { extract_frame_from_mp4_swift(&mp4_path_str, frame_id) };
+    result
+}
+
+
 
 /**
  * Given a path to a directory of images, write them to an mp4
