@@ -65,7 +65,18 @@ func main() {
             
             if let fps = getVideoFPS(from: targetFilenameUrl) {
                 print("FPS: \(fps)")
-                iterateOverMP4Frames(url: targetFilenameUrl, fps: fps)
+                // iterateOverMP4Frames(url: targetFilenameUrl, fps: fps)
+                
+                let extractFrameID = 4
+                if let extractedCGImage = getCGImageFromMP4Frame(url: targetFilenameUrl, fps: fps, frameID: extractFrameID) {
+                    let path = "/tmp/cgimage_extracted.png"
+                    writeCGImage(extractedCGImage, toPath: path)
+                    print("Wrote extracted cgimage frame to \(path)")
+                } else {
+                    print("Failed to extract CGImage.")
+                }
+                
+                
             } else {
                 print("Failed to retrieve FPS")
             }
@@ -388,6 +399,29 @@ func iterateOverMP4Frames(url: URL, fps: Float) {
         }
     }
     
+}
+
+func getCGImageFromMP4Frame(url: URL, fps: Float, frameID: Int) -> CGImage? {
+    let asset = AVAsset(url: url)
+
+    // Create an AVAssetImageGenerator
+    let imageGenerator = AVAssetImageGenerator(asset: asset)
+    imageGenerator.appliesPreferredTrackTransform = true
+    imageGenerator.requestedTimeToleranceBefore = .zero
+    imageGenerator.requestedTimeToleranceAfter = .zero
+
+    // Calculate the CMTime for the specified frameID
+    let frameTime = CMTime(value: Int64(frameID), timescale: Int32(fps))
+    
+    do {
+        // Generate the CGImage for the specified frame
+        let cgImage = try imageGenerator.copyCGImage(at: frameTime, actualTime: nil)
+        // Here you can process the CGImage (e.g., save to file)
+        return cgImage
+    } catch {
+        print("Error generating image for frameID \(frameID): \(error)")
+        return nil
+    }
 }
 
 main()
