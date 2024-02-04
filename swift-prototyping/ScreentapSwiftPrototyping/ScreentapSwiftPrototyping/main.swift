@@ -56,10 +56,21 @@ func main() {
          
             let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
             
-            let documentsDirectoryStr = "/tmp"
-            // let documentsDirectoryStr = documentsDirectory.path
+            // let documentsDirectoryStr = "/tmp"
+            let documentsDirectoryStr = documentsDirectory.path
             
             swiftWriteImagesInDirToMp4(documentsDirectoryStr, targetFilename: targetFilename)
+            
+            let targetFilenameUrl = URL(fileURLWithPath: targetFilename)
+            
+            if let fps = getVideoFPS(from: targetFilenameUrl) {
+                print("FPS: \(fps)")
+                iterateOverMP4Frames(url: targetFilenameUrl, fps: fps)
+            } else {
+                print("Failed to retrieve FPS")
+            }
+            
+            
                         
             imageBatch.removeAll() // Clear the batch after writing
             
@@ -134,6 +145,7 @@ func swiftWriteImagesInDirToMp4(_ directoryPath: String, targetFilename: String)
     let directoryURL = URL(fileURLWithPath: directoryPath)
 
     let images = fetchSortedPngImages(from: directoryURL)
+    print("Writing images to mp4: \(images)")
     
     swiftWriteImagesToMp4(images, targetFilename: targetFilename)
     
@@ -318,6 +330,64 @@ func isImage32ARGB(_ cgImage: CGImage) -> Bool {
     }
 
     return true
+}
+
+func writeCGImage(_ image: CGImage, toPath path: String) {
+    let url = URL(fileURLWithPath: path)
+    guard let destination = CGImageDestinationCreateWithURL(url as CFURL, kUTTypePNG, 1, nil) else {
+        print("Failed to create CGImageDestination for \(url)")
+        return
+    }
+    
+    CGImageDestinationAddImage(destination, image, nil)
+    
+    if !CGImageDestinationFinalize(destination) {
+        print("Failed to write image to \(path)")
+    } else {
+        print("Successfully wrote image to \(path)")
+    }
+}
+
+func getVideoFPS(from url: URL) -> Float? {
+    let asset = AVAsset(url: url)
+    let tracks = asset.tracks(withMediaType: .video)
+    
+    guard let track = tracks.first else {
+        return nil
+    }
+    
+    return track.nominalFrameRate
+}
+
+func iterateOverMP4Frames(url: URL, fps: Float) {
+    
+    let asset = AVAsset(url: url)
+
+    // Create an AVAssetImageGenerator
+    let imageGenerator = AVAssetImageGenerator(asset: asset)
+    imageGenerator.appliesPreferredTrackTransform = true
+    imageGenerator.requestedTimeToleranceBefore = .zero //Optional
+    imageGenerator.requestedTimeToleranceAfter = .zero //Optional
+
+    // Get the total number of frames
+    let duration = asset.duration
+    let durationSeconds = CMTimeGetSeconds(duration)
+    let totalFrames = Int(durationSeconds * Double(fps))
+
+    // Iterate over each frame
+    for frameCount in 0..<totalFrames {
+        let time = CMTimeMake(value: Int64(frameCount), timescale: Int32(fps))
+        do {
+            let cgImage = try imageGenerator.copyCGImage(at: time, actualTime: nil)
+            // Process the frame (e.g., convert to PNG, save to file, etc.)
+            let path = "/tmp/cgimage_\(frameCount).png"
+            writeCGImage(cgImage, toPath: path)
+            
+        } catch {
+            print("Error generating image at frame \(frameCount): \(error)")
+        }
+    }
+    
 }
 
 main()
