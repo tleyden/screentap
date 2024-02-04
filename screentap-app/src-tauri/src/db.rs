@@ -16,11 +16,14 @@ pub struct ScreenshotRecord {
     timestamp: i32,    
     ocr_text: String,
 
-    // the file_path is the path to the screenshot png file
+    // The file_path is the path to the screenshot png file
     file_path: String,
 
-    // the mp4_file_path is the path to the mp4 file, post compaction
+    // The mp4_file_path is the path to the mp4 file, post compaction
     mp4_file_path: String,
+
+    // The frame id in the mp4 file where this screenshot can be found
+    mp4_frame_id: i32,
 
     base64_image: String,
 }
@@ -31,6 +34,9 @@ impl ScreenshotRecord {
     }
     pub fn get_mp4_file_path(&self) -> &str {
         &self.mp4_file_path
+    }
+    pub fn get_mp4_frame_id(&self) -> i32 {
+        self.mp4_frame_id
     }
 }
 
@@ -50,6 +56,8 @@ pub fn screenshot_record_to_hashmap(record: &ScreenshotRecord) -> HashMap<String
     map.insert("timestamp".to_string(), record.timestamp.to_string());
     map.insert("ocr_text".to_string(), record.ocr_text.clone());
     map.insert("file_path".to_string(), record.file_path.clone());
+    map.insert("mp4_file_path".to_string(), record.mp4_file_path.clone());
+    map.insert("mp4_frame_id".to_string(), record.mp4_frame_id.to_string());  // TODO: this should be an i32 rather than a String
     map.insert("base64_image".to_string(), record.base64_image.clone());
     map
 }
@@ -131,7 +139,7 @@ pub fn get_screenshot_by_id(dataset_root: &Path, db_filename: &Path, target_id: 
 
     let conn = get_db_conn(dataset_root, db_filename);
 
-    let mut stmt = conn.prepare("SELECT id, timestamp, ocr_text, file_path, mp4_file_path FROM documents WHERE id = ? ORDER BY timestamp DESC")?;
+    let mut stmt = conn.prepare("SELECT id, timestamp, ocr_text, file_path, mp4_file_path, mp4_frame_id FROM documents WHERE id = ? ORDER BY timestamp DESC")?;
     let screenshots = stmt.query_map(params![target_id], |row| {
 
         // open the file_path and convert to base64
@@ -146,6 +154,7 @@ pub fn get_screenshot_by_id(dataset_root: &Path, db_filename: &Path, target_id: 
             ocr_text: row.get(2)?,
             file_path: file_path_str,
             mp4_file_path: mp4_file_path_str,
+            mp4_frame_id: row.get(5)?,
             base64_image,
         })
     })?
@@ -162,7 +171,7 @@ pub fn get_all_screenshots(dataset_root: &Path, db_filename: &Path, limit: i32) 
 
     let conn = get_db_conn(dataset_root, db_filename);
 
-    let mut stmt = conn.prepare("SELECT id, timestamp, ocr_text, file_path, mp4_file_path FROM documents ORDER BY timestamp DESC LIMIT ?")?;
+    let mut stmt = conn.prepare("SELECT id, timestamp, ocr_text, file_path, mp4_file_path, mp4_frame_id FROM documents ORDER BY timestamp DESC LIMIT ?")?;
     let screenshots = stmt.query_map(params![limit], |row| {
 
         // open the file_path and convert to base64
@@ -178,6 +187,7 @@ pub fn get_all_screenshots(dataset_root: &Path, db_filename: &Path, limit: i32) 
             ocr_text: row.get(2)?,
             file_path: file_path_str,
             mp4_file_path: mp4_file_path_str,
+            mp4_frame_id: row.get(5)?,
             base64_image,
         })
     })?
@@ -195,7 +205,7 @@ pub fn search_screenshots_ocr(term: &str, dataset_root: &Path, db_filename: &Pat
     let conn = get_db_conn(dataset_root, db_filename);
 
     let mut stmt = conn.prepare(r#"
-        SELECT ocr_text_index.rowid, d.timestamp, d.ocr_text, d.file_path, d.mp4_file_path 
+        SELECT ocr_text_index.rowid, d.timestamp, d.ocr_text, d.file_path, d.mp4_file_path, d.mp4_frame_id
         FROM ocr_text_index 
         JOIN documents d on d.id = ocr_text_index.rowid 
         WHERE ocr_text_index.ocr_text MATCH ?
@@ -218,6 +228,7 @@ pub fn search_screenshots_ocr(term: &str, dataset_root: &Path, db_filename: &Pat
             ocr_text: row.get(2)?,
             file_path: file_path_str,
             mp4_file_path: mp4_file_path_str,
+            mp4_frame_id: row.get(5)?,
             base64_image,
         })
     })?

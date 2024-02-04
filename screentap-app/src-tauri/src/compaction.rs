@@ -345,8 +345,8 @@ mod test {
             ).collect();
         
 
-        // Loop over the image file paths, for each one
-        for image_file_path in image_file_paths {
+        // Enumerate over the image file paths and get the path and frame_id
+        for (frame_id, image_file_path) in image_file_paths.iter().enumerate() {
 
             println!("image_file_path: {:?}", image_file_path);
 
@@ -358,10 +358,8 @@ mod test {
             let mp4_file_path = record.unwrap().get_mp4_file_path();
             assert_eq!(mp4_file_path, target_mp4_file.to_str().unwrap(), "The paths do not match: expected {}, got {}", mp4_file_path, target_mp4_file.to_str().unwrap());
 
-
-            //   Assert that the frame ID is set
-
-            //   Assert that the frame ID corresponds to the index in the image file paths list
+            //   Assert that the frame ID is set to expected val
+            assert_eq!(record.unwrap().get_mp4_frame_id(), frame_id as i32, "The frame IDs do not match: expected {}, got {}", frame_id, record.unwrap().get_mp4_frame_id());
 
         }
 
