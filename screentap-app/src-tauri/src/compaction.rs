@@ -2,6 +2,8 @@ extern crate screen_ocr_swift_rs;
 
 use std::path::PathBuf;
 use crate::db;
+use rusqlite::{params, Connection, Result};
+
 
 // The maximum number of image files allowed to accumulate before compacting to an MP4
 pub const DEFAULT_MAX_IMAGE_FILES: u32 = 150;
@@ -61,6 +63,44 @@ impl CompactionHelper {
         png_files
     }
 
+    fn update_db_rows_with_mp4_file(&self, png_files: &Vec<PathBuf>, target_mp4_fn: &str) -> () {
+
+        // Open connection to DB
+        let conn = db::get_db_conn(
+            self.app_data_dir.as_path(), 
+            self.db_filename_path.as_path()
+        );
+
+        // Loop over the image file paths, for each one, update the row to set the 
+        // mp4_file_path to the target_mp4_fn for each matching row
+        for (frame_id, png_file) in png_files.iter().enumerate() {
+
+            let png_file_str = png_file.to_str().unwrap();
+
+            // Update the row to set the mp4_file_path to the target_mp4_fn for each matching row
+            let update_result = conn.execute(
+                "UPDATE documents SET mp4_file_path = ?, mp4_frame_id = ? WHERE file_path = ?",
+                params![target_mp4_fn, frame_id, png_file_str],
+            );
+
+            match update_result {
+                Ok(_) => (),
+                Err(e) => assert!(false, "Error setting mp4_file_path in DB: {} for png file {}", e, png_file_str),
+            }
+
+        }
+
+
+
+
+        
+
+    }
+
+
+    /**
+     * Is it time to run compaction?
+     */
     pub fn should_compact_screenshots(&self) -> bool {
             
         // Count the number of .png files in self.app_data_dir
@@ -116,6 +156,7 @@ impl CompactionHelper {
         self.compact_screenshots_in_dir_to_mp4(target_mp4_fn.clone());
         
         // Update the DB
+        self.update_db_rows_with_mp4_file(&png_files, target_mp4_fn.to_str().unwrap());
 
         // Delete all png files in the incoming dir
 

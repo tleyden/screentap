@@ -54,7 +54,7 @@ pub fn screenshot_record_to_hashmap(record: &ScreenshotRecord) -> HashMap<String
     map
 }
 
-fn get_db_conn(dataset_root: &Path, db_filename: &Path) -> Connection {
+pub fn get_db_conn(dataset_root: &Path, db_filename: &Path) -> Connection {
     let db_filename_fq_path = dataset_root.join(db_filename);
     let path_str = db_filename_fq_path.to_str().expect("Failed to get db_filename_fq_path");
     Connection::open(path_str).expect("Failed to open db connection")
@@ -74,7 +74,8 @@ pub fn create_db(dataset_root: &Path, db_filename: &Path) -> Result<()> {
                 timestamp TIMESTAMP NOT NULL,
                 ocr_text TEXT NOT NULL,
                 file_path TEXT NOT NULL,
-                mp4_file_path TEXT NOT NULL
+                mp4_file_path TEXT NOT NULL,
+                mp4_frame_id INTEGER
             )",
         [],
     )?;
@@ -103,6 +104,7 @@ pub fn save_screenshot_meta(screenshot_file_path: &Path, ocr_text: &str, dataset
 
     let screenshot_file_path_str = screenshot_file_path.to_str().expect("Failed to get screenshot_file_path_str");
 
+    // TODO: change table name to 'screenshots'
     conn.execute(
         "INSERT INTO documents (timestamp, ocr_text, file_path, mp4_file_path) VALUES (?1, ?2, ?3, ?4)",
         params![now.timestamp(), ocr_text, screenshot_file_path_str, ""],
@@ -112,6 +114,12 @@ pub fn save_screenshot_meta(screenshot_file_path: &Path, ocr_text: &str, dataset
     conn.execute(
         "INSERT INTO ocr_text_index (ocr_text) VALUES (?1)",
         [ocr_text],
+    )?;
+
+    // Create a UNIQUE index on the file_path column
+    conn.execute(
+        "CREATE UNIQUE INDEX IF NOT EXISTS file_path_index ON documents (file_path)",
+        [],
     )?;
 
     Ok(())
