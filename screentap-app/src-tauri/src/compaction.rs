@@ -135,6 +135,7 @@ impl CompactionHelper {
             return;
         }
 
+
         // TODO: create the MP4 file in a subdirectory divided by date (year/month/day/hour)
         //       but for now, just keep it flat
 
@@ -147,7 +148,11 @@ impl CompactionHelper {
         let png_files = self.get_png_files_chronologically();
         println!("png_files: {:?}", png_files);
 
-        // Make sure these files are in the DB, otherwise throw an error
+        // Make sure these files are all in the DB, otherwise throw an error
+
+        // TODO: it should skip compacting any png files that are already in an mp4 file, based on the DB state.
+        //       this prevents write multiplication in a worst case scenario where png images end up in multiple mp4 files.
+        //       Delete any PNG files that are on disk but already in an MP4 file according to the DB.
 
         // Create an MP4 file for the png files in the directory
         self.compact_screenshots_in_dir_to_mp4(target_mp4_fn.clone());
