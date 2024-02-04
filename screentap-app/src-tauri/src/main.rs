@@ -130,10 +130,10 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
         loop {
 
             // Compact screenshots to mp4 if necessary
-            // TODO: still a WIP
-            if compaction_helper.should_compact_screenshots() {
-                compaction_helper.compact_screenshots_to_mp4(PathBuf::from("/tmp/screentap.mp4"));
-            }
+            // TODO: enable this once its complete
+            // if compaction_helper.should_compact_screenshots() {
+            //     compaction_helper.compact_screenshots_to_mp4(PathBuf::from("/tmp/screentap.mp4"));
+            // }
 
             let sleep_time_secs = 60;
             thread::sleep(Duration::from_secs(sleep_time_secs));
