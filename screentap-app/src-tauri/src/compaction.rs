@@ -63,7 +63,7 @@ impl CompactionHelper {
         png_files
     }
 
-    fn update_db_rows_with_mp4_file(&self, png_files: &Vec<PathBuf>, target_mp4_fn: &str) -> () {
+    fn update_db_rows_with_mp4_file(&self, png_files: &Vec<PathBuf>, target_mp4_fn: &str) {
 
         // Open connection to DB
         let conn = db::get_db_conn(
@@ -108,7 +108,7 @@ impl CompactionHelper {
      * Given a directory of images, write them to an mp4
      * TODO: return a Result<>
      */
-    pub fn compact_screenshots_in_dir_to_mp4(&self, target_mp4_fn: PathBuf) -> () {  
+    pub fn compact_screenshots_in_dir_to_mp4(&self, target_mp4_fn: PathBuf) {  
         
         screen_ocr_swift_rs::write_images_in_dir_to_mp4(
             self.app_data_dir.to_str().unwrap(), 
@@ -127,7 +127,7 @@ impl CompactionHelper {
      *     3. Update the filename to the MP4 file
      * 5. Delete all entries in the incoming dir
      */
-    pub fn compact_screenshots_to_mp4(&self, target_mp4_fn: PathBuf) -> () {
+    pub fn compact_screenshots_to_mp4(&self, target_mp4_fn: PathBuf) {
 
         if !self.should_compact_screenshots() {
             return;
@@ -164,7 +164,7 @@ impl CompactionHelper {
 
     }
 
-    fn cleanup_screenshot_images(&self, png_files: &Vec<PathBuf>) -> () {
+    fn cleanup_screenshot_images(&self, png_files: &Vec<PathBuf>) {
         for png_file in png_files {
             std::fs::remove_file(png_file.as_path()).unwrap();
         }

@@ -180,7 +180,7 @@ pub fn get_screenshot_by_id(dataset_root: &Path, db_filename: &Path, target_id: 
             ocr_text: row.get(2)?,
             file_path: file_path_str,
             mp4_file_path: mp4_file_path_str,
-            mp4_frame_id: mp4_frame_id,
+            mp4_frame_id,
             base64_image,
         })
     })?
@@ -219,7 +219,7 @@ pub fn get_all_screenshots(dataset_root: &Path, db_filename: &Path, limit: i32) 
             ocr_text: row.get(2)?,
             file_path: file_path_str,
             mp4_file_path: mp4_file_path_str,
-            mp4_frame_id: mp4_frame_id,
+            mp4_frame_id,
             base64_image,
         })
     })?
@@ -267,7 +267,7 @@ pub fn search_screenshots_ocr(term: &str, dataset_root: &Path, db_filename: &Pat
             ocr_text: row.get(2)?,
             file_path: file_path_str,
             mp4_file_path: mp4_file_path_str,
-            mp4_frame_id: mp4_frame_id,
+            mp4_frame_id,
             base64_image,
         })
     })?
