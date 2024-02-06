@@ -162,7 +162,7 @@ impl CompactionHelper {
 
         // Delete all png files in the incoming dir
         // TODO: only enable this after we know we can access the images from the mp4 files
-        // self.cleanup_screenshot_images(&png_files)
+        self.cleanup_screenshot_images(&png_files)
 
 
     }
@@ -281,8 +281,7 @@ mod test {
         );
 
         // Assert that the screenshot png files were deleted
-        // TODO: uncomment this after this functionality is enabled
-        // assert_screenshot_files_deleted(&image_file_paths);
+        assert_screenshot_files_deleted(&image_file_paths);
 
         // Get all the screenshots, and ensure that the base64 of the images
         // are what should be expected 

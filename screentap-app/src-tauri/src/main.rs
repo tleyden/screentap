@@ -163,7 +163,8 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
         loop {
 
             // Compact screenshots to mp4 if necessary
-            // TODO: enable this once its complete
+            // TODO: when more than 150 screenshots, it should compact into multiple mp4s
+            // TODO: its not deleting the PNG files yet and it needs to
             if compaction_helper.should_compact_screenshots() {
                 let now = Local::now().naive_utc();
                 let timestamp_mp4_filename = utils::generate_filename(now, "mp4");
