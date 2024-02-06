@@ -37,19 +37,23 @@ pub struct ScreenshotRecord {
 impl ScreenshotRecord {
     
     // Used by unit tests
+    #[allow(dead_code)]
     pub fn get_file_path(&self) -> &str {
         &self.file_path
     }
     // Used by unit tests
+    #[allow(dead_code)]
     pub fn get_mp4_file_path(&self) -> &str {
         &self.mp4_file_path
     }
 
     // Used by unit tests
+    #[allow(dead_code)]
     pub fn get_mp4_frame_id(&self) -> i32 {
         self.mp4_frame_id
     }
 
+    #[allow(dead_code)]
     pub fn get_base64_image(&self) -> &str {
         &self.base64_image
     }
