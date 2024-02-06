@@ -26,7 +26,6 @@ static DATABASE_FILENAME: &str = "screentap.db";
 #[tauri::command]
 fn search_screenshots(app_handle: tauri::AppHandle, term: &str) -> Vec<HashMap<String, String>> {
 
-    // let app_data_dir = app_handle.path_resolver().app_data_dir().expect("Failed to get app_data_dir");
     let app_data_dir = get_effective_app_dir(app_handle);
 
     let db_filename_path = Path::new(DATABASE_FILENAME);
@@ -116,20 +115,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
     let app_handle = app.handle();
     let db_filename_path = Path::new(DATABASE_FILENAME);
 
-    // Attempt to get the "screentap_app_data_dir" environment variable
-    // let app_data_dir = match env::var("SCREENTAP_APP_DATA_DIR") {
-    //     Ok(value) => {
-    //         // If the environment variable exists, use its value
-    //         Path::new(&value).to_path_buf()
-    //     },
-    //     Err(_) => {
-    //         // If the environment variable does not exist, fall back to the default app data directory
-    //         app_handle.path_resolver().app_data_dir().expect("Failed to get app_data_dir")
-    //     }
-    // };
     let app_data_dir = get_effective_app_dir(app_handle);
-
-    // let app_data_dir = app_handle.path_resolver().app_data_dir().expect("Failed to get app_data_dir");
     
     // If app_data_dir doesn't exist, create it
     if !app_data_dir.exists() {
@@ -163,8 +149,6 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
         loop {
 
             // Compact screenshots to mp4 if necessary
-            // TODO: when more than 150 screenshots, it should compact into multiple mp4s
-            // TODO: its not deleting the PNG files yet and it needs to
             if compaction_helper.should_compact_screenshots() {
                 let now = Local::now().naive_utc();
                 let timestamp_mp4_filename = utils::generate_filename(now, "mp4");
@@ -172,7 +156,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
                 compaction_helper.compact_screenshots_to_mp4(PathBuf::from(timestamp_mp4_filename_fq));
             }
 
-            let sleep_time_secs = 10;  // TODO: set back to 60
+            let sleep_time_secs = 30; 
             thread::sleep(Duration::from_secs(sleep_time_secs));
             let _ = screenshot::save_screenshot(app_data_dir.as_path(), db_filename_path);
         }
