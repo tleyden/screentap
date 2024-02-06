@@ -151,7 +151,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
                 let now = Local::now().naive_utc();
                 let timestamp_mp4_filename = utils::generate_filename(now, "mp4");
                 let timestamp_mp4_filename_fq = app_data_dir.join(timestamp_mp4_filename);
-                compaction_helper.compact_screenshots_to_mp4(PathBuf::from(timestamp_mp4_filename_fq));
+                compaction_helper.compact_screenshots_to_mp4(timestamp_mp4_filename_fq);
             }
 
             let sleep_time_secs = 30; 

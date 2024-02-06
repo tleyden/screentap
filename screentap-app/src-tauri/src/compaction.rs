@@ -59,11 +59,11 @@ impl CompactionHelper {
      */
     fn get_png_files_chronologically(&self) -> Vec<PathBuf> {
         let mut png_files = self.get_png_files();
-        png_files.sort_by(|a, b| a.metadata().unwrap().modified().unwrap().cmp(&b.metadata().unwrap().modified().unwrap()));
+        png_files.sort_by_key(|a| a.metadata().unwrap().modified().unwrap());
         png_files
     }
 
-    fn update_db_rows_with_mp4_file(&self, png_files: &Vec<PathBuf>, target_mp4_fn: &str) {
+    fn update_db_rows_with_mp4_file(&self, png_files: &[PathBuf], target_mp4_fn: &str) {
 
         // Open connection to DB
         let conn = db::get_db_conn(
@@ -85,7 +85,7 @@ impl CompactionHelper {
 
             match update_result {
                 Ok(_) => (),
-                Err(e) => assert!(false, "Error setting mp4_file_path in DB: {} for png file {}", e, png_file_str),
+                Err(e) => panic!("Error setting mp4_file_path in DB: {} for png file {}", e, png_file_str),
             }
 
         }
@@ -384,7 +384,7 @@ mod test {
         let screenshot_records = match screenshot_records_result {
             Ok(screenshot_records) => screenshot_records,
             Err(e) => {
-                assert!(false, "Error getting screenshots from DB: {}", e);
+                panic!("Error getting screenshots from DB: {}", e);
                 vec![]
             },
         };
