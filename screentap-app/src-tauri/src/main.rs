@@ -5,7 +5,6 @@ extern crate screen_ocr_swift_rs;
 
 use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, CustomMenuItem, SystemTrayMenuItem};
 
-use core::time;
 use std::collections::HashMap;
 use std::thread;
 use std::time::Duration;
