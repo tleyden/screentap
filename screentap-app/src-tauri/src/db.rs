@@ -279,7 +279,6 @@ pub fn search_screenshots_ocr(term: &str, dataset_root: &Path, db_filename: &Pat
 
 pub fn get_screenshot_as_base64_string(file_path: &str, mp4_file_path: &str, mp4_frame_id: i32) -> String {
 
-    println!("get_screenshot_as_base64_string: file_path: {}, mp4_file_path: {}, mp4_frame_id: {}", file_path, mp4_file_path, mp4_frame_id);
     // If there is a non-empty mp4_file_path, then the screenshot has been compacted into an mp4
     if !mp4_file_path.is_empty() {
         get_screenshot_base64_from_mp4(mp4_file_path, mp4_frame_id)
@@ -303,21 +302,12 @@ pub fn get_screenshot_as_base64_string(file_path: &str, mp4_file_path: &str, mp4
 
 fn get_screenshot_base64_from_mp4(mp4_file_path: &str, mp4_frame_id: i32) -> String {
     
-    // pub fn extract_frame_from_mp4(mp4_path: &str, frame_id: isize) -> Option<SRData> {
-
-    //    let ocr_text = screen_ocr_swift_rs::extract_text(target_png_file_path.to_str().unwrap());
-
-    let frame_data = screen_ocr_swift_rs::extract_frame_from_mp4(mp4_file_path, mp4_frame_id as isize).unwrap();
+    let frame_data = screen_ocr_swift_rs::extract_frame_from_mp4(
+        mp4_file_path, 
+        mp4_frame_id as isize
+    ).unwrap();
     
     BASE64.encode(frame_data)
 
-    // String::from("TODO: implement get_screenshot_base64_from_mp4")
 }
 
-// fn load_file_as_base_64(file_path: &Path, dataset_root: &Path) -> String {
-//     // TODO: why does this even need dataset_root param?  The file path should be fully qualified
-//     let dataset_root_path = Path::new(dataset_root);  // no longer needed
-//     let file_path_fq = dataset_root_path.join(file_path);
-//     let file_contents = std::fs::read(file_path_fq).unwrap();
-//     BASE64.encode(file_contents)
-// }
