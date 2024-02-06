@@ -84,7 +84,6 @@ pub fn screenshot_record_to_hashmap(record: &ScreenshotRecord) -> HashMap<String
 pub fn get_db_conn(dataset_root: &Path, db_filename: &Path) -> Connection {
     let db_filename_fq_path = dataset_root.join(db_filename);
     let path_str = db_filename_fq_path.to_str().expect("Failed to get db_filename_fq_path");
-    println!("get_db_conn: path_str: {}", path_str);
     Connection::open(path_str).expect("Failed to open db connection")
 }
 
@@ -167,14 +166,7 @@ pub fn get_screenshot_by_id(dataset_root: &Path, db_filename: &Path, target_id: 
         let mp4_file_path_str: String = row.get(4).expect("Failed to get mp4_file_path");
         let mp4_frame_id: i32 = row.get(5).expect("Failed to get mp4_frame_id");
 
-        // OLD CODE
-        // let file_path = PathBuf::from(file_path_str.clone());
-        // let base64_image: String = load_file_as_base_64(file_path.as_path(), dataset_root);
-
-
-        println!("get_all_screenshots: file_path_str: {}", file_path_str);
         let fully_qualified_file_path = dataset_root.join(file_path_str.clone());
-        println!("get_all_screenshots: fully_qualified_file_path: {}", fully_qualified_file_path.to_str().unwrap());
 
         let base64_image: String = get_screenshot_as_base64_string(
             fully_qualified_file_path.to_str().unwrap(), 
@@ -213,14 +205,7 @@ pub fn get_all_screenshots(dataset_root: &Path, db_filename: &Path, limit: i32) 
         let mp4_file_path_str: String = row.get(4).expect("Failed to get mp4_file_path");
         let mp4_frame_id: i32 = row.get(5).expect("Failed to get mp4_frame_id");
 
-        // OLD CODE
-        // let file_path = PathBuf::from(file_path_str.clone());
-        // let base64_image: String = load_file_as_base_64(file_path    .as_path(), dataset_root);
-
-        println!("get_all_screenshots: file_path_str: {}", file_path_str);
         let fully_qualified_file_path = dataset_root.join(file_path_str.clone());
-        println!("get_all_screenshots: fully_qualified_file_path: {}", fully_qualified_file_path.to_str().unwrap());
-
 
         let base64_image: String = get_screenshot_as_base64_string(
             fully_qualified_file_path.to_str().unwrap(), 
@@ -267,14 +252,7 @@ pub fn search_screenshots_ocr(term: &str, dataset_root: &Path, db_filename: &Pat
         let mp4_file_path_str: String = row.get(4).expect("Failed to get mp4_file_path");
         let mp4_frame_id: i32 = row.get(5).expect("Failed to get mp4_frame_id");
 
-        // OLD CODE
-        // let file_path = PathBuf::from(file_path_str.clone());
-        // let base64_image: String = load_file_as_base_64(file_path.as_path(), dataset_root);
-
-
-        println!("get_all_screenshots: file_path_str: {}", file_path_str);
         let fully_qualified_file_path = dataset_root.join(file_path_str.clone());
-        println!("get_all_screenshots: fully_qualified_file_path: {}", fully_qualified_file_path.to_str().unwrap());
 
         let base64_image = get_screenshot_as_base64_string(
             fully_qualified_file_path.to_str().unwrap(), 

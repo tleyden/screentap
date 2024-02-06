@@ -18,8 +18,6 @@ func swiftWriteImagesInDirToMp4(_ directoryPath: SRString, targetFilename: SRStr
 
     let images = fetchSortedPngImages(from: directoryURL)
 
-    print("swiftWriteImagesToMp4 to: \(targetFilename.toString())")
-
     swiftWriteImagesToMp4(images, targetFilename: targetFilename.toString())
     
 }
@@ -61,15 +59,9 @@ public func extract_frame_from_mp4(mp4_path: SRString, frame_id: Int) -> SRData?
     let mp4Url = URL(fileURLWithPath: mp4_path.toString())
 
     if let fps = getVideoFPS(from: mp4Url) {
-        print("FPS: \(fps)")
         
         if let extractedCGImage = getCGImageFromMP4Frame(url: mp4Url, fps: fps, frameID: frame_id) {
             
-            // for validating the image
-            // let path = "/tmp/cgimage_extracted.png"
-            // writeCGImage(extractedCGImage, toPath: path)
-            // print("Wrote extracted cgimage frame to \(path)")
-
             if let byteArray = convertCGImageToByteArray(image: extractedCGImage) {
                 return SRData(byteArray)
             } else {
@@ -85,7 +77,6 @@ public func extract_frame_from_mp4(mp4_path: SRString, frame_id: Int) -> SRData?
         print("Failed to retrieve FPS")
     }
 
-    // TODO: add code
     return nil
 }
 

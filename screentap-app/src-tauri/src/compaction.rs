@@ -77,8 +77,6 @@ impl CompactionHelper {
 
             let png_file_str = png_file.to_str().unwrap();
 
-            println!("UPDATE documents where png_file_str: {}.  Set mp4_file_path: {}", png_file_str, target_mp4_fn);     
-
             // Update the row to set the mp4_file_path to the target_mp4_fn for each matching row
             let update_result = conn.execute(
                 "UPDATE documents SET mp4_file_path = ?, mp4_frame_id = ? WHERE file_path = ?",
@@ -146,7 +144,6 @@ impl CompactionHelper {
         // the same thread that is writing the screenshots to disk.  We can use this
         // list for updating the DB
         let png_files = self.get_png_files_chronologically();
-        println!("png_files: {:?}", png_files);
 
         // Make sure these files are all in the DB, otherwise throw an error
 
@@ -402,8 +399,6 @@ mod test {
 
         // Enumerate over the image file paths and get the path and frame_id
         for (frame_id, image_file_path) in image_file_paths.iter().enumerate() {
-
-            println!("image_file_path: {:?}", image_file_path);
 
             // Check that its record exists in the screenshot_records_map
             let record = screenshot_records_map.get(image_file_path.to_str().unwrap());

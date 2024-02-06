@@ -34,8 +34,6 @@ pub fn write_images_in_dir_to_mp4(directory_path: &str, target_filename: &str) -
 
 /**
  * Given a path to an image, extract the text from it using OCR
- * 
- * TODO: just pass the raw image data to the swift function for OCR
  */
 pub fn extract_text(path: &str) -> String {
     let value: SRString = path.into();
