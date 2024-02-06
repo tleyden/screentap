@@ -20,6 +20,10 @@ screen-ocr-swift-rs = { path = "../../screen-ocr-swift-rs"}
 chrono = "0.4.31"
 rusqlite = { version = "0.30.0", features = ["chrono"] }
 base64 = "0.21.6"
+image = "0.24.8"
+rand = "0.8.5"
+tempfile = "3.9.0"
+backtrace = "0.3.69"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
