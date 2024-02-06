@@ -37,5 +37,3 @@ pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> String {
     }
     
 }
-
-

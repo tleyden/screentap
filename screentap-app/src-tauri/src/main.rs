@@ -135,7 +135,6 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
     let _ = screenshot::save_screenshot(app_data_dir.as_path(), db_filename_path);
 
     // Create a compaction helper
-    // TODO: still a WIP
     let compaction_helper = compaction::CompactionHelper::new(
         app_data_dir.clone(), 
         db_filename_path.to_path_buf(),
