@@ -218,9 +218,6 @@ func fetchSortedPngImages(from directory: URL) -> [CGImage] {
 // Define swiftWriteImagesToMp4
 func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String, blockUntilFinished: Bool = true) {
 
-    print("swiftWriteImagesToMp4 running...")
-
-
     let outputURL = URL(fileURLWithPath: targetFilename)
 
     // The targetFilename should not exist
@@ -287,17 +284,12 @@ func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String, blockUnt
     // (this doesn't happen when running directly from swift, only when calling from rust)
     let semaphore = DispatchSemaphore(value: 0)
 
-    print("Call videoWriter.finishWriting()")
     videoWriter.finishWriting() {
-        // TODO: invoke callback fn that is passed in
-        print("Finished writing video to \(targetFilename) with \(images.count) images")
         semaphore.signal() // Signal the semaphore to end waiting
     }
 
     if blockUntilFinished {
-        print("Call semaphore.wait()")
         semaphore.wait() // Wait for the signal
-        print("Semaphore.wait() returned")
     }
 
 }
