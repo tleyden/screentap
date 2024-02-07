@@ -23,7 +23,7 @@ impl CompactionHelper {
     pub fn new(app_data_dir: PathBuf, db_filename_path: PathBuf, max_image_files: u32) -> Self {
 
         if !app_data_dir.is_dir() {
-            panic!("app_data_dir is not a directory");
+            panic!("app_data_dir is not a directory.");
         }
 
         Self {
