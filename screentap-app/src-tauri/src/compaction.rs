@@ -301,10 +301,18 @@ mod test {
      */
     #[test]
     fn test_compact_screenshots_in_dir_to_mp4() {
-        let app_data_dir = PathBuf::from("/tmp");
-        let db_filename_path = PathBuf::from("test.db");
 
-        let target_mp4_file = PathBuf::from("/tmp/test.mp4");
+        // Generate a random temp directory
+        let tmp_dir = tempdir().unwrap();
+        let db_filename = PathBuf::from("test.db");
+        let app_data_dir = PathBuf::from(tmp_dir.path());
+
+        // Create the app_data_dir if it doesn't exist
+        if !app_data_dir.exists() {
+            std::fs::create_dir_all(app_data_dir.as_path()).unwrap();
+        }
+
+        let target_mp4_file = app_data_dir.join("test_compact_screenshots_in_dir_to_mp4.mp4");
         if target_mp4_file.exists() {
             std::fs::remove_file(target_mp4_file.as_path()).unwrap();
         }
@@ -317,7 +325,7 @@ mod test {
     
         let compaction_helper = CompactionHelper::new(
             app_data_dir.clone(), 
-            db_filename_path.to_path_buf(),
+            db_filename.to_path_buf(),
             MAX_IMAGE_FILES
         );
 
@@ -374,7 +382,6 @@ mod test {
             Ok(screenshot_records) => screenshot_records,
             Err(e) => {
                 panic!("Error getting screenshots from DB: {}", e);
-                vec![]
             },
         };
 
@@ -468,7 +475,7 @@ mod test {
                 }
             }
 
-            img.save(target_file.clone());
+            let _ = img.save(target_file.clone());
             image_files.push(target_file);
         }
 
