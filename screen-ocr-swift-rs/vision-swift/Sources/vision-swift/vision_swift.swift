@@ -18,6 +18,11 @@ func swiftWriteImagesInDirToMp4(_ directoryPath: SRString, targetFilename: SRStr
 
     let images = fetchSortedPngImages(from: directoryURL)
 
+    if images.isEmpty {
+        print("No PNG images found in \(directoryURL.path)")
+        return
+    }
+
     swiftWriteImagesToMp4(images, targetFilename: targetFilename.toString())
     
 }
