@@ -317,6 +317,8 @@ mod test {
             std::fs::remove_file(target_mp4_file.as_path()).unwrap();
         }
 
+        let db_filename = PathBuf::from("test.db");
+
         create_dummy_image_files(
             &app_data_dir, 
             MAX_IMAGE_FILES + 1,
@@ -343,6 +345,8 @@ mod test {
 
         // TODO: assert that the mp4 file has expected number of frames.  Could use 
         // a swift bridge for this
+
+
 
     }
 
