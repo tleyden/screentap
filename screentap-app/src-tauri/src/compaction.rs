@@ -283,7 +283,10 @@ mod test {
             let actual_base_64 = screenshot.get_base64_image();
 
             // if the length of the actual base64 is greater than or equal to half the length of the expected base64, then we can assume that the actual base64 is a valid image
-            assert!(actual_base_64.len() >= expected_base_64.len() / 2, "Base64 images do not match for screenshot {}", screenshot.get_file_path());
+            assert!(
+                actual_base_64.len() >= expected_base_64.len() / 2, 
+                "Base64 images do not match for screenshot {}", screenshot.get_file_path()
+            );
 
             // TODO: this won't work!  It's lossy compression .. how do I compare them?
             // Convert to image data and find the percentage of pixels that are the same 
@@ -302,8 +305,6 @@ mod test {
     #[allow(dead_code)]
     fn test_compact_screenshots_in_harcoded_dir_to_mp4() {
 
-        // TODO: create a db from a directory of image files
-
         let images_dir = PathBuf::from("/Users/tleyden/Development/screentap/local_test_dataset/video_compression");
         let db_filename: PathBuf = PathBuf::from("dummmy.db");
         let target_mp4_file = images_dir.join("test_compact_screenshots_in_dir_to_mp4.mp4");
@@ -311,7 +312,6 @@ mod test {
         if target_mp4_file.exists() {
             std::fs::remove_file(target_mp4_file.as_path()).unwrap();
         }
-
 
         let compaction_helper = CompactionHelper::new(
             images_dir, 
