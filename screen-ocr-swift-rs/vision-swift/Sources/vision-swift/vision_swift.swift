@@ -209,7 +209,13 @@ func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String, blockUnt
     let videoSettings: [String: Any] = [
         AVVideoCodecKey: AVVideoCodecType.h264,
         AVVideoWidthKey: imageWidth,
-        AVVideoHeightKey: imageHeight
+        AVVideoHeightKey: imageHeight,
+
+        // TODO: make this a setting
+        AVVideoCompressionPropertiesKey: [  // from https://forums.developer.apple.com/forums/thread/734885
+            AVVideoQualityKey: 0.35
+        ]
+        
     ]
 
     let videoWriterInput = AVAssetWriterInput(

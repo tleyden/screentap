@@ -298,7 +298,7 @@ mod test {
     /**
      * Compact a hardcoded directory of image files to an mp4
      */
-    #[test]
+    // #[test] - disable this since it only works on my machine
     fn test_compact_screenshots_in_harcoded_dir_to_mp4() {
 
         // TODO: create a db from a directory of image files
@@ -306,6 +306,10 @@ mod test {
         let images_dir = PathBuf::from("/Users/tleyden/Development/screentap/local_test_dataset/video_compression");
         let db_filename: PathBuf = PathBuf::from("dummmy.db");
         let target_mp4_file = images_dir.join("test_compact_screenshots_in_dir_to_mp4.mp4");
+
+        if target_mp4_file.exists() {
+            std::fs::remove_file(target_mp4_file.as_path()).unwrap();
+        }
 
 
         let compaction_helper = CompactionHelper::new(
