@@ -12,13 +12,23 @@ import AVFoundation
  */
 @_cdecl("write_images_in_dir_to_mp4_swift")
 @available(macOS 10.15, *)
-func swiftWriteImagesInDirToMp4(_ directoryPath: SRString, targetFilename: SRString) {  
+func swiftWriteImagesInDirToMp4(_ directoryPath: SRString, targetFilename: SRString, useBitRateKey: Bool = false) {  
     
     let directoryURL = URL(fileURLWithPath: directoryPath.toString())
 
     let images = fetchSortedPngImages(from: directoryURL)
 
-    swiftWriteImagesToMp4(images, targetFilename: targetFilename.toString())
+    if images.isEmpty {
+        print("No PNG images found in \(directoryURL.path)")
+        return
+    }
+
+    swiftWriteImagesToMp4(
+        images, 
+        targetFilename: targetFilename.toString(),
+        blockUntilFinished: true,
+        useBitRateKey: useBitRateKey
+    )
     
 }
 
@@ -182,8 +192,17 @@ func fetchSortedPngImages(from directory: URL) -> [CGImage] {
     }
 }
 
-// Define swiftWriteImagesToMp4
-func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String, blockUntilFinished: Bool = true) {
+/**
+ * Write an array of CGImages to an mp4 file given by targetFilename
+ * 
+ * Parameters:
+ * 
+ * - useBitRateKey: If true, it will use AVVideoAverageBitRateKey instaed of AVVideoQualityKey, since the latter 
+ *                  is not supported on all devices.  The AVVideoQualityKey is problematic as described in
+ *                  https://stackoverflow.com/questions/76811431/avfoundation-compression-property-quality-is-not-supported-for-video-codec-type/76848093#76848093
+ *                  and https://forums.developer.apple.com/forums/thread/734885
+ */
+func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String, blockUntilFinished: Bool = true, useBitRateKey: Bool = false) {
 
     let outputURL = URL(fileURLWithPath: targetFilename)
 
@@ -201,11 +220,27 @@ func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String, blockUnt
     let imageWidth = images[0].width
     let imageHeight = images[0].height
 
-    let videoSettings: [String: Any] = [
-        AVVideoCodecKey: AVVideoCodecType.h264,
-        AVVideoWidthKey: imageWidth,
-        AVVideoHeightKey: imageHeight
-    ]
+    // See comments in method definition for explanation of useBitRateKey
+    let videoSettings: [String: Any]
+    if useBitRateKey {
+        videoSettings = [
+            AVVideoCodecKey: AVVideoCodecType.h264,
+            AVVideoWidthKey: imageWidth,
+            AVVideoHeightKey: imageHeight,
+            AVVideoCompressionPropertiesKey: [
+                AVVideoAverageBitRateKey: 1000000
+            ]
+        ]
+    } else {
+        videoSettings = [
+            AVVideoCodecKey: AVVideoCodecType.h264,
+            AVVideoWidthKey: imageWidth,
+            AVVideoHeightKey: imageHeight,
+            AVVideoCompressionPropertiesKey: [
+                AVVideoQualityKey: 0.4
+            ]
+        ]
+    }
 
     let videoWriterInput = AVAssetWriterInput(
         mediaType: .video,

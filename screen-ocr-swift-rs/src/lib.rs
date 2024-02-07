@@ -1,4 +1,4 @@
-use swift_rs::{swift, SRString, SRData, Int};
+use swift_rs::{swift, SRString, SRData, Int, Bool};
 
 use std::fs::File;
 use std::io::prelude::*;
@@ -6,7 +6,7 @@ use std::io::BufWriter;
 
 swift!(fn perform_ocr_swift(path: &SRString) -> Option<SRString>);
 swift!(fn screen_capture_swift() -> Option<SRData>);    
-swift!(fn write_images_in_dir_to_mp4_swift(directory_path: &SRString, target_filename: &SRString) -> ());
+swift!(fn write_images_in_dir_to_mp4_swift(directory_path: &SRString, target_filename: &SRString, use_bitrate_key: Bool) -> ());
 swift!(fn extract_frame_from_mp4_swift(mp4_path: &SRString, frame_id: Int) -> Option<SRData>);    
 
 
@@ -23,12 +23,25 @@ pub fn extract_frame_from_mp4(mp4_path: &str, frame_id: isize) -> Option<SRData>
 /**
  * Given a path to a directory of images, write them to an mp4
  */
-pub fn write_images_in_dir_to_mp4(directory_path: &str, target_filename: &str) -> () {
+pub fn write_images_in_dir_to_mp4(directory_path: &str, target_filename: &str, use_bitrate_key: bool) -> () {
     let dirpath_str: SRString = directory_path.into();
     let target_filename_str: SRString = target_filename.into();
-    println!("Calling write_images_in_dir_to_mp4_swift with dirpath: {} and target_filename: {}", dirpath_str.as_str(), target_filename_str.as_str());
-    unsafe { write_images_in_dir_to_mp4_swift(&dirpath_str, &target_filename_str) };
-    println!("Finished call to write_images_in_dir_to_mp4_swift ");
+    
+    println!(
+        "Writing images to mp4 in: {} to: {} with use_bitrate_key: {}", 
+        dirpath_str.as_str(), 
+        target_filename_str.as_str(), 
+        use_bitrate_key
+    );
+    
+    unsafe { 
+        write_images_in_dir_to_mp4_swift(
+            &dirpath_str, 
+            &target_filename_str, 
+            use_bitrate_key
+        ) 
+    };
+    
 }
 
 
