@@ -375,7 +375,7 @@ mod test {
             target_mp4_file.clone(),
             // Use bitrate key since this potentially runs on Github Actions, which runs 
             // on hardware that doessn't support the AVVideoQualityKey
-            true  
+            true 
         );
 
         // Assert that the mp4 file was created

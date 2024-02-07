@@ -25,7 +25,8 @@ func swiftWriteImagesInDirToMp4(_ directoryPath: SRString, targetFilename: SRStr
 
     swiftWriteImagesToMp4(
         images, 
-        targetFilename: targetFilename.toString(), 
+        targetFilename: targetFilename.toString(),
+        blockUntilFinished: true,
         useBitRateKey: useBitRateKey
     )
     
@@ -220,19 +221,26 @@ func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String, blockUnt
     let imageHeight = images[0].height
 
     // See comments in method definition for explanation of useBitRateKey
-    let compressionProperties: [String: Any]
+    let videoSettings: [String: Any]
     if useBitRateKey {
-        compressionProperties = [AVVideoAverageBitRateKey: 450000]
+        videoSettings = [
+            AVVideoCodecKey: AVVideoCodecType.h264,
+            AVVideoWidthKey: imageWidth,
+            AVVideoHeightKey: imageHeight,
+            AVVideoCompressionPropertiesKey: [
+                AVVideoAverageBitRateKey: 1000000
+            ]
+        ]
     } else {
-        compressionProperties = [AVVideoQualityKey: 0.4]
+        videoSettings = [
+            AVVideoCodecKey: AVVideoCodecType.h264,
+            AVVideoWidthKey: imageWidth,
+            AVVideoHeightKey: imageHeight,
+            AVVideoCompressionPropertiesKey: [
+                AVVideoQualityKey: 0.4
+            ]
+        ]
     }
-
-    let videoSettings: [String: Any] = [
-        AVVideoCodecKey: AVVideoCodecType.h264,
-        AVVideoWidthKey: imageWidth,
-        AVVideoHeightKey: imageHeight,
-        AVVideoCompressionPropertiesKey: compressionProperties
-    ]
 
     let videoWriterInput = AVAssetWriterInput(
         mediaType: .video,
