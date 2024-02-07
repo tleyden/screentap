@@ -307,8 +307,8 @@ mod test {
     /**
      * Compact a hardcoded directory of image files to an mp4
      */
-    #[test] // - disable this since it only works on my machine
-    // #[allow(dead_code)]
+    // #[test] // - disable this since it only works on my machine
+    #[allow(dead_code)]
     fn test_compact_screenshots_in_harcoded_dir_to_mp4() {
 
         println!("Running test_compact_screenshots_in_harcoded_dir_to_mp4");
@@ -331,7 +331,7 @@ mod test {
             target_mp4_file,
             // Use bitrate key since this potentially runs on Github Actions, which runs 
             // on hardware that doessn't support the AVVideoQualityKey
-            true
+            false
         );
 
     }
