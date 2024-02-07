@@ -22,36 +22,6 @@ func swiftWriteImagesInDirToMp4(_ directoryPath: SRString, targetFilename: SRStr
     
 }
 
-func byteArrayToCGImage(byteArray: [UInt8]) -> CGImage? {
-
-    // Convert the byte array to Data
-    let data = Data(byteArray)
-
-    // Create a CGImageSource from the Data
-    guard let imageSource = CGImageSourceCreateWithData(data as CFData, nil) else {
-        print("Failed to create image source")
-        return nil
-    }
-
-    // Create a CGImage from the CGImageSource
-    let cgImage = CGImageSourceCreateImageAtIndex(imageSource, 0, nil)
-    return cgImage
-}
-
-func convertCGImageToByteArray(image: CGImage) -> [UInt8]? {
-    // Convert the CGImage to NSData
-    let bitmapRep = NSBitmapImageRep(cgImage: image)
-    guard let imageData = bitmapRep.representation(using: .png, properties: [:]) else {
-        print("Failed to convert image to PNG data")
-        return nil
-    }
-
-    // Convert NSData to Byte Array
-    let byteArray = [UInt8](imageData)
-    return byteArray
-}
-
-
 @_cdecl("extract_frame_from_mp4_swift")
 @available(macOS 10.15, *)
 public func extract_frame_from_mp4(mp4_path: SRString, frame_id: Int) -> SRData? {
@@ -211,9 +181,6 @@ func fetchSortedPngImages(from directory: URL) -> [CGImage] {
         return []
     }
 }
-
-
-
 
 // Define swiftWriteImagesToMp4
 func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String, blockUntilFinished: Bool = true) {
@@ -430,4 +397,33 @@ func writeCGImage(_ image: CGImage, toPath path: String) {
     } else {
         print("Successfully wrote image to \(path)")
     }
+}
+
+func byteArrayToCGImage(byteArray: [UInt8]) -> CGImage? {
+
+    // Convert the byte array to Data
+    let data = Data(byteArray)
+
+    // Create a CGImageSource from the Data
+    guard let imageSource = CGImageSourceCreateWithData(data as CFData, nil) else {
+        print("Failed to create image source")
+        return nil
+    }
+
+    // Create a CGImage from the CGImageSource
+    let cgImage = CGImageSourceCreateImageAtIndex(imageSource, 0, nil)
+    return cgImage
+}
+
+func convertCGImageToByteArray(image: CGImage) -> [UInt8]? {
+    // Convert the CGImage to NSData
+    let bitmapRep = NSBitmapImageRep(cgImage: image)
+    guard let imageData = bitmapRep.representation(using: .png, properties: [:]) else {
+        print("Failed to convert image to PNG data")
+        return nil
+    }
+
+    // Convert NSData to Byte Array
+    let byteArray = [UInt8](imageData)
+    return byteArray
 }
