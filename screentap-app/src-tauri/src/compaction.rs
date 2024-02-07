@@ -222,17 +222,6 @@ mod test {
             true
         );
 
-        // Get the base64 string value of each of the images for comparison later
-        // let base64_images: Vec<String> = image_file_paths.iter().map(
-        //     |image_file_path| {
-        //         db::get_screenshot_as_base64_string(
-        //             image_file_path.as_path().to_str().unwrap(),
-        //             "",
-        //             -1
-        //         )
-        //     }
-        // ).collect();
-
         let base64_images: HashMap<String, String> = image_file_paths.iter().map(
             |image_file_path| {
                 let base64_string = db::get_screenshot_as_base64_string(
