@@ -317,8 +317,6 @@ mod test {
             std::fs::remove_file(target_mp4_file.as_path()).unwrap();
         }
 
-        let db_filename = PathBuf::from("test.db");
-
         create_dummy_image_files(
             &app_data_dir, 
             MAX_IMAGE_FILES + 1,
@@ -327,7 +325,7 @@ mod test {
     
         let compaction_helper = CompactionHelper::new(
             app_data_dir.clone(), 
-            db_filename_path.to_path_buf(),
+            db_filename.to_path_buf(),
             MAX_IMAGE_FILES
         );
 
@@ -384,7 +382,6 @@ mod test {
             Ok(screenshot_records) => screenshot_records,
             Err(e) => {
                 panic!("Error getting screenshots from DB: {}", e);
-                vec![]
             },
         };
 
@@ -478,7 +475,7 @@ mod test {
                 }
             }
 
-            img.save(target_file.clone());
+            let _ = img.save(target_file.clone());
             image_files.push(target_file);
         }
 
