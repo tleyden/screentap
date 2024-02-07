@@ -108,11 +108,12 @@ impl CompactionHelper {
      * Given a directory of images, write them to an mp4
      * TODO: return a Result<>
      */
-    pub fn compact_screenshots_in_dir_to_mp4(&self, target_mp4_fn: PathBuf) {  
+    pub fn compact_screenshots_in_dir_to_mp4(&self, target_mp4_fn: PathBuf, use_bitrate_key: bool) {  
         
         screen_ocr_swift_rs::write_images_in_dir_to_mp4(
             self.app_data_dir.to_str().unwrap(), 
-            target_mp4_fn.to_str().unwrap()
+            target_mp4_fn.to_str().unwrap(),
+            use_bitrate_key
         );
 
     }
@@ -127,7 +128,7 @@ impl CompactionHelper {
      *     3. Update the filename to the MP4 file
      * 5. Delete all entries in the incoming dir
      */
-    pub fn compact_screenshots_to_mp4(&self, target_mp4_fn: PathBuf) {
+    pub fn compact_screenshots_to_mp4(&self, target_mp4_fn: PathBuf, use_bitrate_key: bool) {
 
         if !self.should_compact_screenshots() {
             return;
@@ -152,7 +153,7 @@ impl CompactionHelper {
         //       Delete any PNG files that are on disk but already in an MP4 file according to the DB.
 
         // Create an MP4 file for the png files in the directory
-        self.compact_screenshots_in_dir_to_mp4(target_mp4_fn.clone());
+        self.compact_screenshots_in_dir_to_mp4(target_mp4_fn.clone(), use_bitrate_key);
         
         // Update the DB
         self.update_db_rows_with_mp4_file(&png_files, target_mp4_fn.to_str().unwrap());
@@ -196,6 +197,8 @@ mod test {
      */
     #[test]
     fn test_compact_screenshots_to_mp4() {
+
+        println!("Running test_compact_screenshots_to_mp4");
 
         // Generate a random temp directory
         let tmp_dir = tempdir().unwrap();
@@ -250,7 +253,10 @@ mod test {
         // Run compaction
         println!("Running compaction and saving to {:?}", target_mp4_file.as_path());
         compaction_helper.compact_screenshots_to_mp4(
-            target_mp4_file.clone()
+            target_mp4_file.clone(),
+            // Use bitrate key since this potentially runs on Github Actions, which runs 
+            // on hardware that doessn't support the AVVideoQualityKey
+            true
         );
 
         // Assert that the mp4 file was created and has non-zero size
@@ -301,9 +307,11 @@ mod test {
     /**
      * Compact a hardcoded directory of image files to an mp4
      */
-    // #[test] - disable this since it only works on my machine
-    #[allow(dead_code)]
+    #[test] // - disable this since it only works on my machine
+    // #[allow(dead_code)]
     fn test_compact_screenshots_in_harcoded_dir_to_mp4() {
+
+        println!("Running test_compact_screenshots_in_harcoded_dir_to_mp4");
 
         let images_dir = PathBuf::from("/Users/tleyden/Development/screentap/local_test_dataset/video_compression");
         let db_filename: PathBuf = PathBuf::from("dummmy.db");
@@ -320,7 +328,10 @@ mod test {
         );
 
         compaction_helper.compact_screenshots_in_dir_to_mp4(
-            target_mp4_file
+            target_mp4_file,
+            // Use bitrate key since this potentially runs on Github Actions, which runs 
+            // on hardware that doessn't support the AVVideoQualityKey
+            true
         );
 
     }
@@ -330,6 +341,8 @@ mod test {
      */
     #[test]
     fn test_compact_screenshots_in_dir_to_mp4() {
+        
+        println!("Running test_compact_screenshots_in_dir_to_mp4");
 
         // Generate a random temp directory
         let tmp_dir = tempdir().unwrap();
@@ -359,7 +372,10 @@ mod test {
         );
 
         compaction_helper.compact_screenshots_in_dir_to_mp4(
-            target_mp4_file.clone()
+            target_mp4_file.clone(),
+            // Use bitrate key since this potentially runs on Github Actions, which runs 
+            // on hardware that doessn't support the AVVideoQualityKey
+            true  
         );
 
         // Assert that the mp4 file was created
@@ -379,6 +395,8 @@ mod test {
 
     #[test]
     fn test_should_compact_screenshots() {
+
+        println!("Running test_should_compact_screenshots()");
         
         let app_data_dir = PathBuf::from("/tmp");
         let db_filename_path = PathBuf::from("test.db");
