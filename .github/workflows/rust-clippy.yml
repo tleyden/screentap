@@ -26,3 +26,6 @@ jobs:
       run: cargo clippy -- -D warnings
       working-directory: ./screentap-app/src-tauri/
 
+    - name: Tests
+      run: cargo test
+      working-directory: ./screentap-app/src-tauri/
