@@ -312,6 +312,8 @@ mod test {
      */
     #[test]
     fn test_compact_screenshots_in_dir_to_mp4() {
+
+        // TODO: use a random temp directory 
         let app_data_dir = PathBuf::from("/tmp");
         let db_filename_path = PathBuf::from("test.db");
 
