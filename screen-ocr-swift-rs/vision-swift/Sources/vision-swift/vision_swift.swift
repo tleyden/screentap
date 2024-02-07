@@ -211,11 +211,16 @@ func swiftWriteImagesToMp4(_ images: [CGImage], targetFilename: String, blockUnt
         AVVideoWidthKey: imageWidth,
         AVVideoHeightKey: imageHeight,
 
-        // TODO: make this a setting
-        AVVideoCompressionPropertiesKey: [  // from https://forums.developer.apple.com/forums/thread/734885
-            AVVideoQualityKey: 0.35
+        // This is problematic as described in https://stackoverflow.com/questions/76811431/avfoundation-compression-property-quality-is-not-supported-for-video-codec-type/76848093#76848093
+        // and https://forums.developer.apple.com/forums/thread/734885
+        // AVVideoCompressionPropertiesKey: [
+        //     AVVideoQualityKey: 0.4
+        // ]
+
+        AVVideoCompressionPropertiesKey: [
+            AVVideoAverageBitRateKey: 450000
         ]
-        
+
     ]
 
     let videoWriterInput = AVAssetWriterInput(
