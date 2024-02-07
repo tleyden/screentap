@@ -295,6 +295,30 @@ mod test {
 
     }
 
+    /**
+     * Compact a hardcoded directory of image files to an mp4
+     */
+    #[test]
+    fn test_compact_screenshots_in_harcoded_dir_to_mp4() {
+
+        // TODO: create a db from a directory of image files
+
+        let images_dir = PathBuf::from("/Users/tleyden/Development/screentap/local_test_dataset/video_compression");
+        let db_filename: PathBuf = PathBuf::from("dummmy.db");
+        let target_mp4_file = images_dir.join("test_compact_screenshots_in_dir_to_mp4.mp4");
+
+
+        let compaction_helper = CompactionHelper::new(
+            images_dir, 
+            db_filename,
+            1
+        );
+
+        compaction_helper.compact_screenshots_in_dir_to_mp4(
+            target_mp4_file
+        );
+
+    }
 
     /**
      * This is an isolated test on the compact_screenshots_in_dir_to_mp4() method
@@ -304,7 +328,7 @@ mod test {
 
         // Generate a random temp directory
         let tmp_dir = tempdir().unwrap();
-        let db_filename = PathBuf::from("test.db");
+        let db_filename: PathBuf = PathBuf::from("test.db");
         let app_data_dir = PathBuf::from(tmp_dir.path());
 
         // Create the app_data_dir if it doesn't exist
