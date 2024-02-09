@@ -6,7 +6,7 @@ Suppose you saw something but can't even remember where you saw it - was it web 
 Screentap gives you a universal search interface to perform keyword searches across anything that has appeared on your screen.
 
 <div align="center">
-    <img width="500" alt="Screenshot" src="https://github.com/tleyden/screentap/assets/296876/bd865946-68fb-4ff5-8982-024cc4d5bce0">
+    <img width="800" alt="Screenshot" src="https://github.com/tleyden/screentap/assets/296876/bd865946-68fb-4ff5-8982-024cc4d5bce0">
 </div>
 
 You can also browse your screenshot history to see what you were doing on your computer during a given time period.
@@ -30,7 +30,7 @@ This app is still pre-alpha.  Here's what you can currently do it with it:
 2. Search screenshots by keyword (25 results max)
 3. Browse the most recently captured screenshot (soon it will let you scroll through a timeline)
 
-See the [issue list](issues) for planned improvements.
+See the [issue list](https://github.com/tleyden/screentap/issues) for planned improvements. 
 
 # How it works
 
