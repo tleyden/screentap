@@ -3,6 +3,8 @@ use std::time::{Instant, Duration};
 use serde::Serialize;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use std::fs;
+use serde_json::json;
+
 
 // Create an enum with three possible values: openai, llamafile, and ollama
 #[allow(dead_code)]
@@ -37,7 +39,7 @@ impl FocusGuard {
             openai_api_key,
             duration_between_checks: Duration::from_secs(10),  // TEMP - change this back to 5 mins
             last_screentap_time: Instant::now(),
-            llava_backend: LlavaBackendType::OpenAI,
+            llava_backend: LlavaBackendType::Ollama,
         }
     }
 
@@ -52,8 +54,14 @@ impl FocusGuard {
 
             let prompt = self.create_prompt();
 
-            let raw_result = self.invoke_vision_model(&prompt, &png_data);
+            let raw_result = match self.llava_backend {
+                LlavaBackendType::OpenAI => self.invoke_openai_vision_model(&prompt, &png_data),
+                LlavaBackendType::Ollama => self.invoke_ollama_vision_model(&prompt, &png_data),
+                LlavaBackendType::LlamaFile => self.invoke_openai_vision_model(&prompt, &png_data),
+            };
             println!("Raw result: {}", raw_result);
+
+            // let raw_result = self.invoke_openai_vision_model(&prompt, &png_data);
 
             // let productivity_score = self.process_vision_model_result(raw_result);
 
@@ -74,7 +82,55 @@ impl FocusGuard {
         base64_image
     }
 
-    fn invoke_vision_model(&self, prompt: &str, png_data: &Vec<u8>) -> String {
+    fn invoke_ollama_vision_model(&self, prompt: &str, png_data: &Vec<u8>) -> String {
+
+        // Getting the base64 string
+        let base64_image = self.convert_png_data_to_base_64(png_data);
+
+        let client = reqwest::blocking::Client::new();
+
+        let payload = json!({
+            "model": "llava",
+            "prompt": prompt.to_string(),
+            "stream": false,
+            "images": [base64_image]
+        });
+
+        let target_url = "http://localhost:11434/api/generate";
+
+        let response_result = client.post(target_url)
+            .json(&payload)
+            .send();
+
+        println!("Response result: {:?}", response_result);
+
+        let response = match response_result {
+            Ok(response) => response,
+            Err(e) => {
+                println!("Error invoking vision model: {}", e);
+                return "".to_string();
+            }
+        };
+        println!("Response: {:?}", response);
+
+        // let body = &response.text().unwrap();
+        // println!("Response body: {:?}", body);
+
+        let response_json = match response.json::<serde_json::Value>() {
+            Ok(response_json) => response_json,
+            Err(e) => {
+                println!("Error parsing response JSON: {}", e);
+                return "".to_string();
+            }
+        };
+
+        println!("response_json: {:?}", response_json);
+
+        response_json["response"].to_string()
+
+    }
+
+    fn invoke_openai_vision_model(&self, prompt: &str, png_data: &Vec<u8>) -> String {
 
         // Getting the base64 string
         let base64_image = self.convert_png_data_to_base_64(png_data);
@@ -132,7 +188,7 @@ impl FocusGuard {
         let target_url = match self.llava_backend {
             LlavaBackendType::OpenAI => "https://api.openai.com/v1/chat/completions",
             LlavaBackendType::LlamaFile => "http://localhost:8080/v1/chat/completions",
-            LlavaBackendType::Ollama => "TBD",
+            LlavaBackendType::Ollama => panic!("Use a different method for Ollama"),
         };
 
         let response_result = client.post(target_url)
@@ -169,8 +225,7 @@ impl FocusGuard {
     }
 
     fn create_prompt(&self) -> String {
-        let prompt = format!(r###"Imagine you are a boss or a coworker looking at this
-        screen of an employee or colleague.  On a scale of 1 to 10, how much does this screenshot indicate 
+        let prompt = format!(r###"On a scale of 1 to 10, how much does this screenshot indicate 
         a worker with job title of "{}" and job role of "{}" is currently engaged in work activities?  Do not 
         provide any explanation, just the score itself."###, self.job_title, self.job_role);
         println!("Prompt: {}", prompt);
