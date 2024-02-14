@@ -2,7 +2,15 @@
 use std::time::{Instant, Duration};
 use serde::Serialize;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
+use std::fs;
 
+// Create an enum with three possible values: openai, llamafile, and ollama
+#[allow(dead_code)]
+enum LlavaBackendType {
+    OpenAI,
+    LlamaFile,
+    Ollama,
+}
 
 pub struct FocusGuard {
     pub job_title: String,
@@ -15,6 +23,9 @@ pub struct FocusGuard {
     // Internal tracking variable to track the last time a screentap event was handled
     last_screentap_time: Instant,
 
+    // The backend to use for the LLaVA model
+    llava_backend: LlavaBackendType,
+
 }
 
 impl FocusGuard {
@@ -24,8 +35,9 @@ impl FocusGuard {
             job_title,
             job_role,
             openai_api_key,
-            duration_between_checks: Duration::from_secs(10),
+            duration_between_checks: Duration::from_secs(10),  // TEMP - change this back to 5 mins
             last_screentap_time: Instant::now(),
+            llava_backend: LlavaBackendType::OpenAI,
         }
     }
 
@@ -79,10 +91,15 @@ impl FocusGuard {
             HeaderValue::from_str(&format!("Bearer {}", &self.openai_api_key)).unwrap()
         );
 
-        println!("Headers: {:?}", headers);
+        let model_name = match self.llava_backend {
+            LlavaBackendType::OpenAI => "gpt-4-vision-preview",
+            LlavaBackendType::LlamaFile => "LLaMA_CPP",
+            LlavaBackendType::Ollama => "TBD",
+        };
 
         let payload = Payload {
-            model: "gpt-4-vision-preview".to_string(),
+
+            model: model_name.to_string(),
             messages: vec![
                 Message {
                     role: "user".to_string(),
@@ -105,10 +122,25 @@ impl FocusGuard {
             max_tokens: 4096,
         };
 
-        let response_result = client.post("https://api.openai.com/v1/chat/completions")
+        // Convert payload to json and write to file for debugging
+        // let payload_json = serde_json::to_string(&payload).unwrap();
+        // // Write payload json to a file
+        // fs::write("payload.json", payload_json).expect("Unable to write file");
+
+        println!("Invoking OpenAI API");
+
+        let target_url = match self.llava_backend {
+            LlavaBackendType::OpenAI => "https://api.openai.com/v1/chat/completions",
+            LlavaBackendType::LlamaFile => "http://localhost:8080/v1/chat/completions",
+            LlavaBackendType::Ollama => "TBD",
+        };
+
+        let response_result = client.post(target_url)
             .headers(headers)
             .json(&payload)
             .send();
+
+        println!("Response result: {:?}", response_result);
 
         let response = match response_result {
             Ok(response) => response,
@@ -117,6 +149,10 @@ impl FocusGuard {
                 return "".to_string();
             }
         };
+        println!("Response: {:?}", response);
+
+        // let body = &response.text().unwrap();
+        // println!("Response body: {:?}", body);
 
         let response_json = match response.json::<serde_json::Value>() {
             Ok(response_json) => response_json,

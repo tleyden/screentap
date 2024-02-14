@@ -140,6 +140,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
         }
     }
 
+
     // Create a compaction helper
     let compaction_helper = compaction::CompactionHelper::new(
         app_data_dir.clone(), 
