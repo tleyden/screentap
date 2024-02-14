@@ -150,7 +150,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
     );
 
     // Register plugin - create a new focusguard struct
-    let focus_guard = focusguard::FocusGuard::new(
+    let mut focus_guard = focusguard::FocusGuard::new(
         "Software Developer".to_string(),
         "Write software using VSCode, AWS, and other software related tools".to_string(),
         "1234".to_string()
