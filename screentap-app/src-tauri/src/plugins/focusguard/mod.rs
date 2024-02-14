@@ -1,5 +1,8 @@
 
 use std::time::{Instant, Duration};
+use serde::Serialize;
+use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
+
 
 pub struct FocusGuard {
     pub job_title: String,
@@ -37,7 +40,8 @@ impl FocusGuard {
 
             let prompt = self.create_prompt();
 
-            // let raw_result = self.invoke_vision_model(prompt);
+            let raw_result = self.invoke_vision_model(&prompt, &png_data);
+            println!("Raw result: {}", raw_result);
 
             // let productivity_score = self.process_vision_model_result(raw_result);
 
@@ -53,9 +57,79 @@ impl FocusGuard {
 
     }
 
-    fn invoke_vision_model(&self, prompt: String) -> String {
-        
+    fn convert_png_data_to_base_64(&self, png_data: &Vec<u8>) -> String {
+        let base64_image = base64::encode(png_data);
+        base64_image
+    }
 
+    fn invoke_vision_model(&self, prompt: &str, png_data: &Vec<u8>) -> String {
+
+        // Getting the base64 string
+        let base64_image = self.convert_png_data_to_base_64(png_data);
+
+        let client = reqwest::blocking::Client::new();
+
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            HeaderName::from_static("content-type"), 
+            HeaderValue::from_static("application/json")
+        );
+        headers.insert(
+            HeaderName::from_static("authorization"), 
+            HeaderValue::from_str(&format!("Bearer {}", &self.openai_api_key)).unwrap()
+        );
+
+        println!("Headers: {:?}", headers);
+
+        let payload = Payload {
+            model: "gpt-4-vision-preview".to_string(),
+            messages: vec![
+                Message {
+                    role: "user".to_string(),
+                    content: vec![
+                        MessageContent {
+                            content_type: "text".to_string(),
+                            text: Some(prompt.to_string()),
+                            image_url: None,
+                        },
+                        MessageContent {
+                            content_type: "image_url".to_string(),
+                            text: None,
+                            image_url: Some(ImageUrl {
+                                url: format!("data:image/jpeg;base64,{}", base64_image),
+                            }),
+                        },
+                    ],
+                },
+            ],
+            max_tokens: 4096,
+        };
+
+        let response_result = client.post("https://api.openai.com/v1/chat/completions")
+            .headers(headers)
+            .json(&payload)
+            .send();
+
+        let response = match response_result {
+            Ok(response) => response,
+            Err(e) => {
+                println!("Error invoking vision model: {}", e);
+                return "".to_string();
+            }
+        };
+
+        let response_json = match response.json::<serde_json::Value>() {
+            Ok(response_json) => response_json,
+            Err(e) => {
+                println!("Error parsing response JSON: {}", e);
+                return "".to_string();
+            }
+        };
+    
+        println!("response_json: {:?}", response_json);
+
+        response_json["choices"][0]["message"]["content"].to_string()
+        
     }
 
     fn create_prompt(&self) -> String {
@@ -69,4 +143,35 @@ impl FocusGuard {
 
 
 
+}
+
+
+
+// Structs for payload
+#[derive(Serialize)]
+struct ImageUrl {
+    url: String,
+}
+
+#[derive(Serialize)]
+struct MessageContent {
+    #[serde(rename = "type")]
+    content_type: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    text: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    image_url: Option<ImageUrl>,
+}
+
+#[derive(Serialize)]
+struct Message {
+    role: String,
+    content: Vec<MessageContent>,
+}
+
+#[derive(Serialize)]
+struct Payload {
+    model: String,
+    messages: Vec<Message>,
+    max_tokens: u32,
 }

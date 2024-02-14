@@ -7,14 +7,12 @@ use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, CustomMenuItem
 
 use std::collections::HashMap;
 use std::thread;
+use std::env;
 use std::time::Duration;
 use std::path::Path;
-use std::env;
 use std::path::PathBuf;
 use chrono::Local;
 use crate::plugins::focusguard;
-
-
 
 mod db;
 mod utils; 
@@ -150,10 +148,11 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
     );
 
     // Register plugin - create a new focusguard struct
+    let openai_api_key = env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY environment variable must be set");
     let mut focus_guard = focusguard::FocusGuard::new(
         "Software Developer".to_string(),
         "Write software using VSCode, AWS, and other software related tools".to_string(),
-        "1234".to_string()
+        openai_api_key
     );
 
     // Spawn a thread to save screenshots in the background.
