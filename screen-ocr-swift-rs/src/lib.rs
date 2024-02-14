@@ -57,11 +57,12 @@ pub fn extract_text(path: &str) -> String {
 /**
  * Capture the screen and write to a file
  */
-pub fn screen_capture_to_file(dest_file: &str) -> () {
-    let result = unsafe { screen_capture_swift() };
-    let result_vec = result.unwrap().to_vec();
+pub fn screen_capture_to_file(dest_file: &str) -> Vec<u8> {
+    let png_sr_data: Option<SRData> = unsafe { screen_capture_swift() };
+    let png_data = png_sr_data.unwrap().to_vec();
     // Print the length of the vector
-    let _ = write_png_to_file(result_vec, dest_file);
+    let _ = write_png_to_file(&png_data, dest_file);
+    png_data
 }
 
 /**
@@ -76,13 +77,13 @@ pub fn screen_capture() -> Option<SRData> {
 /**
  * Helper function to write a PNG to a file
  */
-fn write_png_to_file(image_data: Vec<u8>, file_path: &str) -> std::io::Result<()> {
+fn write_png_to_file(image_data: &Vec<u8>, file_path: &str) -> std::io::Result<()> {
     // Create a file in write-only mode
     let file = File::create(file_path)?;
     let mut buf_writer = BufWriter::new(file);
 
     // Write the byte array to the file
-    buf_writer.write_all(&image_data)?;
+    buf_writer.write_all(image_data)?;
 
     Ok(())
 }

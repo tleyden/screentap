@@ -13,12 +13,16 @@ use std::env;
 use std::path::PathBuf;
 use chrono::Local;
 
+use crate::plugins::focusguard;
+
 
 
 mod db;
 mod utils; 
 mod screenshot;
 mod compaction;
+mod plugins;
+
 
 static DATABASE_FILENAME: &str = "screentap.db";
 
@@ -131,7 +135,13 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
     }
 
     // Save one screenshot on startup so we never have an empty screen
-    let _ = screenshot::save_screenshot(app_data_dir.as_path(), db_filename_path);
+    let screenshot_result = screenshot::save_screenshot(app_data_dir.as_path(), db_filename_path);
+    match screenshot_result {
+        Ok(_) => {},
+        Err(e) => {
+            println!("Error saving screenshot on startup: {}", e);
+        }
+    }
 
     // Create a compaction helper
     let compaction_helper = compaction::CompactionHelper::new(
@@ -139,6 +149,13 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
         db_filename_path.to_path_buf(),
         compaction::DEFAULT_MAX_IMAGE_FILES,
     );
+
+    // Register plugin - create a new focusguard struct
+    let focus_guard = focusguard::FocusGuard {
+        job_title: "Software Developer".to_string(),
+        job_role: "Software Developer".to_string(),
+        openai_api_key: "1234".to_string(),
+    };
 
     // Spawn a thread to save screenshots in the background.
     // The move keyword is necessary to move app_data_dir into the thread.
@@ -160,11 +177,26 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
                 );
             }
 
-            // TODO: make this a setting
-            let sleep_time_secs = 30; 
+            // Capture a screenshot, OCR and save it to DB
+            let screenshot_result = screenshot::save_screenshot(app_data_dir.as_path(), db_filename_path);
+            match screenshot_result {
+                Ok((png_data, ocr_text)) => {
+                    // Invoke plugins
+                    focus_guard.handle_screentap_event(
+                        png_data,
+                        ocr_text,
+                    );
+                },
+                Err(e) => {
+                    println!("Error saving screenshot: {}", e);
+                }
+            }
 
+
+            // Sleep for a while (TODO: make configurable)
+            let sleep_time_secs = 30; 
             thread::sleep(Duration::from_secs(sleep_time_secs));
-            let _ = screenshot::save_screenshot(app_data_dir.as_path(), db_filename_path);
+
         }
     });
 

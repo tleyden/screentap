@@ -60,6 +60,9 @@ public func extract_frame_from_mp4(mp4_path: SRString, frame_id: Int) -> SRData?
     return nil
 }
 
+/**
+ * Capture the screen and return the image as a PNG encoded byte array
+ */
 @_cdecl("screen_capture_swift")
 @available(macOS 10.15, *)
 public func screen_capture() -> SRData? {

@@ -5,12 +5,13 @@ use std::path::Path;
 
 use super::utils;
 use super::db;
+use std::error::Error;
 
 
 /**
  * Helper function to save a screenshot and OCR text to the dataset directory and DB
  */
-pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> String {
+pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> Result<(Vec<u8>, String), Box<dyn Error>> {
 
     let now = Local::now().naive_utc();
 
@@ -18,7 +19,7 @@ pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> String {
     let dataset_root_path = Path::new(dataset_root);
     let target_png_file_path = dataset_root_path.join(timestamp_png_filename.clone());
 
-    screen_ocr_swift_rs::screen_capture_to_file(target_png_file_path.to_str().unwrap());
+    let png_data = screen_ocr_swift_rs::screen_capture_to_file(target_png_file_path.to_str().unwrap());
     let ocr_text = screen_ocr_swift_rs::extract_text(target_png_file_path.to_str().unwrap());
 
     // Save screenshot meta to the DB
@@ -32,8 +33,14 @@ pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> String {
 
     let current_time_formatted = now.format("%Y-%m-%d %H:%M:%S").to_string();
     match save_result {
-        Ok(()) => format!("Screenshot saved to DB successfully at {}", current_time_formatted),
-        Err(e) => format!("Error occurred: {} at {}", e, current_time_formatted),
+        Ok(()) => { 
+            format!("Screenshot saved to DB successfully at {}", current_time_formatted); 
+            Ok((png_data, ocr_text))
+        },
+        Err(e) => { 
+            format!("Error occurred: {} at {}", e, current_time_formatted); 
+            Err(e.into())
+        }
     }
     
 }
