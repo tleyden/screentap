@@ -12,7 +12,6 @@ use std::path::Path;
 use std::env;
 use std::path::PathBuf;
 use chrono::Local;
-
 use crate::plugins::focusguard;
 
 
@@ -151,11 +150,11 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
     );
 
     // Register plugin - create a new focusguard struct
-    let focus_guard = focusguard::FocusGuard {
-        job_title: "Software Developer".to_string(),
-        job_role: "Software Developer".to_string(),
-        openai_api_key: "1234".to_string(),
-    };
+    let focus_guard = focusguard::FocusGuard::new(
+        "Software Developer".to_string(),
+        "Write software using VSCode, AWS, and other software related tools".to_string(),
+        "1234".to_string()
+    );
 
     // Spawn a thread to save screenshots in the background.
     // The move keyword is necessary to move app_data_dir into the thread.
