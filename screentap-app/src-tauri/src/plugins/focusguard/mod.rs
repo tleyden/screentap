@@ -4,6 +4,7 @@ use serde::Serialize;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use std::fs;
 use serde_json::json;
+use std::fmt;
 
 
 // Create an enum with three possible values: openai, llamafile, and ollama
@@ -12,6 +13,16 @@ enum LlavaBackendType {
     OpenAI,
     LlamaFile,
     Ollama,
+}
+
+impl fmt::Display for LlavaBackendType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            LlavaBackendType::OpenAI => write!(f, "OpenAI"),
+            LlavaBackendType::LlamaFile => write!(f, "LlamaFile"),
+            LlavaBackendType::Ollama => write!(f, "Ollama"),
+        }
+    }
 }
 
 pub struct FocusGuard {
@@ -28,6 +39,9 @@ pub struct FocusGuard {
     // The backend to use for the LLaVA model
     llava_backend: LlavaBackendType,
 
+    // The threshold to be considered in "flow state"
+    productivity_score_threshold: i32,
+
 }
 
 impl FocusGuard {
@@ -39,18 +53,22 @@ impl FocusGuard {
             openai_api_key,
             duration_between_checks: Duration::from_secs(10),  // TEMP - change this back to 5 mins
             last_screentap_time: Instant::now(),
-            llava_backend: LlavaBackendType::Ollama,
+            llava_backend: LlavaBackendType::OpenAI,
+            productivity_score_threshold: 6,
         }
     }
 
     pub fn handle_screentap_event(&mut self, png_data: Vec<u8>, ocr_text: String) {
-        println!("Handling screentap event with len(ocr_text): {} and len(png_data): {}", ocr_text.len(), png_data.len());
+        println!("FocusGuard handling screentap event with len(ocr_text): {} and len(png_data): {}", ocr_text.len(), png_data.len());
 
         let now = Instant::now();
         let elapsed = now.duration_since(self.last_screentap_time);
 
         if elapsed > self.duration_between_checks {
-            println!("Time to check!");
+
+            self.last_screentap_time = now;
+
+            println!("FocusGuard analyzing image with {}", self.llava_backend);
 
             let prompt = self.create_prompt();
 
@@ -59,22 +77,41 @@ impl FocusGuard {
                 LlavaBackendType::Ollama => self.invoke_ollama_vision_model(&prompt, &png_data),
                 LlavaBackendType::LlamaFile => self.invoke_openai_vision_model(&prompt, &png_data),
             };
-            println!("Raw result: {}", raw_result);
 
-            // let raw_result = self.invoke_openai_vision_model(&prompt, &png_data);
+            // Convert LLM response into numeric productivity score
+            let productivity_score = match self.process_vision_model_result(&raw_result) { 
+                Some(raw_result_i32) => {
+                    raw_result_i32
+                },
+                None => {
+                    println!("FocusGuard could not parsing raw result [{}] into number", raw_result);
+                    return
+                }
+            };
 
-            // let productivity_score = self.process_vision_model_result(raw_result);
+            if productivity_score < self.productivity_score_threshold {
+                println!("Productivity score is low: {}", productivity_score);
 
-            // if productivity_score < 5 {
-            //     println!("Productivity score is low: {}", productivity_score);
-            // } else {
-            //     println!("Productivity score is high: {}", productivity_score);
-            // }
 
-            self.last_screentap_time = now;
+
+            } else {
+                println!("Woohoo!  Looks like you're working.  Score is: {}", productivity_score);
+            }
+
 
         } 
 
+    }
+
+    fn process_vision_model_result(&self, raw_llm_response: &str) -> Option<i32> {
+        // Try to convert the raw result into a number
+        match raw_llm_response.parse::<i32>() {
+            Ok(raw_result_i32) => Some(raw_result_i32),
+            Err(e) => {
+                println!("Error parsing raw LLM response {} into number: {}", raw_llm_response, e);
+                None
+            }
+        }
     }
 
     fn convert_png_data_to_base_64(&self, png_data: &Vec<u8>) -> String {
@@ -82,6 +119,13 @@ impl FocusGuard {
         base64_image
     }
 
+    /**
+     * To run it with ollama, you need to have it running on localhost:11434.  
+     * 
+     * $ ollama run llava
+     * $ ctl-c
+     * $ ollama serve
+     */
     fn invoke_ollama_vision_model(&self, prompt: &str, png_data: &Vec<u8>) -> String {
 
         // Getting the base64 string
@@ -102,8 +146,6 @@ impl FocusGuard {
             .json(&payload)
             .send();
 
-        println!("Response result: {:?}", response_result);
-
         let response = match response_result {
             Ok(response) => response,
             Err(e) => {
@@ -111,10 +153,6 @@ impl FocusGuard {
                 return "".to_string();
             }
         };
-        println!("Response: {:?}", response);
-
-        // let body = &response.text().unwrap();
-        // println!("Response body: {:?}", body);
 
         let response_json = match response.json::<serde_json::Value>() {
             Ok(response_json) => response_json,
@@ -123,8 +161,6 @@ impl FocusGuard {
                 return "".to_string();
             }
         };
-
-        println!("response_json: {:?}", response_json);
 
         response_json["response"].to_string()
 
@@ -178,11 +214,6 @@ impl FocusGuard {
             max_tokens: 4096,
         };
 
-        // Convert payload to json and write to file for debugging
-        // let payload_json = serde_json::to_string(&payload).unwrap();
-        // // Write payload json to a file
-        // fs::write("payload.json", payload_json).expect("Unable to write file");
-
         println!("Invoking OpenAI API");
 
         let target_url = match self.llava_backend {
@@ -196,8 +227,6 @@ impl FocusGuard {
             .json(&payload)
             .send();
 
-        println!("Response result: {:?}", response_result);
-
         let response = match response_result {
             Ok(response) => response,
             Err(e) => {
@@ -205,11 +234,7 @@ impl FocusGuard {
                 return "".to_string();
             }
         };
-        println!("Response: {:?}", response);
-
-        // let body = &response.text().unwrap();
-        // println!("Response body: {:?}", body);
-
+    
         let response_json = match response.json::<serde_json::Value>() {
             Ok(response_json) => response_json,
             Err(e) => {
@@ -217,17 +242,23 @@ impl FocusGuard {
                 return "".to_string();
             }
         };
-    
-        println!("response_json: {:?}", response_json);
 
-        response_json["choices"][0]["message"]["content"].to_string()
+        println!("Response JSON: {}", response_json.to_string());
+    
+        if response_json["choices"].as_array().unwrap().len() == 0 {
+            println!("No choices in response");
+            return "".to_string();
+        }
+
+        // The as_str() call is important because it removes the double quotes
+        response_json["choices"][0]["message"]["content"].as_str().unwrap().to_string()
         
     }
 
     fn create_prompt(&self) -> String {
         let prompt = format!(r###"On a scale of 1 to 10, how much does this screenshot indicate 
         a worker with job title of "{}" and job role of "{}" is currently engaged in work activities?  Do not 
-        provide any explanation, just the score itself."###, self.job_title, self.job_role);
+        provide any explanation, just the score itself which is a number between 1 and 10."###, self.job_title, self.job_role);
         println!("Prompt: {}", prompt);
         prompt
     }
