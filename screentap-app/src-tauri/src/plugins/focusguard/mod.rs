@@ -47,6 +47,11 @@ pub struct FocusGuard {
     // The threshold to be considered in "flow state"
     productivity_score_threshold: i32,
 
+    // The size of the largest image dimension (width or height) to send to the vision model.
+    // For OpenAI, the max is 2000 pixels.  Using a smaller value will cause the model
+    // to consume less tokens during inference. 
+    image_dimension_longest_side: u32,
+
 }
 
 impl FocusGuard {
@@ -69,6 +74,7 @@ impl FocusGuard {
             last_screentap_time: last_screentap_time,
             llava_backend: LlavaBackendType::OpenAI,
             productivity_score_threshold: 6,
+            image_dimension_longest_side: 1200,
         }
     }
 
@@ -93,8 +99,14 @@ impl FocusGuard {
                     // Invoke the actual vision model
                     println!("FocusGuard analyzing image with {}", self.llava_backend);
 
-                    // OpenAI requires the longest side to be < 2000 pixels.
-                    let resized_png_data = match FocusGuard::resize_image(png_data, 1800) {
+                    // Resize the image before sending to the vision model
+                    let resize_img_result = FocusGuard::resize_image(
+                        png_data, 
+                        self.image_dimension_longest_side
+                    );
+
+                    // Get the resized png data
+                    let resized_png_data = match resize_img_result {
                         Ok(resized_img) => resized_img,
                         Err(e) => {
                             println!("Error resizing image: {}", e);
@@ -132,7 +144,6 @@ impl FocusGuard {
                 println!("Woohoo!  Looks like you're working.  Score is: {}", productivity_score);
             }
 
-
         } 
 
     }
@@ -157,28 +168,22 @@ impl FocusGuard {
         };
     
         // Resize the image
-        let resized = img.resize_exact(new_width, new_height, FilterType::Lanczos3);
+        let resized = img.resize_exact(
+            new_width, 
+            new_height, 
+            FilterType::Lanczos3
+        );
     
-        // // Encode the resized image back into a Vec<u8>
-        // let mut result_data = Vec::new();
-        // resized.write_to(&mut result_data, ImageFormat::Png)?;
-    
-        // // Create a new Vec to hold the encoded image
-        // let mut buffer: Vec<u8> = Vec::new();
-
-        // // Write the DynamicImage to the buffer as a PNG
-        // resized.write_to(&mut buffer, image::ImageOutputFormat::Png).unwrap();
-
         let mut bytes = Cursor::new(Vec::new());
         resized.write_to(&mut bytes, image::ImageOutputFormat::Png)?;
         Ok(bytes.into_inner())
 
-        // Ok(result_data)
-
     }
 
     fn show_productivity_alert(&self, app: &tauri::AppHandle, productivity_score: i32) {
-        println!("Showing productivity alert");
+
+        // TODO: pass the score to the UI somehow
+        println!("Showing productivity alert for score: {}", productivity_score);
 
         let window = app.get_window("focusguard");
         match window {
