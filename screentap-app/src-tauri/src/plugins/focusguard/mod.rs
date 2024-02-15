@@ -7,6 +7,8 @@ use tauri::Manager;
 use std::fs;
 use serde_json::json;
 use std::fmt;
+use image::{DynamicImage, GenericImageView, ImageFormat, imageops::FilterType};
+use std::io::Cursor;
 
 const DEV_MODE: bool = false;
 
@@ -91,10 +93,21 @@ impl FocusGuard {
                     // Invoke the actual vision model
                     println!("FocusGuard analyzing image with {}", self.llava_backend);
 
+                    // OpenAI requires the longest side to be < 2000 pixels.  Use 1600 for now
+                    let resized_png_data = match FocusGuard::resize_image(png_data, 1200) {
+                        Ok(resized_img) => resized_img,
+                        Err(e) => {
+                            println!("Error resizing image: {}", e);
+                            return
+                        }
+                    };
+
+                    println!("Resized image length in bytes: {}", resized_png_data.len());
+
                     let raw_result = match self.llava_backend {
-                        LlavaBackendType::OpenAI => self.invoke_openai_vision_model(&prompt, &png_data),
-                        LlavaBackendType::Ollama => self.invoke_ollama_vision_model(&prompt, &png_data),
-                        LlavaBackendType::LlamaFile => self.invoke_openai_vision_model(&prompt, &png_data),
+                        LlavaBackendType::OpenAI => self.invoke_openai_vision_model(&prompt, &resized_png_data),
+                        LlavaBackendType::Ollama => self.invoke_ollama_vision_model(&prompt, &resized_png_data),
+                        LlavaBackendType::LlamaFile => self.invoke_openai_vision_model(&prompt, &resized_png_data),
                     };
 
                     match self.process_vision_model_result(&raw_result) { 
@@ -121,6 +134,46 @@ impl FocusGuard {
 
 
         } 
+
+    }
+
+
+    fn resize_image(png_data: Vec<u8>, max_dimension: u32) -> Result<Vec<u8>, image::ImageError> {
+
+        // Load the image from a byte slice (&[u8])
+        let img = image::load_from_memory(&png_data)?;
+    
+        // Calculate the new dimensions
+        let (width, height) = img.dimensions();
+        let aspect_ratio = width as f32 / height as f32;
+        let (new_width, new_height) = if width > height {
+            let new_width = max_dimension;
+            let new_height = (max_dimension as f32 / aspect_ratio).round() as u32;
+            (new_width, new_height)
+        } else {
+            let new_height = max_dimension;
+            let new_width = (max_dimension as f32 * aspect_ratio).round() as u32;
+            (new_width, new_height)
+        };
+    
+        // Resize the image
+        let resized = img.resize_exact(new_width, new_height, FilterType::Lanczos3);
+    
+        // // Encode the resized image back into a Vec<u8>
+        // let mut result_data = Vec::new();
+        // resized.write_to(&mut result_data, ImageFormat::Png)?;
+    
+        // // Create a new Vec to hold the encoded image
+        // let mut buffer: Vec<u8> = Vec::new();
+
+        // // Write the DynamicImage to the buffer as a PNG
+        // resized.write_to(&mut buffer, image::ImageOutputFormat::Png).unwrap();
+
+        let mut bytes = Cursor::new(Vec::new());
+        resized.write_to(&mut bytes, image::ImageOutputFormat::Png)?;
+        Ok(bytes.into_inner())
+
+        // Ok(result_data)
 
     }
 
