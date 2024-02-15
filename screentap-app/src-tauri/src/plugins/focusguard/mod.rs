@@ -3,6 +3,7 @@ use std::time::{Instant, Duration};
 use serde::Serialize;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use reqwest::blocking::Response;
+use tauri::Manager;
 use std::fs;
 use serde_json::json;
 use std::fmt;
@@ -105,8 +106,6 @@ impl FocusGuard {
 
                 self.show_productivity_alert(app, productivity_score);
 
-
-
             } else {
                 println!("Woohoo!  Looks like you're working.  Score is: {}", productivity_score);
             }
@@ -119,13 +118,22 @@ impl FocusGuard {
     fn show_productivity_alert(&self, app: &tauri::AppHandle, productivity_score: i32) {
         println!("Showing productivity alert");
 
-        // TODO: only create the window if it does not already exist.  In that case,
-        // just bring it to the foreground
-        let _ = tauri::WindowBuilder::new(
-            app,
-            "focusguard",
-            tauri::WindowUrl::App("index_focusguard.html".into())
-        ).maximized(true).title("Focusguard").build().expect("failed to build window");
+        let window = app.get_window("focusguard");
+        match window {
+            Some(w) => {
+                // Window exists, so just bring it to the foreground
+                w.show().unwrap();
+                w.set_focus().unwrap();
+            },
+            None => {
+                // Create and show new window
+                let _ = tauri::WindowBuilder::new(
+                    app,
+                    "focusguard",
+                    tauri::WindowUrl::App("index_focusguard.html".into())
+                ).maximized(true).title("Focusguard").build().expect("failed to build window");
+            }
+        }   
 
     }
     
