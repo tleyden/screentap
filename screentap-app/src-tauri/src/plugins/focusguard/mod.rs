@@ -2,6 +2,7 @@
 use std::time::{Instant, Duration};
 use serde::Serialize;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
+use reqwest::blocking::Response;
 use std::fs;
 use serde_json::json;
 use std::fmt;
@@ -235,6 +236,12 @@ impl FocusGuard {
             }
         };
     
+        self.extract_content_openai_response(response)
+        
+    }
+
+    fn extract_content_openai_response(&self, response: Response) -> String {
+
         let response_json = match response.json::<serde_json::Value>() {
             Ok(response_json) => response_json,
             Err(e) => {
@@ -244,15 +251,26 @@ impl FocusGuard {
         };
 
         println!("Response JSON: {}", response_json.to_string());
-    
-        if response_json["choices"].as_array().unwrap().len() == 0 {
-            println!("No choices in response");
-            return "".to_string();
-        }
 
-        // The as_str() call is important because it removes the double quotes
-        response_json["choices"][0]["message"]["content"].as_str().unwrap().to_string()
-        
+        let choices = response_json["choices"].as_array();
+        let first_choice = match choices {
+            Some(choices) => {
+                if choices.len() == 0 {
+                    println!("No choices in response");
+                    return "".to_string();
+                }
+                &choices[0]
+            },
+            None => {
+                println!("No choices in response");
+                return "".to_string();
+            }
+        };
+
+        let message_content = &first_choice["message"]["content"].as_str();
+
+        message_content.unwrap_or("").to_string()
+
     }
 
     fn create_prompt(&self) -> String {
