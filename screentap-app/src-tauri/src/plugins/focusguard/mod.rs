@@ -7,6 +7,7 @@ use std::fs;
 use serde_json::json;
 use std::fmt;
 
+const DEV_MODE: bool = true;
 
 // Create an enum with three possible values: openai, llamafile, and ollama
 #[allow(dead_code)]
@@ -52,7 +53,7 @@ impl FocusGuard {
             job_title,
             job_role,
             openai_api_key,
-            duration_between_checks: Duration::from_secs(10),  // TEMP - change this back to 5 mins
+            duration_between_checks: Duration::from_secs(5),  // TEMP - change this back to 5 mins
             last_screentap_time: Instant::now(),
             llava_backend: LlavaBackendType::OpenAI,
             productivity_score_threshold: 6,
@@ -69,24 +70,33 @@ impl FocusGuard {
 
             self.last_screentap_time = now;
 
-            println!("FocusGuard analyzing image with {}", self.llava_backend);
-
             let prompt = self.create_prompt();
 
-            let raw_result = match self.llava_backend {
-                LlavaBackendType::OpenAI => self.invoke_openai_vision_model(&prompt, &png_data),
-                LlavaBackendType::Ollama => self.invoke_ollama_vision_model(&prompt, &png_data),
-                LlavaBackendType::LlamaFile => self.invoke_openai_vision_model(&prompt, &png_data),
-            };
+            let productivity_score = match DEV_MODE {
+                true => {
+                    println!("FocusGuard returning hardcoded productivity score");
+                    2
+                },  
+                false => {
+                    // Invoke the actual vision model
+                    println!("FocusGuard analyzing image with {}", self.llava_backend);
 
-            // Convert LLM response into numeric productivity score
-            let productivity_score = match self.process_vision_model_result(&raw_result) { 
-                Some(raw_result_i32) => {
-                    raw_result_i32
-                },
-                None => {
-                    println!("FocusGuard could not parsing raw result [{}] into number", raw_result);
-                    return
+                    let raw_result = match self.llava_backend {
+                        LlavaBackendType::OpenAI => self.invoke_openai_vision_model(&prompt, &png_data),
+                        LlavaBackendType::Ollama => self.invoke_ollama_vision_model(&prompt, &png_data),
+                        LlavaBackendType::LlamaFile => self.invoke_openai_vision_model(&prompt, &png_data),
+                    };
+
+                    match self.process_vision_model_result(&raw_result) { 
+                        Some(raw_result_i32) => {
+                            raw_result_i32
+                        },
+                        None => {
+                            println!("FocusGuard could not parsing raw result [{}] into number", raw_result);
+                            return
+                        }
+                    }
+
                 }
             };
 
@@ -109,13 +119,14 @@ impl FocusGuard {
     fn show_productivity_alert(&self, app: &tauri::AppHandle, productivity_score: i32) {
         println!("Showing productivity alert");
 
+        // TODO: only create the window if it does not already exist.  In that case,
+        // just bring it to the foreground
         let _ = tauri::WindowBuilder::new(
             app,
-            "browse",
-            tauri::WindowUrl::App("index_browse.html".into())
-        ).maximized(true).title("Screentap: browse").build().expect("failed to build window");
+            "focusguard",
+            tauri::WindowUrl::App("index_focusguard.html".into())
+        ).maximized(true).title("Focusguard").build().expect("failed to build window");
 
-        
     }
     
     fn process_vision_model_result(&self, raw_llm_response: &str) -> Option<i32> {
