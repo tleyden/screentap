@@ -59,7 +59,7 @@ impl FocusGuard {
         }
     }
 
-    pub fn handle_screentap_event(&mut self, png_data: Vec<u8>, ocr_text: String) {
+    pub fn handle_screentap_event(&mut self, app: &tauri::AppHandle, png_data: Vec<u8>, ocr_text: String) {
         println!("FocusGuard handling screentap event with len(ocr_text): {} and len(png_data): {}", ocr_text.len(), png_data.len());
 
         let now = Instant::now();
@@ -93,6 +93,8 @@ impl FocusGuard {
             if productivity_score < self.productivity_score_threshold {
                 println!("Productivity score is low: {}", productivity_score);
 
+                self.show_productivity_alert(app, productivity_score);
+
 
 
             } else {
@@ -104,6 +106,18 @@ impl FocusGuard {
 
     }
 
+    fn show_productivity_alert(&self, app: &tauri::AppHandle, productivity_score: i32) {
+        println!("Showing productivity alert");
+
+        let _ = tauri::WindowBuilder::new(
+            app,
+            "browse",
+            tauri::WindowUrl::App("index_browse.html".into())
+        ).maximized(true).title("Screentap: browse").build().expect("failed to build window");
+
+        
+    }
+    
     fn process_vision_model_result(&self, raw_llm_response: &str) -> Option<i32> {
         // Try to convert the raw result into a number
         match raw_llm_response.parse::<i32>() {

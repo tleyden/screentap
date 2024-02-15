@@ -140,7 +140,6 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
         }
     }
 
-
     // Create a compaction helper
     let compaction_helper = compaction::CompactionHelper::new(
         app_data_dir.clone(), 
@@ -155,6 +154,9 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
         "Write software using VSCode, AWS, and other software related tools".to_string(),
         openai_api_key
     );
+
+    // Get an app handle from the app since this can be moved to threads
+    let app_handle = app.app_handle();
 
     // Spawn a thread to save screenshots in the background.
     // The move keyword is necessary to move app_data_dir into the thread.
@@ -182,6 +184,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
                 Ok((png_data, ocr_text)) => {
                     // Invoke plugins
                     focus_guard.handle_screentap_event(
+                        &app_handle,
                         png_data,
                         ocr_text,
                     );
@@ -190,7 +193,6 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
                     println!("Error saving screenshot: {}", e);
                 }
             }
-
 
             // Sleep for a while (TODO: make configurable)
             let sleep_time_secs = 30; 
