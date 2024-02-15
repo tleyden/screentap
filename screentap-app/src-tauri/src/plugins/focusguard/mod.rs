@@ -250,8 +250,6 @@ impl FocusGuard {
             }
         };
 
-        println!("Response JSON: {}", response_json.to_string());
-
         let choices = response_json["choices"].as_array();
         let first_choice = match choices {
             Some(choices) => {
@@ -280,8 +278,6 @@ impl FocusGuard {
         println!("Prompt: {}", prompt);
         prompt
     }
-
-
 
 }
 
