@@ -93,8 +93,8 @@ impl FocusGuard {
                     // Invoke the actual vision model
                     println!("FocusGuard analyzing image with {}", self.llava_backend);
 
-                    // OpenAI requires the longest side to be < 2000 pixels.  Use 1600 for now
-                    let resized_png_data = match FocusGuard::resize_image(png_data, 1200) {
+                    // OpenAI requires the longest side to be < 2000 pixels.
+                    let resized_png_data = match FocusGuard::resize_image(png_data, 1800) {
                         Ok(resized_img) => resized_img,
                         Err(e) => {
                             println!("Error resizing image: {}", e);
