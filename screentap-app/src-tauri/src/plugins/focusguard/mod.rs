@@ -56,12 +56,15 @@ impl FocusGuard {
             false => Duration::from_secs(5 * 60),
         };
 
+        // Set last_screentap_time so that it begins with an initial check
+        let last_screentap_time = Instant::now() - duration_between_checks - Duration::from_secs(1);
+
         FocusGuard {
             job_title,
             job_role,
             openai_api_key,
             duration_between_checks: duration_between_checks,
-            last_screentap_time: Instant::now(),
+            last_screentap_time: last_screentap_time,
             llava_backend: LlavaBackendType::OpenAI,
             productivity_score_threshold: 6,
         }
