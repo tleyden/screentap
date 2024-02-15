@@ -8,7 +8,7 @@ use std::fs;
 use serde_json::json;
 use std::fmt;
 
-const DEV_MODE: bool = true;
+const DEV_MODE: bool = false;
 
 // Create an enum with three possible values: openai, llamafile, and ollama
 #[allow(dead_code)]
@@ -50,11 +50,17 @@ pub struct FocusGuard {
 impl FocusGuard {
 
     pub fn new(job_title: String, job_role: String, openai_api_key: String) -> FocusGuard {
+
+        let duration_between_checks = match DEV_MODE {
+            true => Duration::from_secs(5), 
+            false => Duration::from_secs(5 * 60),
+        };
+
         FocusGuard {
             job_title,
             job_role,
             openai_api_key,
-            duration_between_checks: Duration::from_secs(5),  // TEMP - change this back to 5 mins
+            duration_between_checks: duration_between_checks,
             last_screentap_time: Instant::now(),
             llava_backend: LlavaBackendType::OpenAI,
             productivity_score_threshold: 6,
