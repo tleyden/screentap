@@ -4,19 +4,34 @@ use serde::Serialize;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use reqwest::blocking::Response;
 use tauri::Manager;
-use std::fs;
 use serde_json::json;
 use std::fmt;
-use image::{DynamicImage, GenericImageView, ImageFormat, imageops::FilterType};
+use image::{GenericImageView, imageops::FilterType};
 use std::io::Cursor;
+use std::path::Path;
+use std::process::Command;
+
 
 const DEV_MODE: bool = false;
 
 // Create an enum with three possible values: openai, llamafile, and ollama
 #[allow(dead_code)]
 enum LlavaBackendType {
+
+    // This works
     OpenAI,
+
+    // This doesn't work due to a limitation with the LlamaFile + Llava JSON API
+    // that cannot handle images. 
     LlamaFile,
+
+    // TODO: maybe forking off a process and calling LlamaFile's command line
+    // interface would work.
+    LlamaFileSubprocess,
+
+    // This doesn't work because yet because the version of Llava ignores the 
+    // instructions and doesn't return a single number.  Also sometimes it
+    // doesn't even return any score at all.
     Ollama,
 }
 
@@ -25,6 +40,7 @@ impl fmt::Display for LlavaBackendType {
         match self {
             LlavaBackendType::OpenAI => write!(f, "OpenAI"),
             LlavaBackendType::LlamaFile => write!(f, "LlamaFile"),
+            LlavaBackendType::LlamaFileSubprocess => write!(f, "LlamaFileSubprocess"),
             LlavaBackendType::Ollama => write!(f, "Ollama"),
         }
     }
@@ -72,13 +88,14 @@ impl FocusGuard {
             openai_api_key,
             duration_between_checks: duration_between_checks,
             last_screentap_time: last_screentap_time,
-            llava_backend: LlavaBackendType::OpenAI,
+            llava_backend: LlavaBackendType::LlamaFileSubprocess,
             productivity_score_threshold: 6,
             image_dimension_longest_side: 1200,
         }
     }
 
-    pub fn handle_screentap_event(&mut self, app: &tauri::AppHandle, png_data: Vec<u8>, ocr_text: String) {
+    pub fn handle_screentap_event(&mut self, app: &tauri::AppHandle, png_data: Vec<u8>, png_image_path: &Path, ocr_text: String) {
+
         println!("FocusGuard handling screentap event with len(ocr_text): {} and len(png_data): {}", ocr_text.len(), png_data.len());
 
         let now = Instant::now();
@@ -120,6 +137,7 @@ impl FocusGuard {
                         LlavaBackendType::OpenAI => self.invoke_openai_vision_model(&prompt, &resized_png_data),
                         LlavaBackendType::Ollama => self.invoke_ollama_vision_model(&prompt, &resized_png_data),
                         LlavaBackendType::LlamaFile => self.invoke_openai_vision_model(&prompt, &resized_png_data),
+                        LlavaBackendType::LlamaFileSubprocess => self.invoke_subprocess_vision_model(&prompt, &png_image_path),
                     };
 
                     match self.process_vision_model_result(&raw_result) { 
@@ -267,6 +285,39 @@ impl FocusGuard {
 
     }
 
+    fn invoke_subprocess_vision_model(&self, prompt: &str, png_image_path: &Path) -> String {
+
+        let full_prompt = format!("### User: {}\n ### Assistant:", prompt);
+
+        // sh ./llava-v1.5-7b-q4.llamafile -ngl 9999 --image ~/Desktop/2024_02_15_10_24_53.png -e -p '### User: On a scale of 1 to 10, how much does this screenshot indicate..'
+        let output = Command::new("/Users/tleyden/Development/screentap/screentap-app/src-tauri/llava-v1.5-7b-q4.llamafile")
+            .arg("-ngl")
+            .arg("9999")
+            .arg("--image")
+            .arg(png_image_path)
+            .arg("-e")
+            .arg("-p")
+            .arg(full_prompt)
+            .output()
+            .expect("Failed to execute command");
+
+        // Assuming the command outputs something to stdout
+        let result = if output.status.success() {
+            let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
+            println!("Raw output from llavafile: {}", &stdout);
+            stdout
+        } else {
+            // If the command fails, e.g., non-zero exit status
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            eprintln!("Error: {}", stderr);
+            "".to_string()
+        };
+
+        result.trim().to_string()
+        
+
+    }
+
     fn invoke_openai_vision_model(&self, prompt: &str, png_data: &Vec<u8>) -> String {
 
         // Getting the base64 string
@@ -287,6 +338,7 @@ impl FocusGuard {
         let model_name = match self.llava_backend {
             LlavaBackendType::OpenAI => "gpt-4-vision-preview",
             LlavaBackendType::LlamaFile => "LLaMA_CPP",
+            LlavaBackendType::LlamaFileSubprocess => "LLaMA_CPP",
             LlavaBackendType::Ollama => "TBD",
         };
 
@@ -320,6 +372,7 @@ impl FocusGuard {
         let target_url = match self.llava_backend {
             LlavaBackendType::OpenAI => "https://api.openai.com/v1/chat/completions",
             LlavaBackendType::LlamaFile => "http://localhost:8080/v1/chat/completions",
+            LlavaBackendType::LlamaFileSubprocess => panic!("Use a different method for LlamaFileSubprocess"),
             LlavaBackendType::Ollama => panic!("Use a different method for Ollama"),
         };
 

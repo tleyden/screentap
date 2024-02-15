@@ -2,6 +2,7 @@ extern crate screen_ocr_swift_rs;
 
 use chrono::Local;
 use std::path::Path;
+use std::path::PathBuf;
 
 use super::utils;
 use super::db;
@@ -10,8 +11,14 @@ use std::error::Error;
 
 /**
  * Helper function to save a screenshot and OCR text to the dataset directory and DB
+ * 
+ * Return a Result with a generic Error, or a Tuple of:
+ * 
+ * - PNG data
+ * - OCR text
+ * - PNG file path
  */
-pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> Result<(Vec<u8>, String), Box<dyn Error>> {
+pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> Result<(Vec<u8>, String, PathBuf), Box<dyn Error>> {
 
     let now = Local::now().naive_utc();
 
@@ -35,7 +42,7 @@ pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> Result<(Vec<u
     match save_result {
         Ok(()) => { 
             format!("Screenshot saved to DB successfully at {}", current_time_formatted); 
-            Ok((png_data, ocr_text))
+            Ok((png_data, ocr_text, target_png_file_path))
         },
         Err(e) => { 
             format!("Error occurred: {} at {}", e, current_time_formatted); 

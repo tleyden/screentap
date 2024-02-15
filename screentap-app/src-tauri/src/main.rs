@@ -181,11 +181,12 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
             // Capture a screenshot, OCR and save it to DB
             let screenshot_result = screenshot::save_screenshot(app_data_dir.as_path(), db_filename_path);
             match screenshot_result {
-                Ok((png_data, ocr_text)) => {
+                Ok((png_data, ocr_text, png_image_path)) => {
                     // Invoke plugins
                     focus_guard.handle_screentap_event(
                         &app_handle,
                         png_data,
+                        png_image_path.as_path(),
                         ocr_text,
                     );
                 },
