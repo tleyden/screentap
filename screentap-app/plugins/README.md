@@ -13,4 +13,8 @@ The content of this dir should somehow get deployed into the application root:
 
 This is where the application will expect to find these files.
 
-TODO: write a script to copy these files over.  For now, do it by hand.
+Create a symlink as follows:
+
+```
+ln -s "/Users/<username>/Development/screentap/screentap-app/plugins/"  "/Users/tleyden/Library/Application Support/com.screentap-app.dev/"
+```
