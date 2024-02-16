@@ -10,7 +10,10 @@ use image::{GenericImageView, imageops::FilterType};
 use std::io::Cursor;
 use std::path::Path;
 use std::process::Command;
+use std::env;
+use std::str::FromStr;
 
+pub mod config;
 
 const DEV_MODE: bool = false;
 
@@ -42,6 +45,20 @@ impl fmt::Display for LlavaBackendType {
             LlavaBackendType::LlamaFile => write!(f, "LlamaFile"),
             LlavaBackendType::LlamaFileSubprocess => write!(f, "LlamaFileSubprocess"),
             LlavaBackendType::Ollama => write!(f, "Ollama"),
+        }
+    }
+}
+
+impl FromStr for LlavaBackendType {
+    type Err = ();
+
+    fn from_str(input: &str) -> Result<LlavaBackendType, Self::Err> {
+        match input {
+            "OpenAI" => Ok(LlavaBackendType::OpenAI),
+            "LlamaFile" => Ok(LlavaBackendType::LlamaFile),
+            "LlamaFileSubprocess" => Ok(LlavaBackendType::LlamaFileSubprocess),
+            "Ollama" => Ok(LlavaBackendType::Ollama),
+            _ => Err(()),
         }
     }
 }
@@ -78,22 +95,57 @@ pub struct FocusGuard {
 
 impl FocusGuard {
 
-    pub fn new(job_title: String, job_role: String, openai_api_key: String) -> FocusGuard {
+    pub fn new_from_config(app_data_dir: &Path) -> Option<FocusGuard> {
 
-        let duration_between_checks = match DEV_MODE {
-            true => Duration::from_secs(5), 
-            false => Duration::from_secs(5 * 60),
+        // Register plugin - create a new focusguard struct
+        let openai_api_key = match env::var("OPENAI_API_KEY") {
+            Ok(open_api_key_val) => open_api_key_val,
+            Err(_) => "".to_string()
         };
 
-        let duration_between_alerts = match DEV_MODE {
-            true => Duration::from_secs(60), 
-            false => Duration::from_secs(60 * 30),
+        let focus_guard_config = config::FocusGuardConfig::new(app_data_dir);
+        let focus_guard = match focus_guard_config {
+            Some(config) => {
+                FocusGuard::new(
+                    config.job_title,
+                    config.job_role,
+                    openai_api_key,
+                    config.duration_between_checks_secs,
+                    config.duration_between_alerts_secs,
+                    config.llava_backend,
+                    config.productivity_score_threshold,
+                    config.image_dimension_longest_side
+                )
+            },
+            None => {
+                println!("Unable to load FocusGuard config.  This plugin will not be enabled");
+                return None
+            }   
         };
+
+        Some(focus_guard)
+
+    }
+
+    pub fn new(job_title: String, 
+        job_role: String, 
+        openai_api_key: String, 
+        duration_between_checks_secs: u64,
+        duration_between_alerts_secs: u64,
+        llava_backend_str: String,
+        productivity_score_threshold: i32,
+        image_dimension_longest_side: u32,
+    ) -> FocusGuard {
+
+        let duration_between_checks = Duration::from_secs(duration_between_checks_secs);
+        let duration_between_alerts = Duration::from_secs(duration_between_alerts_secs);
 
         // Initialize tracking vars so that it begins with an initial check
         let last_screentap_time = Instant::now() - duration_between_checks - Duration::from_secs(1);
         let last_distraction_alert_time = Instant::now() - duration_between_alerts - Duration::from_secs(1);
 
+        let llava_backend = LlavaBackendType::from_str(&llava_backend_str).expect("Failed to parse vision model backend type");
+        
         FocusGuard {
             job_title,
             job_role,
@@ -102,10 +154,11 @@ impl FocusGuard {
             duration_between_alerts: duration_between_alerts,
             last_screentap_time: last_screentap_time,
             last_distraction_alert_time: last_distraction_alert_time,
-            llava_backend: LlavaBackendType::LlamaFileSubprocess,
-            productivity_score_threshold: 6,
-            image_dimension_longest_side: 1200,
+            llava_backend: llava_backend,
+            productivity_score_threshold: productivity_score_threshold,
+            image_dimension_longest_side: image_dimension_longest_side
         }
+
     }
 
     pub fn should_invoke_vision_model(&self, now: Instant) -> bool {

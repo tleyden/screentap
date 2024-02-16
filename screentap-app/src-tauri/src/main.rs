@@ -147,13 +147,16 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
         compaction::DEFAULT_MAX_IMAGE_FILES,
     );
 
-    // Register plugin - create a new focusguard struct
-    let openai_api_key = env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY environment variable must be set");
-    let mut focus_guard = focusguard::FocusGuard::new(
-        "Software Developer".to_string(),
-        "Write software using VSCode, AWS, and other software related tools".to_string(),
-        openai_api_key
+
+    let mut focus_guard_option = focusguard::FocusGuard::new_from_config(
+        app_data_dir.as_path(),
     );
+
+    // let mut focus_guard = focusguard::FocusGuard::new(
+    //     "Software Developer".to_string(),
+    //     "Write software using VSCode, AWS, and other software related tools".to_string(),
+    //     openai_api_key
+    // );
 
     // Get an app handle from the app since this can be moved to threads
     let app_handle = app.app_handle();
@@ -183,12 +186,18 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
             match screenshot_result {
                 Ok((png_data, ocr_text, png_image_path)) => {
                     // Invoke plugins
-                    focus_guard.handle_screentap_event(
-                        &app_handle,
-                        png_data,
-                        png_image_path.as_path(),
-                        ocr_text,
-                    );
+                    match focus_guard_option {
+                        // TODO: any way to avoid this confusing "ref mut" stuff?
+                        Some(ref mut focus_guard) => {
+                            focus_guard.handle_screentap_event(
+                                &app_handle,
+                                png_data,
+                                png_image_path.as_path(),
+                                ocr_text,
+                            );        
+                        },
+                        None => println!("Focusguard was not initialized, skipping")
+                    }
                 },
                 Err(e) => {
                     println!("Error saving screenshot: {}", e);
