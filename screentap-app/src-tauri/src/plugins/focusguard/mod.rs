@@ -25,8 +25,8 @@ enum LlavaBackendType {
     // that cannot handle images. 
     LlamaFile,
 
-    // TODO: maybe forking off a process and calling LlamaFile's command line
-    // interface would work.
+    // Fork off a process and call LlamaFile's command line interface would work
+    // to do inference on Llava.  This is working great.
     LlamaFileSubprocess,
 
     // This doesn't work because yet because the version of Llava ignores the 
@@ -51,11 +51,17 @@ pub struct FocusGuard {
     pub job_role: String,
     pub openai_api_key: String,
 
-    // The duration between focusguard checks
+    // The duration between focusguard checks (Vision Model invocations)
     pub duration_between_checks: Duration,
 
-    // Internal tracking variable to track the last time a screentap event was handled
+    // How long to delay before showing next distraction alert (eg, 30 mins)
+    duration_between_alerts: Duration,
+
+    // Track the last time a screentap event was handled
     last_screentap_time: Instant,
+
+    // Track the last time a distraction alert was shown
+    last_distraction_alert_time: Instant,
 
     // The backend to use for the LLaVA model
     llava_backend: LlavaBackendType,
@@ -79,90 +85,116 @@ impl FocusGuard {
             false => Duration::from_secs(5 * 60),
         };
 
-        // Set last_screentap_time so that it begins with an initial check
+        let duration_between_alerts = match DEV_MODE {
+            true => Duration::from_secs(60), 
+            false => Duration::from_secs(60 * 30),
+        };
+
+        // Initialize tracking vars so that it begins with an initial check
         let last_screentap_time = Instant::now() - duration_between_checks - Duration::from_secs(1);
+        let last_distraction_alert_time = Instant::now() - duration_between_alerts - Duration::from_secs(1);
 
         FocusGuard {
             job_title,
             job_role,
             openai_api_key,
             duration_between_checks: duration_between_checks,
+            duration_between_alerts: duration_between_alerts,
             last_screentap_time: last_screentap_time,
+            last_distraction_alert_time: last_distraction_alert_time,
             llava_backend: LlavaBackendType::LlamaFileSubprocess,
             productivity_score_threshold: 6,
             image_dimension_longest_side: 1200,
         }
     }
 
+    pub fn should_invoke_vision_model(&self, now: Instant) -> bool {
+        
+        // Check if enough time elapsed between checks
+        let elapsed = now.duration_since(self.last_screentap_time);
+        let enough_time_elapsed = elapsed > self.duration_between_checks;
+
+        // Check if enough time elapsed since last distraction alert
+        let elapsed_alert = now.duration_since(self.last_distraction_alert_time);
+        let enough_time_elapsed_alert = elapsed_alert > self.duration_between_alerts;
+
+        enough_time_elapsed && enough_time_elapsed_alert
+
+    }
+
     pub fn handle_screentap_event(&mut self, app: &tauri::AppHandle, png_data: Vec<u8>, png_image_path: &Path, ocr_text: String) {
 
         println!("FocusGuard handling screentap event with len(ocr_text): {} and len(png_data): {}", ocr_text.len(), png_data.len());
 
+        // Get the current time
         let now = Instant::now();
-        let elapsed = now.duration_since(self.last_screentap_time);
 
-        if elapsed > self.duration_between_checks {
+        if !self.should_invoke_vision_model(now) {
+            return
+        }
 
-            self.last_screentap_time = now;
+        self.last_screentap_time = now;
 
-            let prompt = self.create_prompt();
+        let prompt = self.create_prompt();
 
-            let productivity_score = match DEV_MODE {
-                true => {
-                    println!("FocusGuard returning hardcoded productivity score");
-                    2
-                },  
-                false => {
-                    // Invoke the actual vision model
-                    println!("FocusGuard analyzing image with {}", self.llava_backend);
+        let productivity_score = match DEV_MODE {
+            true => {
+                println!("FocusGuard returning hardcoded productivity score");
+                2
+            },  
+            false => {
+                // Invoke the actual vision model
+                println!("FocusGuard analyzing image with {}", self.llava_backend);
 
-                    // Resize the image before sending to the vision model
-                    let resize_img_result = FocusGuard::resize_image(
-                        png_data, 
-                        self.image_dimension_longest_side
-                    );
+                // Resize the image before sending to the vision model
+                let resize_img_result = FocusGuard::resize_image(
+                    png_data, 
+                    self.image_dimension_longest_side
+                );
 
-                    // Get the resized png data
-                    let resized_png_data = match resize_img_result {
-                        Ok(resized_img) => resized_img,
-                        Err(e) => {
-                            println!("Error resizing image: {}", e);
-                            return
-                        }
-                    };
-
-                    println!("Resized image length in bytes: {}", resized_png_data.len());
-
-                    let raw_result = match self.llava_backend {
-                        LlavaBackendType::OpenAI => self.invoke_openai_vision_model(&prompt, &resized_png_data),
-                        LlavaBackendType::Ollama => self.invoke_ollama_vision_model(&prompt, &resized_png_data),
-                        LlavaBackendType::LlamaFile => self.invoke_openai_vision_model(&prompt, &resized_png_data),
-                        LlavaBackendType::LlamaFileSubprocess => self.invoke_subprocess_vision_model(&prompt, &png_image_path),
-                    };
-
-                    match self.process_vision_model_result(&raw_result) { 
-                        Some(raw_result_i32) => {
-                            raw_result_i32
-                        },
-                        None => {
-                            println!("FocusGuard could not parsing raw result [{}] into number", raw_result);
-                            return
-                        }
+                // Get the resized png data
+                let resized_png_data = match resize_img_result {
+                    Ok(resized_img) => resized_img,
+                    Err(e) => {
+                        println!("Error resizing image: {}", e);
+                        return
                     }
+                };
 
+                println!("Resized image length in bytes: {}", resized_png_data.len());
+
+                let raw_result = match self.llava_backend {
+                    LlavaBackendType::OpenAI => self.invoke_openai_vision_model(&prompt, &resized_png_data),
+                    LlavaBackendType::Ollama => self.invoke_ollama_vision_model(&prompt, &resized_png_data),
+                    LlavaBackendType::LlamaFile => self.invoke_openai_vision_model(&prompt, &resized_png_data),
+                    LlavaBackendType::LlamaFileSubprocess => self.invoke_subprocess_vision_model(&prompt, &png_image_path),
+                };
+
+                match self.process_vision_model_result(&raw_result) { 
+                    Some(raw_result_i32) => {
+                        raw_result_i32
+                    },
+                    None => {
+                        println!("FocusGuard could not parsing raw result [{}] into number", raw_result);
+                        return
+                    }
                 }
-            };
 
-            if productivity_score < self.productivity_score_threshold {
-                println!("Productivity score is low: {}", productivity_score);
-
-                self.show_productivity_alert(app, productivity_score);
-
-            } else {
-                println!("Woohoo!  Looks like you're working.  Score is: {}", productivity_score);
             }
+        };
 
-        } 
+        if productivity_score < self.productivity_score_threshold {
+            println!("Productivity score is low: {}", productivity_score);
+
+            self.show_productivity_alert(app, productivity_score);
+
+            self.last_distraction_alert_time = Instant::now();
+
+
+        } else {
+            println!("Woohoo!  Looks like you're working.  Score is: {}", productivity_score);
+        }
+
 
     }
 
@@ -199,6 +231,7 @@ impl FocusGuard {
     }
 
     fn show_productivity_alert(&self, app: &tauri::AppHandle, productivity_score: i32) {
+
 
         // TODO: pass the score to the UI somehow
         println!("Showing productivity alert for score: {}", productivity_score);
