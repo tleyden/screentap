@@ -113,12 +113,18 @@ impl FocusGuard {
             
             Some(config) => {
 
-                let llava_backend = LlavaBackendType::from_str(&config.llava_backend).expect("Failed to parse vision model backend type");
+                let llava_backend = match LlavaBackendType::from_str(&config.llava_backend) {
+                    Ok(llava_backend) => llava_backend,
+                    Err(_) => {
+                        println!("Invalid LlavaBackendType: {}.  Not starting FocusGuard plugin.", config.llava_backend);
+                        return None
+                    }
+                };
 
                 if llava_backend == LlavaBackendType::OpenAI && openai_api_key.is_empty() {
                     println!("OpenAI API key is required for OpenAI backend");
                     return None
-                } 
+                };
 
                 FocusGuard::new(
                     config.job_title,

@@ -154,6 +154,9 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
         // TODO: review this, it feels a bit overcomplicated
         PathBuf::from(app_data_dir.clone()),  
     );
+    if focus_guard_option.is_none() {
+        println!("FocusGuard not initialized");
+    }
 
     // Get an app handle from the app since this can be moved to threads
     let app_handle = app.app_handle();
@@ -193,7 +196,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
                                 ocr_text,
                             );        
                         },
-                        None => println!("Focusguard was not initialized, skipping")
+                        None => ()
                     }
                 },
                 Err(e) => {
