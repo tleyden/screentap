@@ -8,7 +8,7 @@ use serde_json::json;
 use std::fmt;
 use image::{GenericImageView, imageops::FilterType};
 use std::io::Cursor;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::env;
 use std::str::FromStr;
@@ -19,7 +19,8 @@ const DEV_MODE: bool = false;
 
 // Create an enum with three possible values: openai, llamafile, and ollama
 #[allow(dead_code)]
-enum LlavaBackendType {
+#[derive(PartialEq)]
+pub enum LlavaBackendType {
 
     // This works
     OpenAI,
@@ -91,11 +92,15 @@ pub struct FocusGuard {
     // to consume less tokens during inference. 
     image_dimension_longest_side: u32,
 
+    // The path to the app data directory in order to find plugin assets like
+    // the Llamafile binary
+    app_data_dir: PathBuf,
+
 }
 
 impl FocusGuard {
 
-    pub fn new_from_config(app_data_dir: &Path) -> Option<FocusGuard> {
+    pub fn new_from_config(app_data_dir: PathBuf) -> Option<FocusGuard> {
 
         // Register plugin - create a new focusguard struct
         let openai_api_key = match env::var("OPENAI_API_KEY") {
@@ -103,18 +108,28 @@ impl FocusGuard {
             Err(_) => "".to_string()
         };
 
-        let focus_guard_config = config::FocusGuardConfig::new(app_data_dir);
+        let focus_guard_config = config::FocusGuardConfig::new(app_data_dir.as_path());
         let focus_guard = match focus_guard_config {
+            
             Some(config) => {
+
+                let llava_backend = LlavaBackendType::from_str(&config.llava_backend).expect("Failed to parse vision model backend type");
+
+                if llava_backend == LlavaBackendType::OpenAI && openai_api_key.is_empty() {
+                    println!("OpenAI API key is required for OpenAI backend");
+                    return None
+                } 
+
                 FocusGuard::new(
                     config.job_title,
                     config.job_role,
                     openai_api_key,
                     config.duration_between_checks_secs,
                     config.duration_between_alerts_secs,
-                    config.llava_backend,
+                    llava_backend,
                     config.productivity_score_threshold,
-                    config.image_dimension_longest_side
+                    config.image_dimension_longest_side,
+                    app_data_dir
                 )
             },
             None => {
@@ -132,9 +147,10 @@ impl FocusGuard {
         openai_api_key: String, 
         duration_between_checks_secs: u64,
         duration_between_alerts_secs: u64,
-        llava_backend_str: String,
+        llava_backend: LlavaBackendType,
         productivity_score_threshold: i32,
         image_dimension_longest_side: u32,
+        app_data_dir: PathBuf
     ) -> FocusGuard {
 
         let duration_between_checks = Duration::from_secs(duration_between_checks_secs);
@@ -144,8 +160,6 @@ impl FocusGuard {
         let last_screentap_time = Instant::now() - duration_between_checks - Duration::from_secs(1);
         let last_distraction_alert_time = Instant::now() - duration_between_alerts - Duration::from_secs(1);
 
-        let llava_backend = LlavaBackendType::from_str(&llava_backend_str).expect("Failed to parse vision model backend type");
-        
         FocusGuard {
             job_title,
             job_role,
@@ -156,7 +170,8 @@ impl FocusGuard {
             last_distraction_alert_time: last_distraction_alert_time,
             llava_backend: llava_backend,
             productivity_score_threshold: productivity_score_threshold,
-            image_dimension_longest_side: image_dimension_longest_side
+            image_dimension_longest_side: image_dimension_longest_side,
+            app_data_dir
         }
 
     }
@@ -375,8 +390,15 @@ impl FocusGuard {
 
         let full_prompt = format!("### User: {}\n ### Assistant:", prompt);
 
+        // before: Command::new("/Users/tleyden/Development/screentap/screentap-app/src-tauri/llava-v1.5-7b-q4.llamafile")
+        let llamafile_path = self.app_data_dir.join("plugins").join("focusguard").join("llava-v1.5-7b-q4.llamafile");
+        if !llamafile_path.exists() {
+            println!("Cannot find Llamafile at {}, skipping inference and returning empty string", llamafile_path.display());
+            return "".to_string();
+        } 
+
         // sh ./llava-v1.5-7b-q4.llamafile -ngl 9999 --image ~/Desktop/2024_02_15_10_24_53.png -e -p '### User: On a scale of 1 to 10, how much does this screenshot indicate..'
-        let output = Command::new("/Users/tleyden/Development/screentap/screentap-app/src-tauri/llava-v1.5-7b-q4.llamafile")
+        let output = Command::new(llamafile_path)
             .arg("-ngl")
             .arg("9999")
             .arg("--image")

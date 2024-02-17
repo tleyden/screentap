@@ -55,7 +55,7 @@ fn browse_screenshots(app_handle: tauri::AppHandle, cur_id: i32, direction: &str
 
     println!("browse_screenshots: cur_id: {}, direction: {}", cur_id, direction);
 
-    let app_data_dir = get_effective_app_dir(app_handle);
+    let app_data_dir: PathBuf = get_effective_app_dir(app_handle);
 
     let db_filename_path = Path::new(DATABASE_FILENAME);
 
@@ -147,16 +147,13 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
         compaction::DEFAULT_MAX_IMAGE_FILES,
     );
 
-
+    // Create a focusguard instance
     let mut focus_guard_option = focusguard::FocusGuard::new_from_config(
-        app_data_dir.as_path(),
+        // Clone app_data_dir so focusguard can own the app data dir path instance
+        // and we avoid reference lifetime issues
+        // TODO: review this, it feels a bit overcomplicated
+        PathBuf::from(app_data_dir.clone()),  
     );
-
-    // let mut focus_guard = focusguard::FocusGuard::new(
-    //     "Software Developer".to_string(),
-    //     "Write software using VSCode, AWS, and other software related tools".to_string(),
-    //     openai_api_key
-    // );
 
     // Get an app handle from the app since this can be moved to threads
     let app_handle = app.app_handle();

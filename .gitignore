@@ -3,3 +3,5 @@ dataset.old
 **/.DS_Store
 test-image-gallery
 local_test_dataset
+screentap-app/plugins/focusguard/*.llamafile
+screentap-app/plugins/focusguard/config.toml
