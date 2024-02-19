@@ -8,7 +8,7 @@ swift!(fn perform_ocr_swift(path: &SRString) -> Option<SRString>);
 swift!(fn screen_capture_swift() -> Option<SRData>);    
 swift!(fn write_images_in_dir_to_mp4_swift(directory_path: &SRString, target_filename: &SRString, use_bitrate_key: Bool) -> ());
 swift!(fn extract_frame_from_mp4_swift(mp4_path: &SRString, frame_id: Int) -> Option<SRData>);    
-
+swift!(fn get_frontmost_app_swift() -> SRString);
 
 
 pub fn extract_frame_from_mp4(mp4_path: &str, frame_id: isize) -> Option<SRData> {
@@ -53,6 +53,15 @@ pub fn extract_text(path: &str) -> String {
     let result = unsafe { perform_ocr_swift(&value) };
     String::from(result.unwrap().as_str())
 }
+
+/**
+ * Get the name of the frontmost app
+ */
+pub fn get_frontmost_app() -> String {
+    let result = unsafe { get_frontmost_app_swift() };
+    result.to_string()
+}
+
 
 /**
  * Capture the screen and write to a file

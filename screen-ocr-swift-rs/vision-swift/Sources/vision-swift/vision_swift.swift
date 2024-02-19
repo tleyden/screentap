@@ -4,7 +4,7 @@ import Vision
 import ScreenCaptureKit
 import CoreGraphics
 import AVFoundation
-
+import Cocoa
 
 /**
  * Write all of the PNG images in a directory into an mp4 file given by 
@@ -60,12 +60,27 @@ public func extract_frame_from_mp4(mp4_path: SRString, frame_id: Int) -> SRData?
     return nil
 }
 
+@_cdecl("get_frontmost_app_swift")
+@available(macOS 10.15, *)
+public func get_frontmost_app() -> SRString {
+    if let appname = NSWorkspace.shared.frontmostApplication {
+        if let localized_name = appname.localizedName {
+            return SRString(localized_name)
+        } else {
+            return SRString("")
+        }
+    } else {
+        return SRString("")
+    }
+}
+
 /**
  * Capture the screen and return the image as a PNG encoded byte array
  */
 @_cdecl("screen_capture_swift")
 @available(macOS 10.15, *)
 public func screen_capture() -> SRData? {
+
 
     // Specify the display to capture (main display in this case)
     let displayID = CGMainDisplayID()

@@ -196,9 +196,9 @@ impl FocusGuard {
 
     }
 
-    pub fn handle_screentap_event(&mut self, app: &tauri::AppHandle, png_data: Vec<u8>, png_image_path: &Path, ocr_text: String) {
+    pub fn handle_screentap_event(&mut self, app: &tauri::AppHandle, png_data: Vec<u8>, png_image_path: &Path, ocr_text: String, frontmost_app: String) {
 
-        println!("FocusGuard handling screentap event with len(ocr_text): {} and len(png_data): {}", ocr_text.len(), png_data.len());
+        println!("FocusGuard handling screentap event with len(ocr_text): {} and len(png_data): {} frontmost app: {}", ocr_text.len(), png_data.len(), frontmost_app);
 
         // Get the current time
         let now = Instant::now();

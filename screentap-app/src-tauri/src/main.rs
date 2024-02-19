@@ -187,13 +187,18 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
                 Ok((png_data, ocr_text, png_image_path)) => {
                     // Invoke plugins
                     match focus_guard_option {
+
                         // TODO: any way to avoid this confusing "ref mut" stuff?
                         Some(ref mut focus_guard) => {
+
+                            let frontmost_app = screen_ocr_swift_rs::get_frontmost_app();
+
                             focus_guard.handle_screentap_event(
                                 &app_handle,
                                 png_data,
                                 png_image_path.as_path(),
                                 ocr_text,
+                                frontmost_app
                             );        
                         },
                         None => ()
