@@ -6,6 +6,43 @@ import CoreGraphics
 import AVFoundation
 import Cocoa
 
+
+public class ApplicationObserver: NSObject {
+
+    var added_observer: Bool = false
+
+    override init() {
+        super.init()
+        if !added_observer {
+            observeFrontmostApplication()
+        }
+        added_observer = true
+        // observeFrontmostApplication()
+    }
+
+    private func observeFrontmostApplication() {
+        print("Added observer didActivateApplicationNotification")
+        NotificationCenter.default.addObserver(self, selector: #selector(applicationDidActivate), name: NSWorkspace.didActivateApplicationNotification, object: nil)
+    }
+
+    @objc private func applicationDidActivate(notification: Notification) {
+        print("applicationDidActivate: \(notification)")
+        if let userInfo = notification.userInfo,
+           let app = userInfo[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+           let localizedName = app.localizedName {
+            // Here, you can use your SRString or any other logic with the localizedName
+            print("applicationDidActivate: Frontmost application is now: \(localizedName)")
+        }
+    }
+
+    deinit {
+        print("removeObserver didActivateApplicationNotification")
+        NotificationCenter.default.removeObserver(self)
+    }
+}
+
+
+
 /**
  * Write all of the PNG images in a directory into an mp4 file given by 
  * targetFilename
@@ -60,6 +97,15 @@ public func extract_frame_from_mp4(mp4_path: SRString, frame_id: Int) -> SRData?
     return nil
 }
 
+@_cdecl("create_app_change_observer_swift")
+@available(macOS 10.15, *)
+public func create_app_change_observer() -> ApplicationObserver {
+    let app_observer = ApplicationObserver()
+    return app_observer
+}
+
+
+
 /**
  * TODO: this is returning stale cached values.  Look at other approaches instead.
  * https://stackoverflow.com/questions/33393216/objective-c-refreshing-frontmostapplication
@@ -67,6 +113,7 @@ public func extract_frame_from_mp4(mp4_path: SRString, frame_id: Int) -> SRData?
 @_cdecl("get_frontmost_app_swift")
 @available(macOS 10.15, *)
 public func get_frontmost_app() -> SRString {
+
     if let appname = NSWorkspace.shared.frontmostApplication {
         if let localized_name = appname.localizedName {
             return SRString(localized_name)
