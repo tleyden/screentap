@@ -1,21 +1,14 @@
-use swift_rs::{swift, SRString, SRData, Int, Bool, SRObject};
+use swift_rs::{swift, SRString, SRData, Int, Bool};
 
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufWriter;
-
-#[repr(C)]
-// Struct matches the class declaration in Swift
-pub struct ApplicationObserver {
-    added_observer: bool
-}
 
 swift!(fn perform_ocr_swift(path: &SRString) -> Option<SRString>);
 swift!(fn screen_capture_swift() -> Option<SRData>);    
 swift!(fn write_images_in_dir_to_mp4_swift(directory_path: &SRString, target_filename: &SRString, use_bitrate_key: Bool) -> ());
 swift!(fn extract_frame_from_mp4_swift(mp4_path: &SRString, frame_id: Int) -> Option<SRData>);    
 swift!(fn get_frontmost_app_swift() -> SRString);
-swift!(fn create_app_change_observer_swift() -> SRObject<ApplicationObserver>);
 
 
 pub fn extract_frame_from_mp4(mp4_path: &str, frame_id: isize) -> Option<SRData> {
@@ -24,6 +17,7 @@ pub fn extract_frame_from_mp4(mp4_path: &str, frame_id: isize) -> Option<SRData>
     let result = unsafe { extract_frame_from_mp4_swift(&mp4_path_str, frame_id) };
     result
 }
+
 
 
 /**
@@ -68,13 +62,6 @@ pub fn get_frontmost_app() -> String {
     result.to_string()
 }
 
-
-pub fn create_app_change_observer_rust() -> ApplicationObserver {
-    let result = unsafe { create_app_change_observer_swift() };
-    ApplicationObserver {
-        added_observer: result.added_observer
-    }
-}
 
 /**
  * Capture the screen and write to a file

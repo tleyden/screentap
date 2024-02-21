@@ -161,9 +161,6 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
     let mut last_screenshot_time = Local::now().naive_utc();
     let mut last_frontmost_app = screen_ocr_swift_rs::get_frontmost_app();
 
-    let app_observer = screen_ocr_swift_rs::create_app_change_observer_rust();
-    println!("created app_observer");
-
     // Create a compaction helper
     let compaction_helper = compaction::CompactionHelper::new(
         app_data_dir.clone(), 
