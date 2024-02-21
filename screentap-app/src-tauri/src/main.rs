@@ -205,7 +205,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
             }
 
             // Get the name of the frontmost app
-            let cur_frontmost_app = screen_ocr_swift_rs::get_frontmost_app();
+            let cur_frontmost_app = utils::get_frontmost_app_via_applescript();
 
             // Check if it's time to capture a new screenshot based on whether the
             // frontmost app has changed or if it's been a while since the last screenshot

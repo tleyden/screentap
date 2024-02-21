@@ -61,8 +61,9 @@ public func extract_frame_from_mp4(mp4_path: SRString, frame_id: Int) -> SRData?
 }
 
 /**
- * TODO: this is returning stale cached values.  Look at other approaches instead.
- * https://stackoverflow.com/questions/33393216/objective-c-refreshing-frontmostapplication
+ * NOTE: no longer used because it was returning stale values, and using KVO observing
+ * or NSWorkspace.DidActivateApplicationNotification appears to be difficult to do
+ * with the swift-rs bridge.
  */
 @_cdecl("get_frontmost_app_swift")
 @available(macOS 10.15, *)

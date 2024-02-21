@@ -56,6 +56,10 @@ pub fn extract_text(path: &str) -> String {
 
 /**
  * Get the name of the frontmost app
+ * 
+ * NOTE: no longer used because it was returning stale values, and using KVO observing
+ * or NSWorkspace.DidActivateApplicationNotification appears to be difficult to do
+ * with the swift-rs bridge.
  */
 pub fn get_frontmost_app() -> String {
     let result = unsafe { get_frontmost_app_swift() };
