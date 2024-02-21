@@ -25,24 +25,19 @@ pub fn execute_applescript(script: &str) -> String {
 }
 
 /**
- * Get the name of the frontmost app via applescript
+ * Get the name of the frontmost app via applescript.  This uses the bundle identifier
+ * since it is more informative.  For example, just using the "name" will return "Electron"
+ * for VSCode, while using the bundle identifier will return "com.microsoft.VSCode".
  */
 pub fn get_frontmost_app_via_applescript() -> (String, String) {
     let script = r#"
-        tell application "System Events" to tell (first process whose frontmost is true) to return name
+    tell application "System Events" to tell (first process whose frontmost is true) to get the bundle identifier of it
     "#;
-    // let output = std::process::Command::new("osascript")
-    //     .arg("-e")
-    //     .arg(script)
-    //     .output()
-    //     .expect("Failed to execute osascript");
-    // let output_str = String::from_utf8_lossy(&output.stdout);
     let frontmost_app = execute_applescript(script);
 
-
-    let browser_tab_name = if frontmost_app == "Google Chrome" {
+    let browser_tab_name = if frontmost_app == "com.google.Chrome" {
         get_chrome_browser_tab_name()
-    } else if frontmost_app == "Safari" {
+    } else if frontmost_app == "com.apple.Safari" {
         get_safari_browser_tab_name()
     } else {
         "".to_string()
@@ -86,7 +81,7 @@ pub fn frontmost_app_or_browser_tab_changed(cur_frontmost_app: &str, last_frontm
         return true
     }
 
-    if cur_frontmost_app == "Google Chrome" || cur_frontmost_app == "Safari" {
+    if cur_frontmost_app == "com.google.Chrome" || cur_frontmost_app == "com.apple.Safari" {
         return cur_browser_tab != last_browser_tab
     }
 
