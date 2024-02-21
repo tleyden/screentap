@@ -159,7 +159,8 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
         }
     }
     let mut last_screenshot_time = Local::now().naive_utc();
-    let mut last_frontmost_app = screen_ocr_swift_rs::get_frontmost_app();
+    // let mut last_frontmost_app = screen_ocr_swift_rs::get_frontmost_app();
+    let (mut last_frontmost_app, mut last_browser_tab) = utils::get_frontmost_app_via_applescript();
 
     // Create a compaction helper
     let compaction_helper = compaction::CompactionHelper::new(
@@ -205,16 +206,22 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
             }
 
             // Get the name of the frontmost app
-            let cur_frontmost_app = utils::get_frontmost_app_via_applescript();
+            let (cur_frontmost_app, cur_browser_tab) = utils::get_frontmost_app_via_applescript();
 
             // Check if it's time to capture a new screenshot based on whether the
             // frontmost app has changed or if it's been a while since the last screenshot
-            let frontmost_app_changed = cur_frontmost_app != last_frontmost_app;
-            println!("frontmost_app_changed: {} cur_frontmost_app: {} last_frontmost_app: {}", frontmost_app_changed, &cur_frontmost_app, last_frontmost_app);
+            // let frontmost_app_changed = cur_frontmost_app != last_frontmost_app;
+            // println!("frontmost_app_changed: {} cur_frontmost_app: {} last_frontmost_app: {}", frontmost_app_changed, &cur_frontmost_app, last_frontmost_app);
+            
+            // let frontmost_app_or_tab_changed =  cur_frontmost_app != last_frontmost_app || cur_browser_tab != last_browser_tab;
+            let frontmost_app_or_tab_changed = utils::frontmost_app_or_browser_tab_changed(&cur_frontmost_app, &last_frontmost_app, &cur_browser_tab, &last_browser_tab);
+            println!("frontmost_app_or_tab_changed: {} cur_frontmost_app: {} last_frontmost_app: {} cur_browser_tab: {}, last_browser_tab: {}", frontmost_app_or_tab_changed, &cur_frontmost_app, last_frontmost_app, cur_browser_tab, last_browser_tab);
 
             last_frontmost_app = cur_frontmost_app;
+            last_browser_tab = cur_browser_tab;
 
-            let should_capture = should_capture_screenshot(last_screenshot_time, now, frontmost_app_changed);
+
+            let should_capture = should_capture_screenshot(last_screenshot_time, now, frontmost_app_or_tab_changed);
             println!("Should_capture: {} last_screenshot_time: {} now: {}", should_capture, last_screenshot_time, now);
 
             if should_capture {
@@ -238,7 +245,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
                                     png_image_path.as_path(),
                                     ocr_text,
                                     &last_frontmost_app,
-                                    frontmost_app_changed
+                                    frontmost_app_or_tab_changed
                                 );        
                             },
                             None => ()

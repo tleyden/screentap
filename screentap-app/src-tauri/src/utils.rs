@@ -13,13 +13,7 @@ pub fn generate_filename(now: NaiveDateTime, extension: &str) -> PathBuf {
 }
 
 
-/**
- * Get the name of the frontmost app via applescript
- */
-pub fn get_frontmost_app_via_applescript() -> String {
-    let script = r#"
-        tell application "System Events" to tell (first process whose frontmost is true) to return name
-    "#;
+pub fn execute_applescript(script: &str) -> String {
     let output = std::process::Command::new("osascript")
         .arg("-e")
         .arg(script)
@@ -27,4 +21,75 @@ pub fn get_frontmost_app_via_applescript() -> String {
         .expect("Failed to execute osascript");
     let output_str = String::from_utf8_lossy(&output.stdout);
     output_str.trim().to_string()
+
+}
+
+/**
+ * Get the name of the frontmost app via applescript
+ */
+pub fn get_frontmost_app_via_applescript() -> (String, String) {
+    let script = r#"
+        tell application "System Events" to tell (first process whose frontmost is true) to return name
+    "#;
+    // let output = std::process::Command::new("osascript")
+    //     .arg("-e")
+    //     .arg(script)
+    //     .output()
+    //     .expect("Failed to execute osascript");
+    // let output_str = String::from_utf8_lossy(&output.stdout);
+    let frontmost_app = execute_applescript(script);
+
+
+    let browser_tab_name = if frontmost_app == "Google Chrome" {
+        get_chrome_browser_tab_name()
+    } else if frontmost_app == "Safari" {
+        get_safari_browser_tab_name()
+    } else {
+        "".to_string()
+    };
+
+    (frontmost_app, browser_tab_name)
+
+
+}
+
+pub fn get_chrome_browser_tab_name() -> String {
+    let script = r#"
+        tell application "Google Chrome"
+            set theTitle to title of active tab of front window
+            return theTitle
+        end tell
+    "#;
+    execute_applescript(script)
+}
+
+pub fn get_safari_browser_tab_name() -> String {
+    let script = r#"
+        tell application "Safari"
+            set theTitle to name of front document
+            return theTitle
+        end tell
+    "#;
+    execute_applescript(script)
+
+}
+
+/**
+ * Has the frontmost app or browser tab changed?
+ * 
+ * If the frontmost app has changed, return true.
+ * Otherwise, if the frontmost app is a browser, check if the tab has changed
+ */
+pub fn frontmost_app_or_browser_tab_changed(cur_frontmost_app: &str, last_frontmost_app: &str, cur_browser_tab: &str, last_browser_tab: &str) -> bool {
+
+    if cur_frontmost_app != last_frontmost_app {
+        return true
+    }
+
+    if cur_frontmost_app == "Google Chrome" || cur_frontmost_app == "Safari" {
+        return cur_browser_tab != last_browser_tab
+    }
+
+    return false
+
 }
