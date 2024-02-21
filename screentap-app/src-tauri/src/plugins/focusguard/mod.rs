@@ -182,28 +182,54 @@ impl FocusGuard {
 
     }
 
-    pub fn should_invoke_vision_model(&self, now: Instant) -> bool {
-        
-        // Check if enough time elapsed between checks
-        let elapsed = now.duration_since(self.last_screentap_time);
-        let enough_time_elapsed = elapsed > self.duration_between_checks;
+    /**
+     * The logic is as follows:
+     * 
+     * - First check if enough time has elapsed since the last distraction alert.  If not, return false.
+     * - Then check if either of the following conditions are true:
+     *   - The frontmost app has changed
+     *   - Enough time has elapsed since the last screentap event was processed
+     * 
+     */
+    pub fn should_invoke_vision_model(&self, now: Instant, frontmost_app_changed: bool) -> bool {
 
-        // Check if enough time elapsed since last distraction alert
+        // Check if enough time elapsed since last distraction alert.  We don't want to hound the user
+        // with alerts if they already know they're in a distraction state
         let elapsed_alert = now.duration_since(self.last_distraction_alert_time);
         let enough_time_elapsed_alert = elapsed_alert > self.duration_between_alerts;
+        if !enough_time_elapsed_alert {
+            println!("Not enough time elapsed since last distraction alert.  elapsed_alert: {:?}", elapsed_alert);
+            return false
+        }
 
-        enough_time_elapsed && enough_time_elapsed_alert
+        // If the frontmost app changed, then we should invoke the vision model immediately, since it is 
+        // much more likely that the user has entered a distraction zone
+        if frontmost_app_changed {
+            println!("Frontmost app changed, so invoking vision model");
+            return true
+        }
+                
+        // If we got this far, check if enough time elapsed between checks to justify invoking the vision model  
+        let elapsed = now.duration_since(self.last_screentap_time);
+        let enough_time_elapsed = elapsed > self.duration_between_checks;
+        if enough_time_elapsed {
+            println!("Enough time elapsed since last screentap event and last distraction alert.  elapsed_alert: {:?} elapsed: {:?} ", elapsed_alert, elapsed);
+        } else {
+            println!("Not enough time elapsed since last screentap event and last distraction alert.  elapsed_alert: {:?} elapsed: {:?} ", elapsed_alert, elapsed);
+        }
+
+        enough_time_elapsed
 
     }
 
-    pub fn handle_screentap_event(&mut self, app: &tauri::AppHandle, png_data: Vec<u8>, png_image_path: &Path, ocr_text: String, frontmost_app: String) {
+    pub fn handle_screentap_event(&mut self, app: &tauri::AppHandle, png_data: Vec<u8>, png_image_path: &Path, ocr_text: String, frontmost_app: &str, frontmost_app_changed: bool) {
 
         println!("FocusGuard handling screentap event with len(ocr_text): {} and len(png_data): {} frontmost app: {}", ocr_text.len(), png_data.len(), frontmost_app);
 
         // Get the current time
         let now = Instant::now();
 
-        if !self.should_invoke_vision_model(now) {
+        if !self.should_invoke_vision_model(now, frontmost_app_changed) {
             return
         }
 
@@ -218,9 +244,13 @@ impl FocusGuard {
             },  
             false => {
                 // Invoke the actual vision model
-                println!("FocusGuard analyzing image with {}", self.llava_backend);
+                println!("FocusGuard analyzing image with {}.  Resizing image ..", self.llava_backend);
+
+                let now = Instant::now();
 
                 // Resize the image before sending to the vision model
+                // TODO: just capture image in target dimensions in the first place, this will save a lot of resources.
+                // TODO: or if that's not possible, move the resizing to native swift libraries to take adcantage of apple silicon
                 let resize_img_result = FocusGuard::resize_image(
                     png_data, 
                     self.image_dimension_longest_side
@@ -235,7 +265,10 @@ impl FocusGuard {
                     }
                 };
 
-                println!("Resized image length in bytes: {}", resized_png_data.len());
+                let time_to_resize = now.elapsed();
+                println!("Resized image length in bytes: {}: time_to_resize: {:?}", resized_png_data.len(), time_to_resize);
+
+                let now2 = Instant::now();
 
                 let raw_result = match self.llava_backend {
                     LlavaBackendType::OpenAI => self.invoke_openai_vision_model(&prompt, &resized_png_data),
@@ -243,6 +276,9 @@ impl FocusGuard {
                     LlavaBackendType::LlamaFile => self.invoke_openai_vision_model(&prompt, &resized_png_data),
                     LlavaBackendType::LlamaFileSubprocess => self.invoke_subprocess_vision_model(&prompt, &png_image_path),
                 };
+
+                let time_to_infer = now2.elapsed();
+                println!("time_to_infer: {:?}", time_to_infer);
 
                 match self.process_vision_model_result(&raw_result) { 
                     Some(raw_result_i32) => {

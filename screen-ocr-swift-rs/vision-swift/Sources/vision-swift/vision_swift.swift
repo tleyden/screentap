@@ -60,6 +60,10 @@ public func extract_frame_from_mp4(mp4_path: SRString, frame_id: Int) -> SRData?
     return nil
 }
 
+/**
+ * TODO: this is returning stale cached values.  Look at other approaches instead.
+ * https://stackoverflow.com/questions/33393216/objective-c-refreshing-frontmostapplication
+ */
 @_cdecl("get_frontmost_app_swift")
 @available(macOS 10.15, *)
 public func get_frontmost_app() -> SRString {
