@@ -205,21 +205,13 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
                 );
             }
 
-            // Get the name of the frontmost app
+            // Get the name of the frontmost app and browser tab (if applicable)
             let (cur_frontmost_app, cur_browser_tab) = utils::get_frontmost_app_via_applescript();
-
-            // Check if it's time to capture a new screenshot based on whether the
-            // frontmost app has changed or if it's been a while since the last screenshot
-            // let frontmost_app_changed = cur_frontmost_app != last_frontmost_app;
-            // println!("frontmost_app_changed: {} cur_frontmost_app: {} last_frontmost_app: {}", frontmost_app_changed, &cur_frontmost_app, last_frontmost_app);
-            
-            // let frontmost_app_or_tab_changed =  cur_frontmost_app != last_frontmost_app || cur_browser_tab != last_browser_tab;
             let frontmost_app_or_tab_changed = utils::frontmost_app_or_browser_tab_changed(&cur_frontmost_app, &last_frontmost_app, &cur_browser_tab, &last_browser_tab);
             println!("frontmost_app_or_tab_changed: {} cur_frontmost_app: {} last_frontmost_app: {} cur_browser_tab: {}, last_browser_tab: {}", frontmost_app_or_tab_changed, &cur_frontmost_app, last_frontmost_app, cur_browser_tab, last_browser_tab);
 
             last_frontmost_app = cur_frontmost_app;
             last_browser_tab = cur_browser_tab;
-
 
             let should_capture = should_capture_screenshot(last_screenshot_time, now, frontmost_app_or_tab_changed);
             println!("Should_capture: {} last_screenshot_time: {} now: {}", should_capture, last_screenshot_time, now);
@@ -229,7 +221,6 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
                 // Update tracking variables
                 last_screenshot_time = now;
                 
-
                 // Capture a screenshot, OCR and save it to DB
                 let screenshot_result = screenshot::save_screenshot(app_data_dir.as_path(), db_filename_path);
                 match screenshot_result {
@@ -256,11 +247,6 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
                     }
                 }
             }
-
-
-
-
-
 
             thread::sleep(Duration::from_secs(DURATION_BETWEEN_SCREEN_CAPTURES_CHECKS as u64));
 
