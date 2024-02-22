@@ -3,6 +3,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { invoke } from "@tauri-apps/api/tauri";
+import { listen } from '@tauri-apps/api/event';
 
 // Keep this as an array because eventually we might request 
 // these in blocks
@@ -23,10 +24,37 @@ async function getScreenshot() {
     // getScreenshotResult.value = await invoke("browse_screenshots", { curId: window.__SCREENTAP_SCREENSHOT__.id, direction: "backward" });
 }
 
+async function getScreenshotById(id) {
+    console.log('getScreenshotById:', id);
+    getScreenshotResult.value = await invoke("browse_screenshots", { 
+            curId: id, 
+            direction: "exact" 
+        });
+    console.log('/getScreenshotById:', id);
+}
+
+
 
 function getBase64Image(dynamicBase64: string) {
   return dynamicBase64 ? `data:image/png;base64,${dynamicBase64}` : '';
 }
+
+
+// Listen for the custom event emitted from Rust
+/**
+ *                 let event_name = "update-screenshot-event"; // The event name to emit
+                let payload = serde_json::json!({
+                    "screenshot_id": screenshot_id
+                });
+ * 
+ */
+listen('update-screenshot-event', (event) => {
+  console.log('Event received from Rust:', event.payload);
+  console.log('screenshot_id:', event.payload.screenshot_id);
+  getScreenshotById(event.payload.screenshot_id);
+
+});
+
 
 getScreenshot()
 

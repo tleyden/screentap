@@ -357,10 +357,10 @@ impl FocusGuard {
                 w.show().unwrap();
                 w.set_focus().unwrap();
                 
-                let event_name = "my-custom-event"; // The event name to emit
+                let event_name = "update-screenshot-event"; // The event name to emit
                 let payload = serde_json::json!({
-                    "message": "Hello from Rust! - send event to current window"
-                }); // Payload to send with the event, serialized as JSON
+                    "screenshot_id": screenshot_id
+                });
 
                 // Emitting the event to the JavaScript running in the window
                 if let Err(e) = w.emit(event_name, Some(payload)) {
@@ -371,6 +371,9 @@ impl FocusGuard {
 
                 println!("Window does not exist, creating and showing new productivity alert window");
 
+                // Use an init script approach when creating a new window, since sending an event
+                // did not work in my testing.  Maybe it's not ready for events yet as some sort
+                // of race condition?
                 let init_script = get_init_script(screenshot_id);
                 println!("init_script: {}", init_script);
 

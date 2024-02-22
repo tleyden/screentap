@@ -7,6 +7,13 @@ import Focusguard from "./components/Focusguard.vue";
 import { listen } from '@tauri-apps/api/event';
 
 // Listen for the custom event emitted from Rust
+/**
+ *                 let event_name = "update-screenshot-event"; // The event name to emit
+                let payload = serde_json::json!({
+                    "screenshot_id": screenshot_id
+                });
+ * 
+ */
 listen('my-custom-event', (event) => {
   console.log('Event received from Rust:', event.payload);
 
