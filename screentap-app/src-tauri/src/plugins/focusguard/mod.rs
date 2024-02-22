@@ -382,7 +382,7 @@ impl FocusGuard {
 
                 // "#;
 
-                let init_script = get_init_script(png_image_path.to_str().unwrap(), screenshot_id);
+                let init_script = get_init_script(screenshot_id);
                 println!("init_script: {}", init_script);
 
                 // Create and show new window
@@ -630,18 +630,11 @@ impl FocusGuard {
 }
 
 
-fn get_init_script(console_log: &str, screenshot_id: i64) -> String {
-    format!(r#"
-        console.log("hello world from js init script");
-        console.log("console_log", "{}");
-        console.log("screenshot_id", "{}");
-    
-        window.__MY_CUSTOM_PROPERTY__ = {{ foo: 'bar' }};
+fn get_init_script(screenshot_id: i64) -> String {
+    format!(r#"    
+        window.__SCREENTAP_SCREENSHOT__ = {{ id: '{}' }};
 
-        const button = document.createElement('button');
-        button.textContent = 'click me too';
-        document.body.appendChild(button);
-    "#, console_log, screenshot_id)
+    "#, screenshot_id)
 }
 
 // Structs for payload
