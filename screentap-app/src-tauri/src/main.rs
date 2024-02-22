@@ -92,6 +92,7 @@ fn browse_screenshots(app_handle: tauri::AppHandle, cur_id: i32, direction: &str
             let target_id = match direction {
                 "forward" => cur_id + 1,
                 "backward" => cur_id - 1,
+                "exact" => cur_id,
                 _ => cur_id,
             };
             db::get_screenshot_by_id(

@@ -9,7 +9,18 @@ import { invoke } from "@tauri-apps/api/tauri";
 const getScreenshotResult = ref([]);
 
 async function getScreenshot() {
-    getScreenshotResult.value = await invoke("browse_screenshots", { curId: 5490, direction: "backward" });
+    // The __SCREENTAP_SCREENSHOT__ window property is set by the rust backend before showing the window
+    if (window.__SCREENTAP_SCREENSHOT__ && window.__SCREENTAP_SCREENSHOT__.hasOwnProperty('id')) {
+        getScreenshotResult.value = await invoke("browse_screenshots", { 
+            curId: parseInt(window.__SCREENTAP_SCREENSHOT__.id), 
+            direction: "exact" 
+        });
+    } else {
+        console.error('window.__SCREENTAP_SCREENSHOT__.id is not defined');
+        // Handle the case where __SCREENTAP_SCREENSHOT__ or its 'id' property is not available
+    }
+
+    // getScreenshotResult.value = await invoke("browse_screenshots", { curId: window.__SCREENTAP_SCREENSHOT__.id, direction: "backward" });
 }
 
 
