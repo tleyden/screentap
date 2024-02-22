@@ -15,7 +15,7 @@ use std::str::FromStr;
 
 pub mod config;
 
-const DEV_MODE: bool = false;
+const DEV_MODE: bool = true;
 
 // Create an enum with three possible values: openai, llamafile, and ollama
 #[allow(dead_code)]
@@ -222,9 +222,9 @@ impl FocusGuard {
 
     }
 
-    pub fn handle_screentap_event(&mut self, app: &tauri::AppHandle, png_data: Vec<u8>, png_image_path: &Path, ocr_text: String, frontmost_app: &str, frontmost_app_changed: bool) {
+    pub fn handle_screentap_event(&mut self, app: &tauri::AppHandle, png_data: Vec<u8>, png_image_path: &Path, screenshot_id: i64, ocr_text: String, frontmost_app: &str, frontmost_app_changed: bool) {
 
-        println!("FocusGuard handling screentap event with len(ocr_text): {} and len(png_data): {} frontmost app: {}", ocr_text.len(), png_data.len(), frontmost_app);
+        println!("FocusGuard handling screentap event # {} with len(ocr_text): {} and len(png_data): {} frontmost app: {}", screenshot_id, ocr_text.len(), png_data.len(), frontmost_app);
 
         // Get the current time
         let now = Instant::now();
@@ -293,16 +293,16 @@ impl FocusGuard {
             }
         };
 
-        if productivity_score < self.productivity_score_threshold {
-            println!("Productivity score is low: {}", productivity_score);
+        if DEV_MODE || productivity_score < self.productivity_score_threshold {
+            println!("Productivity score is low: {} for png_image_path: {}", productivity_score, png_image_path.display());
 
-            self.show_productivity_alert(app, productivity_score);
+            self.show_productivity_alert(app, productivity_score, png_image_path, screenshot_id);
 
             self.last_distraction_alert_time = Instant::now();
 
 
         } else {
-            println!("Woohoo!  Looks like you're working.  Score is: {}", productivity_score);
+            println!("Woohoo!  Looks like you're working.  Score is: {} for png_image_path: {}", productivity_score, png_image_path.display());
         }
 
 
@@ -340,8 +340,9 @@ impl FocusGuard {
 
     }
 
-    fn show_productivity_alert(&self, app: &tauri::AppHandle, productivity_score: i32) {
 
+
+    fn show_productivity_alert(&self, app: &tauri::AppHandle, productivity_score: i32, png_image_path: &Path, screenshot_id: i64) {
 
         // TODO: pass the score to the UI somehow
         println!("Showing productivity alert for score: {}", productivity_score);
@@ -349,17 +350,58 @@ impl FocusGuard {
         let window = app.get_window("focusguard");
         match window {
             Some(w) => {
+
+                println!("Window exists, showing existing productivity alert window");
+
                 // Window exists, so just bring it to the foreground
                 w.show().unwrap();
                 w.set_focus().unwrap();
+                
+                let event_name = "my-custom-event"; // The event name to emit
+                let payload = serde_json::json!({
+                    "message": "Hello from Rust! - send event to current window"
+                }); // Payload to send with the event, serialized as JSON
+
+                // Emitting the event to the JavaScript running in the window
+                if let Err(e) = w.emit(event_name, Some(payload)) {
+                    eprintln!("Error emitting event: {}", e);
+                }
             },
             None => {
+
+                println!("Window does not exist, creating and showing new productivity alert window");
+
+                // const INIT_SCRIPT: &str = r#"
+                //   console.log("hello world from js init script", window.location.origin);
+              
+                //   window.__MY_CUSTOM_PROPERTY__ = { foo: 'bar' };
+
+                //   const button = document.createElement('button');
+                //   button.textContent = 'Click me too!!';
+                //   document.body.appendChild(button);
+
+                // "#;
+
+                let init_script = get_init_script(png_image_path.to_str().unwrap(), screenshot_id);
+                println!("init_script: {}", init_script);
+
                 // Create and show new window
-                let _ = tauri::WindowBuilder::new(
+                let w = tauri::WindowBuilder::new(
                     app,
                     "focusguard",
                     tauri::WindowUrl::App("index_focusguard.html".into())
-                ).maximized(true).title("Focusguard").build().expect("failed to build window");
+                ).initialization_script(&init_script).maximized(true).title("Focusguard").build().expect("failed to build window");
+
+                let event_name = "my-custom-event"; // The event name to emit
+                let payload = serde_json::json!({
+                    "message": "Hello from Rust - create and show new window!"
+                }); // Payload to send with the event, serialized as JSON
+
+                // Emitting the event to the JavaScript running in the window
+                if let Err(e) = w.emit(event_name, Some(payload)) {
+                    eprintln!("Error emitting event: {}", e);
+                }
+
             }
         }   
 
@@ -576,8 +618,11 @@ impl FocusGuard {
 
     fn create_prompt(&self) -> String {
         let prompt = format!(r###"On a scale of 1 to 10, how much does this screenshot indicate 
-        a worker with job title of "{}" and job role of "{}" is currently engaged in work activities?  Do not 
-        provide any explanation, just the score itself which is a number between 1 and 10."###, self.job_title, self.job_role);
+        a worker with job title of "{}" and job role of "{}" is currently engaged in work activities?  
+        When analyzing the screenshots, please note that:
+        * In many apps such as VS Code and Slack, the project name is often displayed in the top left corner in a slightly larger 
+        font than the rest of the text, and the project name should be considered very important when determining the result.
+        Do not provide any explanation, just the score itself which is a number between 1 and 10."###, self.job_title, self.job_role);
         println!("Prompt: {}", prompt);
         prompt
     }
@@ -585,6 +630,19 @@ impl FocusGuard {
 }
 
 
+fn get_init_script(console_log: &str, screenshot_id: i64) -> String {
+    format!(r#"
+        console.log("hello world from js init script");
+        console.log("console_log", "{}");
+        console.log("screenshot_id", "{}");
+    
+        window.__MY_CUSTOM_PROPERTY__ = {{ foo: 'bar' }};
+
+        const button = document.createElement('button');
+        button.textContent = 'click me too';
+        document.body.appendChild(button);
+    "#, console_log, screenshot_id)
+}
 
 // Structs for payload
 #[derive(Serialize)]

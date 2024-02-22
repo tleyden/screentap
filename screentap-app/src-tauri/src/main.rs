@@ -159,7 +159,6 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
         }
     }
     let mut last_screenshot_time = Local::now().naive_utc();
-    // let mut last_frontmost_app = screen_ocr_swift_rs::get_frontmost_app();
     let (mut last_frontmost_app, mut last_browser_tab) = utils::get_frontmost_app_via_applescript();
 
     // Create a compaction helper
@@ -179,7 +178,6 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
     if focus_guard_option.is_none() {
         println!("FocusGuard not initialized");
     }
-
 
     // Get an app handle from the app since this can be moved to threads
     let app_handle = app.app_handle();
@@ -210,6 +208,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
             let frontmost_app_or_tab_changed = utils::frontmost_app_or_browser_tab_changed(&cur_frontmost_app, &last_frontmost_app, &cur_browser_tab, &last_browser_tab);
             println!("frontmost_app_or_tab_changed: {} cur_frontmost_app: {} last_frontmost_app: {} cur_browser_tab: {}, last_browser_tab: {}", frontmost_app_or_tab_changed, &cur_frontmost_app, last_frontmost_app, cur_browser_tab, last_browser_tab);
 
+            // Update the last_ tracking variables to the current values
             last_frontmost_app = cur_frontmost_app;
             last_browser_tab = cur_browser_tab;
 
@@ -224,7 +223,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
                 // Capture a screenshot, OCR and save it to DB
                 let screenshot_result = screenshot::save_screenshot(app_data_dir.as_path(), db_filename_path);
                 match screenshot_result {
-                    Ok((png_data, ocr_text, png_image_path)) => {
+                    Ok((png_data, ocr_text, png_image_path, screenshot_id)) => {
                         // Invoke plugins
                         match focus_guard_option {
 
@@ -234,6 +233,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
                                     &app_handle,
                                     png_data,
                                     png_image_path.as_path(),
+                                    screenshot_id,
                                     ocr_text,
                                     &last_frontmost_app,
                                     frontmost_app_or_tab_changed

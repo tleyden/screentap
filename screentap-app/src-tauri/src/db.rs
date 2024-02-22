@@ -132,8 +132,10 @@ pub fn create_db(dataset_root: &Path, db_filename: &Path) -> Result<()> {
 
 /**
  * Helper function to save screenshot meta to the DB
+ * 
+ * Returns a Result with the screenshot_id (primary key)
  */
-pub fn save_screenshot_meta(screenshot_file_path: &Path, ocr_text: &str, dataset_root: &Path, db_filename: &Path, now: NaiveDateTime) -> Result<()> {
+pub fn save_screenshot_meta(screenshot_file_path: &Path, ocr_text: &str, dataset_root: &Path, db_filename: &Path, now: NaiveDateTime) -> Result<i64> {
 
     let conn = get_db_conn(dataset_root, db_filename);
 
@@ -145,13 +147,15 @@ pub fn save_screenshot_meta(screenshot_file_path: &Path, ocr_text: &str, dataset
         params![now.timestamp(), ocr_text, screenshot_file_path_str, ""],
     )?;
 
+    let last_id = conn.last_insert_rowid();
+
     // Insert the OCR text into the full-text search index
     conn.execute(
         "INSERT INTO ocr_text_index (ocr_text) VALUES (?1)",
         [ocr_text],
     )?;
 
-    Ok(())
+    Ok(last_id)
 
 }
 

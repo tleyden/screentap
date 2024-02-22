@@ -17,8 +17,9 @@ use std::error::Error;
  * - PNG data
  * - OCR text
  * - PNG file path
+ * - Screenshot ID
  */
-pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> Result<(Vec<u8>, String, PathBuf), Box<dyn Error>> {
+pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> Result<(Vec<u8>, String, PathBuf, i64), Box<dyn Error>> {
 
     let now = Local::now().naive_utc();
 
@@ -40,9 +41,9 @@ pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> Result<(Vec<u
 
     let current_time_formatted = now.format("%Y-%m-%d %H:%M:%S").to_string();
     match save_result {
-        Ok(()) => { 
-            format!("Screenshot saved to DB successfully at {}", current_time_formatted); 
-            Ok((png_data, ocr_text, target_png_file_path))
+        Ok(screenshot_id) => { 
+            format!("Screenshot #{} saved to DB successfully at {}", screenshot_id, current_time_formatted); 
+            Ok((png_data, ocr_text, target_png_file_path, screenshot_id))
         },
         Err(e) => { 
             format!("Error occurred: {} at {}", e, current_time_formatted); 

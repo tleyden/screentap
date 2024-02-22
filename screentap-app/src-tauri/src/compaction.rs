@@ -488,7 +488,7 @@ mod test {
             );
         
             match save_result {
-                Ok(()) => println!("Screenshot saved to DB successfully"),
+                Ok(screenshot_id) => println!("Screenshot saved to DB successfully.  id: {}", screenshot_id),
                 Err(e) => assert!(false, "Failed to save screenshot to db: {}", e),
             }
 
