@@ -1,5 +1,5 @@
 import { createApp } from "vue";
 import "./styles.css";
-import Focusguard from "./Focusguard.vue";
+import AppFocusguard from "./AppFocusguard.vue";
 
-createApp(Focusguard).mount("#app");
+createApp(AppFocusguard).mount("#app");

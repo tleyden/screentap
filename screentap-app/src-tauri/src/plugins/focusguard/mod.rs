@@ -371,17 +371,6 @@ impl FocusGuard {
 
                 println!("Window does not exist, creating and showing new productivity alert window");
 
-                // const INIT_SCRIPT: &str = r#"
-                //   console.log("hello world from js init script", window.location.origin);
-              
-                //   window.__MY_CUSTOM_PROPERTY__ = { foo: 'bar' };
-
-                //   const button = document.createElement('button');
-                //   button.textContent = 'Click me too!!';
-                //   document.body.appendChild(button);
-
-                // "#;
-
                 let init_script = get_init_script(screenshot_id);
                 println!("init_script: {}", init_script);
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
+import Focusguard from "./components/Focusguard.vue";
 
 
 import { listen } from '@tauri-apps/api/event';
@@ -25,7 +26,7 @@ listen('my-custom-event', (event) => {
 
 <template>
   <div class="container">
-    <h1>Are you getting distracted?</h1>
+    <Focusguard />
     
     
   </div>
