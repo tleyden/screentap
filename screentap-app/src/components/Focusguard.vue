@@ -18,10 +18,8 @@ async function getScreenshot() {
         });
     } else {
         console.error('window.__SCREENTAP_SCREENSHOT__.id is not defined');
-        // Handle the case where __SCREENTAP_SCREENSHOT__ or its 'id' property is not available
     }
 
-    // getScreenshotResult.value = await invoke("browse_screenshots", { curId: window.__SCREENTAP_SCREENSHOT__.id, direction: "backward" });
 }
 
 async function getScreenshotById(id) {
@@ -41,13 +39,6 @@ function getBase64Image(dynamicBase64: string) {
 
 
 // Listen for the custom event emitted from Rust
-/**
- *                 let event_name = "update-screenshot-event"; // The event name to emit
-                let payload = serde_json::json!({
-                    "screenshot_id": screenshot_id
-                });
- * 
- */
 listen('update-screenshot-event', (event) => {
   console.log('Event received from Rust:', event.payload);
   console.log('screenshot_id:', event.payload.screenshot_id);
@@ -66,7 +57,6 @@ getScreenshot()
   <!-- Flex container for the buttons and header -->
   <div class="flex-container-header">
 
-
     <!-- Header -->
     <h1>Getting distracted?</h1>  
 
@@ -80,7 +70,10 @@ getScreenshot()
     </div>
   </div>
 
+
 </template>
+
+
 
 <!-- CSS styles -->
 <style>
