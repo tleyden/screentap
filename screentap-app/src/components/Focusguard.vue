@@ -24,7 +24,6 @@ const closeWindow = async () => {
 // Keep a reference to the screenshot id
 const screenshotId = ref<number | null>(null);
 
-
 // screenshotresults array.  Keep as an array because eventually we might request 
 // these in blocks
 const getScreenshotResult = ref([]);
@@ -33,6 +32,9 @@ const getScreenshotResult = ref([]);
 const explanationLLMInferResult = ref('');
 
 const isVisibleExplanationLLMInferResult = ref(false);
+
+const productivityScore = ref('');
+
 
 
 async function getScreenshot() {
@@ -45,6 +47,7 @@ async function getScreenshot() {
 
     if (window.__SCREENTAP_SCREENSHOT__ && window.__SCREENTAP_SCREENSHOT__.hasOwnProperty('productivity_score')) {
         console.log('Productivity score:', window.__SCREENTAP_SCREENSHOT__.productivity_score);
+        productivityScore.value = window.__SCREENTAP_SCREENSHOT__.productivity_score;
     } else {
         console.error('window.__SCREENTAP_SCREENSHOT__.productivity_score is not defined');
     }
@@ -84,6 +87,7 @@ listen('update-screenshot-event', (event) => {
   console.log('Event received from Rust:', event.payload);
   console.log('screenshot_id:', event.payload.screenshot_id);
   console.log('productivity_score:', event.payload.productivity_score);
+  productivityScore.value = event.payload.productivity_score;
   console.log('raw_llm_result_base64:', event.payload.raw_llm_result_base64);
   explanationLLMInferResult.value = atob(event.payload.raw_llm_result_base64);
   getScreenshotById(event.payload.screenshot_id);
@@ -102,7 +106,7 @@ getScreenshot()
     <div class="flex flex-col items-center justify-center min-h-screen">
         
         <h1 className="text-4xl font-bold mb-4">
-        Getting distracted??
+        Getting distracted?? (score = {{ productivityScore }})
         </h1>
 
         <div class="flex space-x-2 mb-4">

@@ -345,7 +345,6 @@ impl FocusGuard {
 
     fn show_productivity_alert(&self, app: &tauri::AppHandle, productivity_score: i32, raw_llm_result: &str, png_image_path: &Path, screenshot_id: i64) {
 
-        // TODO: pass the score to the UI somehow
         println!("Showing productivity alert for score: {}", productivity_score);
 
         let window = app.get_window("focusguard");
