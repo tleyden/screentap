@@ -32,11 +32,9 @@ listen('my-custom-event', (event) => {
 </script>
 
 <template>
-  <div class="container">
-    <Focusguard />
-    
-    
-  </div>
+  
+  <Focusguard />
+      
 </template>
 
 <style scoped>

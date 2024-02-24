@@ -5,7 +5,7 @@ import SearchScreenshots from "./components/SearchScreenshots.vue";
 </script>
 
 <template>
-  <div class="container">
+  <div>
     <h1>Search screenshots</h1>
     
     <SearchScreenshots />

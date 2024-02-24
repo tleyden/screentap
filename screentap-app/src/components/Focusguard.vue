@@ -62,43 +62,38 @@ getScreenshot()
 <!-- Vue.js template -->
 <template>
 
-  <!-- Flex container for the buttons and header -->
-  <div class="flex-container-header">
-
-    <!-- Header -->
-    <h1>Getting distracted?</h1>  
-
-
-  </div>
-
-  <fwb-accordion class="mt-4 mx-4 mb-4" :open-first-item="false">
-    <fwb-accordion-panel>
-    <fwb-accordion-header>Details</fwb-accordion-header>
-    <fwb-accordion-content>
-        <div class="flex justify-center">
+    <div class="flex flex-col items-center justify-center min-h-screen">
         
-        <img src="/test.png" class="h-49" />
+        <h1 className="text-4xl font-bold mb-4">
+        Getting distracted??
+        </h1>
 
+        <div class="flex space-x-2 mb-4">
+            <button class="btn btn-primary">👍 Yes</button>
+            <button class="btn btn-secondary">👎 No</button>
         </div>
 
-        <div class="flex justify-center mt-4">
-            <!-- button: explain reasoning -->
-            <button class="btn btn-primary">🤔 Explain reasoning</button>
-        </div>
+        <fwb-accordion class="mt-4 mx-4 mb-4" :open-first-item="false">
+            <fwb-accordion-panel>
+            <fwb-accordion-header>Details</fwb-accordion-header>
+            <fwb-accordion-content>
+                
+                <div v-if="getScreenshotResult && getScreenshotResult.length > 0" class="flex-item">
+                    <img :src="getBase64Image(getScreenshotResult[0]['base64_image'])" alt="Screenshot">
+                </div>
 
-        
-        
+                <div class="flex justify-center mt-4">
+                    <!-- button: explain reasoning -->
+                    <button class="btn btn-primary">🤔 Explain reasoning</button>
+                </div>
 
-    </fwb-accordion-content>
-    </fwb-accordion-panel>
-  </fwb-accordion>
+            </fwb-accordion-content>
+            </fwb-accordion-panel>
+        </fwb-accordion>
 
-  <!-- Flex container for the screenshot -->
-  <div class="flex-container">
-    <div v-if="getScreenshotResult && getScreenshotResult.length > 0" class="flex-item">
-      <img :src="getBase64Image(getScreenshotResult[0]['base64_image'])" alt="Screenshot">
     </div>
-  </div>
+
+
 
 
 </template>
