@@ -399,15 +399,6 @@ impl FocusGuard {
 
         println!("Raw LLM response: {}", raw_llm_response);
 
-        // // Try to convert the raw result into a number
-        // match raw_llm_response.parse::<i32>() {
-        //     Ok(raw_result_i32) => Some(raw_result_i32),
-        //     Err(e) => {
-        //         println!("Error parsing raw LLM response {} into number: {}", raw_llm_response, e);
-        //         None
-        //     }
-        // }
-
         match self.find_first_number(raw_llm_response) {
             Some(raw_result_i32) => Some(raw_result_i32),
             None => {
