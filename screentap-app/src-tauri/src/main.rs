@@ -114,49 +114,6 @@ fn browse_screenshots(app_handle: tauri::AppHandle, cur_id: i32, direction: &str
     }
 }
 
-/**
- * Explain the LLM inference for a given screenshot.
- * 
- * NOTE: The initial LLM inference could return both a score and an explanation,
- * but that makes parsing a bit harder.  Plus I'm not sure if the model will even reliably do it.
- * For now, we'll do the explanation in a separate step.
- * 
- * Challenges here:
- * 
- * 1. We need to get the PNG data, not the base64 data.  It would be good to avoid the base64 encode / decode round trip.
- *    - Hack, just round trip it for now
- * 2. This should be defined by the focusguard plugin, not the main app. 
- *    - Hack, leave it here for now
- * 3. How do we get a handle to the focusguard instance?
- *    - Hack, create a new focusguard instance here and throw it away
- */
-#[tauri::command]
-fn explain_llm_infer(app_handle: tauri::AppHandle, screenshot_id: i32) -> String {
-
-    // let app_data_dir: PathBuf = get_effective_app_dir(app_handle);
-
-    // let db_filename_path = Path::new(DATABASE_FILENAME);
-
-    // let screenshot_record = db::get_screenshot_by_id(
-    //     app_data_dir.as_path(), 
-    //     db_filename_path, 
-    //     screenshot_id
-    // );
-
-    // match screenshot_record {
-    //     Ok(screenshot_record) => {
-    //         let screenshot_record = screenshot_record.get(0).unwrap();
-            
-    //     },
-    //     Err(e) => {
-    //         format!("Error explaining LLM Infer: {}", e)
-    //     }
-    // }
-
-    println!("Explain LLM Infer for screenshot_id: {}", screenshot_id);
-    "TODO: Explain LLM Infer".to_string()
-
-}
 
 fn get_effective_app_dir(app_handle: tauri::AppHandle) -> PathBuf {
     // Attempt to get the "screentap_app_data_dir" environment variable
@@ -406,8 +363,7 @@ fn main() {
     .on_system_tray_event(handle_system_tray_event)
     .invoke_handler(tauri::generate_handler![
         search_screenshots, 
-        browse_screenshots,
-        explain_llm_infer]
+        browse_screenshots]
     )
     .run(tauri::generate_context!())
     .expect("Error while starting screentap");

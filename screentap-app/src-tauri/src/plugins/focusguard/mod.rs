@@ -310,12 +310,6 @@ impl FocusGuard {
     }
 
 
-    // pub fn explain_llm_infer(&self, app_handle: tauri::AppHandle, screenshot_id: i32) -> String {
-
-
-    // }
-
-
     fn resize_image(png_data: Vec<u8>, max_dimension: u32) -> Result<Vec<u8>, image::ImageError> {
 
         // Load the image from a byte slice (&[u8])

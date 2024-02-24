@@ -69,15 +69,6 @@ async function getScreenshotById(id: number) {
     console.log('/getScreenshotById:', id);
 }
 
-// async function explainLLMInfer() {
-//     console.log('explainLLMInfer, screenshotId', screenshotId.value);
-//     explanationLLMInferResult.value = await invoke("explain_llm_infer", { 
-//             screenshotId: screenshotId.value
-//         });
-//     console.log('/explainLLMInfer.  result', explanationLLMInferResult.value);
-    
-// }
-
 async function explainLLMInfer() {
     isVisibleExplanationLLMInferResult.value = true;
 }
