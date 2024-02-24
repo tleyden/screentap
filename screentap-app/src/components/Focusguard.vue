@@ -32,6 +32,8 @@ const getScreenshotResult = ref([]);
 // Explanation of LLM infer result
 const explanationLLMInferResult = ref('');
 
+const isVisibleExplanationLLMInferResult = ref(false);
+
 
 async function getScreenshot() {
     // The __SCREENTAP_SCREENSHOT__ window property is set by the rust backend before showing the window
@@ -40,6 +42,21 @@ async function getScreenshot() {
     } else {
         console.error('window.__SCREENTAP_SCREENSHOT__.id is not defined');
     }
+
+    if (window.__SCREENTAP_SCREENSHOT__ && window.__SCREENTAP_SCREENSHOT__.hasOwnProperty('productivity_score')) {
+        console.log('Productivity score:', window.__SCREENTAP_SCREENSHOT__.productivity_score);
+    } else {
+        console.error('window.__SCREENTAP_SCREENSHOT__.productivity_score is not defined');
+    }
+
+    if (window.__SCREENTAP_SCREENSHOT__ && window.__SCREENTAP_SCREENSHOT__.hasOwnProperty('raw_llm_result_base64')) {
+        console.log('Raw LLM result:', window.__SCREENTAP_SCREENSHOT__.raw_llm_result);
+        // decode window.__SCREENTAP_SCREENSHOT__.raw_llm_result from base64 into a string
+        explanationLLMInferResult.value = atob(window.__SCREENTAP_SCREENSHOT__.raw_llm_result_base64);
+    } else {
+        console.error('window.__SCREENTAP_SCREENSHOT__.raw_llm_result_base64 is not defined');
+    }
+
 }
 
 async function getScreenshotById(id: number) {
@@ -52,14 +69,19 @@ async function getScreenshotById(id: number) {
     console.log('/getScreenshotById:', id);
 }
 
-async function explainLLMInfer() {
-    console.log('explainLLMInfer, screenshotId', screenshotId.value);
-    explanationLLMInferResult.value = await invoke("explain_llm_infer", { 
-            screenshotId: screenshotId.value
-        });
-    console.log('/explainLLMInfer.  result', explanationLLMInferResult.value);
+// async function explainLLMInfer() {
+//     console.log('explainLLMInfer, screenshotId', screenshotId.value);
+//     explanationLLMInferResult.value = await invoke("explain_llm_infer", { 
+//             screenshotId: screenshotId.value
+//         });
+//     console.log('/explainLLMInfer.  result', explanationLLMInferResult.value);
     
+// }
+
+async function explainLLMInfer() {
+    isVisibleExplanationLLMInferResult.value = true;
 }
+
 
 function getBase64Image(dynamicBase64: string) {
   return dynamicBase64 ? `data:image/png;base64,${dynamicBase64}` : '';
@@ -70,7 +92,11 @@ function getBase64Image(dynamicBase64: string) {
 listen('update-screenshot-event', (event) => {
   console.log('Event received from Rust:', event.payload);
   console.log('screenshot_id:', event.payload.screenshot_id);
+  console.log('productivity_score:', event.payload.productivity_score);
+  console.log('raw_llm_result_base64:', event.payload.raw_llm_result_base64);
+  explanationLLMInferResult.value = atob(event.payload.raw_llm_result_base64);
   getScreenshotById(event.payload.screenshot_id);
+
 
 });
 
@@ -106,6 +132,8 @@ getScreenshot()
                     <!-- button: explain reasoning -->
                     <button class="btn btn-primary" @click="explainLLMInfer">🤔 Explain reasoning</button>
                 </div>
+
+                <p v-show="isVisibleExplanationLLMInferResult">{{ explanationLLMInferResult }}</p>
 
             </fwb-accordion-content>
             </fwb-accordion-panel>

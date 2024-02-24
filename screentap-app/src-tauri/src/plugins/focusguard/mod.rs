@@ -12,10 +12,11 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::env;
 use std::str::FromStr;
+use regex::Regex;
 
 pub mod config;
 
-const DEV_MODE: bool = true;
+const DEV_MODE: bool = false;
 
 // Create an enum with three possible values: openai, llamafile, and ollama
 #[allow(dead_code)]
@@ -237,14 +238,14 @@ impl FocusGuard {
 
         let prompt = self.create_prompt();
 
-        let productivity_score = match DEV_MODE {
+        let (productivity_score, raw_llm_result) = match DEV_MODE {
             true => {
                 println!("FocusGuard returning hardcoded productivity score");
-                2
+                (2, "".to_string())
             },  
             false => {
                 // Invoke the actual vision model
-                println!("FocusGuard analyzing image with {}.  Resizing image ..", self.llava_backend);
+                println!("FocusGuard analyzing image with {}.  Resizing image at png_image_path: {}", self.llava_backend, png_image_path.display());
 
                 let now = Instant::now();
 
@@ -282,7 +283,7 @@ impl FocusGuard {
 
                 match self.process_vision_model_result(&raw_result) { 
                     Some(raw_result_i32) => {
-                        raw_result_i32
+                        (raw_result_i32, raw_result)
                     },
                     None => {
                         println!("FocusGuard could not parsing raw result [{}] into number", raw_result);
@@ -296,7 +297,7 @@ impl FocusGuard {
         if DEV_MODE || productivity_score < self.productivity_score_threshold {
             println!("Productivity score is low: {} for png_image_path: {}", productivity_score, png_image_path.display());
 
-            self.show_productivity_alert(app, productivity_score, png_image_path, screenshot_id);
+            self.show_productivity_alert(app, productivity_score, &raw_llm_result, png_image_path, screenshot_id);
 
             self.last_distraction_alert_time = Instant::now();
 
@@ -307,6 +308,12 @@ impl FocusGuard {
 
 
     }
+
+
+    // pub fn explain_llm_infer(&self, app_handle: tauri::AppHandle, screenshot_id: i32) -> String {
+
+
+    // }
 
 
     fn resize_image(png_data: Vec<u8>, max_dimension: u32) -> Result<Vec<u8>, image::ImageError> {
@@ -342,7 +349,7 @@ impl FocusGuard {
 
 
 
-    fn show_productivity_alert(&self, app: &tauri::AppHandle, productivity_score: i32, png_image_path: &Path, screenshot_id: i64) {
+    fn show_productivity_alert(&self, app: &tauri::AppHandle, productivity_score: i32, raw_llm_result: &str, png_image_path: &Path, screenshot_id: i64) {
 
         // TODO: pass the score to the UI somehow
         println!("Showing productivity alert for score: {}", productivity_score);
@@ -358,8 +365,12 @@ impl FocusGuard {
                 w.set_focus().unwrap();
                 
                 let event_name = "update-screenshot-event"; // The event name to emit
+                let raw_llm_result_base64: String = base64::encode(raw_llm_result);
+
                 let payload = serde_json::json!({
-                    "screenshot_id": screenshot_id
+                    "screenshot_id": screenshot_id,
+                    "productivity_score": productivity_score,
+                    "raw_llm_result_base64": raw_llm_result_base64,
                 });
 
                 // Emitting the event to the JavaScript running in the window
@@ -374,7 +385,7 @@ impl FocusGuard {
                 // Use an init script approach when creating a new window, since sending an event
                 // did not work in my testing.  Maybe it's not ready for events yet as some sort
                 // of race condition?
-                let init_script = get_init_script(screenshot_id);
+                let init_script = get_init_script(screenshot_id, productivity_score, raw_llm_result);
                 println!("init_script: {}", init_script);
 
                 // Create and show new window
@@ -384,15 +395,6 @@ impl FocusGuard {
                     tauri::WindowUrl::App("index_focusguard.html".into())
                 ).initialization_script(&init_script).maximized(true).title("Focusguard").build().expect("failed to build window");
 
-                let event_name = "my-custom-event"; // The event name to emit
-                let payload = serde_json::json!({
-                    "message": "Hello from Rust - create and show new window!"
-                }); // Payload to send with the event, serialized as JSON
-
-                // Emitting the event to the JavaScript running in the window
-                if let Err(e) = w.emit(event_name, Some(payload)) {
-                    eprintln!("Error emitting event: {}", e);
-                }
 
             }
         }   
@@ -400,14 +402,35 @@ impl FocusGuard {
     }
     
     fn process_vision_model_result(&self, raw_llm_response: &str) -> Option<i32> {
-        // Try to convert the raw result into a number
-        match raw_llm_response.parse::<i32>() {
-            Ok(raw_result_i32) => Some(raw_result_i32),
-            Err(e) => {
-                println!("Error parsing raw LLM response {} into number: {}", raw_llm_response, e);
+
+        println!("Raw LLM response: {}", raw_llm_response);
+
+        // // Try to convert the raw result into a number
+        // match raw_llm_response.parse::<i32>() {
+        //     Ok(raw_result_i32) => Some(raw_result_i32),
+        //     Err(e) => {
+        //         println!("Error parsing raw LLM response {} into number: {}", raw_llm_response, e);
+        //         None
+        //     }
+        // }
+
+        match self.find_first_number(raw_llm_response) {
+            Some(raw_result_i32) => Some(raw_result_i32),
+            None => {
+                println!("Error parsing raw LLM response {} into number", raw_llm_response);
                 None
             }
         }
+
+    }
+
+    fn find_first_number(&self, text: &str) -> Option<i32> {
+        // Create a Regex to find numbers
+        let re = Regex::new(r"\d+").unwrap();
+    
+        // Search for the first match
+        re.find(text)
+            .and_then(|mat| mat.as_str().parse::<i32>().ok())
     }
 
     fn convert_png_data_to_base_64(&self, png_data: &Vec<u8>) -> String {
@@ -591,13 +614,13 @@ impl FocusGuard {
         let first_choice = match choices {
             Some(choices) => {
                 if choices.len() == 0 {
-                    println!("No choices in response");
+                    println!("No choices in response.  Raw response: {}", response_json);
                     return "".to_string();
                 }
                 &choices[0]
             },
             None => {
-                println!("No choices in response");
+                println!("No choices in response.  Raw response: {}", response_json);
                 return "".to_string();
             }
         };
@@ -611,10 +634,10 @@ impl FocusGuard {
     fn create_prompt(&self) -> String {
         let prompt = format!(r###"On a scale of 1 to 10, how much does this screenshot indicate 
         a worker with job title of "{}" and job role of "{}" is currently engaged in work activities?  
+        Give a score and an explanation of your reasoning.
         When analyzing the screenshots, please note that:
         * In many apps such as VS Code and Slack, the project name is often displayed in the top left corner in a slightly larger 
-        font than the rest of the text, and the project name should be considered very important when determining the result.
-        Do not provide any explanation, just the score itself which is a number between 1 and 10."###, self.job_title, self.job_role);
+        font than the rest of the text, and the project name should be considered very important when determining the result."###, self.job_title, self.job_role);
         println!("Prompt: {}", prompt);
         prompt
     }
@@ -622,11 +645,14 @@ impl FocusGuard {
 }
 
 
-fn get_init_script(screenshot_id: i64) -> String {
-    format!(r#"    
-        window.__SCREENTAP_SCREENSHOT__ = {{ id: '{}' }};
+fn get_init_script(screenshot_id: i64, productivity_score: i32, raw_llm_result: &str) -> String {
 
-    "#, screenshot_id)
+    let raw_llm_result_base64: String = base64::encode(raw_llm_result);
+
+    format!(r#"    
+        window.__SCREENTAP_SCREENSHOT__ = {{ id: '{}', productivity_score: '{}', raw_llm_result_base64: '{}' }};
+
+    "#, screenshot_id, productivity_score, raw_llm_result_base64)
 }
 
 // Structs for payload
