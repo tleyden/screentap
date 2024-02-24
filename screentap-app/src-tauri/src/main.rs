@@ -114,6 +114,19 @@ fn browse_screenshots(app_handle: tauri::AppHandle, cur_id: i32, direction: &str
     }
 }
 
+/**
+ * Explain the LLM inference for a given screenshot.
+ * 
+ * NOTE: The initial LLM inference could return both a score and an explanation,
+ * but that makes parsing a bit harder.  Plus I'm not sure if the model will even reliably do it.
+ * For now, we'll do the explanation in a separate step.
+ */
+#[tauri::command]
+fn explain_llm_infer(app_handle: tauri::AppHandle, screenshot_id: i32) -> String {
+    println!("Explain LLM Infer for screenshot_id: {}", screenshot_id);
+    "TODO: Explain LLM Infer".to_string()
+
+}
 
 fn get_effective_app_dir(app_handle: tauri::AppHandle) -> PathBuf {
     // Attempt to get the "screentap_app_data_dir" environment variable
@@ -363,7 +376,8 @@ fn main() {
     .on_system_tray_event(handle_system_tray_event)
     .invoke_handler(tauri::generate_handler![
         search_screenshots, 
-        browse_screenshots]
+        browse_screenshots,
+        explain_llm_infer]
     )
     .run(tauri::generate_context!())
     .expect("Error while starting screentap");

@@ -21,25 +21,30 @@ const closeWindow = async () => {
   }
 };
 
-// Keep this as an array because eventually we might request 
+// Keep a reference to the screenshot id
+const screenshotId = ref<number | null>(null);
+
+
+// screenshotresults array.  Keep as an array because eventually we might request 
 // these in blocks
 const getScreenshotResult = ref([]);
+
+// Explanation of LLM infer result
+const explanationLLMInferResult = ref('');
+
 
 async function getScreenshot() {
     // The __SCREENTAP_SCREENSHOT__ window property is set by the rust backend before showing the window
     if (window.__SCREENTAP_SCREENSHOT__ && window.__SCREENTAP_SCREENSHOT__.hasOwnProperty('id')) {
-        getScreenshotResult.value = await invoke("browse_screenshots", { 
-            curId: parseInt(window.__SCREENTAP_SCREENSHOT__.id), 
-            direction: "exact" 
-        });
+        getScreenshotById(parseInt(window.__SCREENTAP_SCREENSHOT__.id));
     } else {
         console.error('window.__SCREENTAP_SCREENSHOT__.id is not defined');
     }
-
 }
 
-async function getScreenshotById(id) {
+async function getScreenshotById(id: number) {
     console.log('getScreenshotById:', id);
+    screenshotId.value = id;
     getScreenshotResult.value = await invoke("browse_screenshots", { 
             curId: id, 
             direction: "exact" 
@@ -47,7 +52,14 @@ async function getScreenshotById(id) {
     console.log('/getScreenshotById:', id);
 }
 
-
+async function explainLLMInfer() {
+    console.log('explainLLMInfer, screenshotId', screenshotId.value);
+    explanationLLMInferResult.value = await invoke("explain_llm_infer", { 
+            screenshotId: screenshotId.value
+        });
+    console.log('/explainLLMInfer.  result', explanationLLMInferResult.value);
+    
+}
 
 function getBase64Image(dynamicBase64: string) {
   return dynamicBase64 ? `data:image/png;base64,${dynamicBase64}` : '';
@@ -92,7 +104,7 @@ getScreenshot()
 
                 <div class="flex justify-center mt-4">
                     <!-- button: explain reasoning -->
-                    <button class="btn btn-primary">🤔 Explain reasoning</button>
+                    <button class="btn btn-primary" @click="explainLLMInfer">🤔 Explain reasoning</button>
                 </div>
 
             </fwb-accordion-content>
