@@ -5,6 +5,14 @@ import { ref } from "vue";
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from '@tauri-apps/api/event';
 
+import {
+  FwbAccordion,
+  FwbAccordionContent,
+  FwbAccordionHeader,
+  FwbAccordionPanel,
+} from 'flowbite-vue';
+
+
 // Keep this as an array because eventually we might request 
 // these in blocks
 const getScreenshotResult = ref([]);
@@ -62,6 +70,28 @@ getScreenshot()
 
 
   </div>
+
+  <fwb-accordion class="mt-4 mx-4 mb-4" :open-first-item="false">
+    <fwb-accordion-panel>
+    <fwb-accordion-header>Details</fwb-accordion-header>
+    <fwb-accordion-content>
+        <div class="flex justify-center">
+        
+        <img src="/test.png" class="h-49" />
+
+        </div>
+
+        <div class="flex justify-center mt-4">
+            <!-- button: explain reasoning -->
+            <button class="btn btn-primary">🤔 Explain reasoning</button>
+        </div>
+
+        
+        
+
+    </fwb-accordion-content>
+    </fwb-accordion-panel>
+  </fwb-accordion>
 
   <!-- Flex container for the screenshot -->
   <div class="flex-container">
