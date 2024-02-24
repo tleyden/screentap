@@ -4,6 +4,7 @@
 import { ref } from "vue";
 import { invoke } from "@tauri-apps/api/tauri";
 import { listen } from '@tauri-apps/api/event';
+import { appWindow } from '@tauri-apps/api/window';
 
 import {
   FwbAccordion,
@@ -12,6 +13,13 @@ import {
   FwbAccordionPanel,
 } from 'flowbite-vue';
 
+const closeWindow = async () => {
+  try {
+    await appWindow.close();
+  } catch (error) {
+    console.error('Error closing window:', error);
+  }
+};
 
 // Keep this as an array because eventually we might request 
 // these in blocks
@@ -69,8 +77,8 @@ getScreenshot()
         </h1>
 
         <div class="flex space-x-2 mb-4">
-            <button class="btn btn-primary">👍 Yes</button>
-            <button class="btn btn-secondary">👎 No</button>
+            <button class="btn btn-primary" @click="closeWindow">👍 Yes</button>
+            <button class="btn btn-secondary" @click="closeWindow">👎 No</button>
         </div>
 
         <fwb-accordion class="mt-4 mx-4 mb-4" :open-first-item="false">
@@ -92,9 +100,6 @@ getScreenshot()
         </fwb-accordion>
 
     </div>
-
-
-
 
 </template>
 
