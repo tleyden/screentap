@@ -16,7 +16,6 @@ use regex::Regex;
 
 pub mod config;
 
-const DEV_MODE: bool = false;
 
 // Create an enum with three possible values: openai, llamafile, and ollama
 #[allow(dead_code)]
@@ -97,6 +96,9 @@ pub struct FocusGuard {
     // the Llamafile binary
     app_data_dir: PathBuf,
 
+    // Amorphous dev mode flag to speed up dev
+    dev_mode: bool,
+
 }
 
 impl FocusGuard {
@@ -136,7 +138,8 @@ impl FocusGuard {
                     llava_backend,
                     config.productivity_score_threshold,
                     config.image_dimension_longest_side,
-                    app_data_dir
+                    app_data_dir,
+                    config.dev_mode
                 )
             },
             None => {
@@ -157,7 +160,8 @@ impl FocusGuard {
         llava_backend: LlavaBackendType,
         productivity_score_threshold: i32,
         image_dimension_longest_side: u32,
-        app_data_dir: PathBuf
+        app_data_dir: PathBuf,
+        dev_mode: bool
     ) -> FocusGuard {
 
         let duration_between_checks = Duration::from_secs(duration_between_checks_secs);
@@ -178,7 +182,8 @@ impl FocusGuard {
             llava_backend: llava_backend,
             productivity_score_threshold: productivity_score_threshold,
             image_dimension_longest_side: image_dimension_longest_side,
-            app_data_dir
+            app_data_dir,
+            dev_mode
         }
 
     }
@@ -238,7 +243,7 @@ impl FocusGuard {
 
         let prompt = self.create_prompt();
 
-        let (productivity_score, raw_llm_result) = match DEV_MODE {
+        let (productivity_score, raw_llm_result) = match self.dev_mode {
             true => {
                 println!("FocusGuard returning hardcoded productivity score");
                 (2, "".to_string())
@@ -294,7 +299,7 @@ impl FocusGuard {
             }
         };
 
-        if DEV_MODE || productivity_score < self.productivity_score_threshold {
+        if self.dev_mode || productivity_score < self.productivity_score_threshold {
             println!("Productivity score is low: {} for png_image_path: {}", productivity_score, png_image_path.display());
 
             self.show_productivity_alert(app, productivity_score, &raw_llm_result, png_image_path, screenshot_id);

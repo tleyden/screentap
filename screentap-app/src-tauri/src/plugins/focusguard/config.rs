@@ -12,6 +12,7 @@ pub struct FocusGuardConfig {
     pub llava_backend: String,
     pub productivity_score_threshold: i32,
     pub image_dimension_longest_side: u32,
+    pub dev_mode: bool,
 }
 
 impl FocusGuardConfig {

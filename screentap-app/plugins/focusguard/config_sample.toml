@@ -9,3 +9,5 @@ llava_backend = "LlamaFileSubprocess"
 
 productivity_score_threshold = 6
 image_dimension_longest_side = 1200
+
+dev_mode = false
