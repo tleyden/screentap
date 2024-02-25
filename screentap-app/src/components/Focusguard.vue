@@ -105,11 +105,15 @@ getScreenshot()
 
     <div class="flex flex-col items-center justify-center min-h-screen">
         
-        <h1 className="text-4xl font-bold mb-4">
-        Getting distracted?? (productivity = {{ productivityScore }})
+        <h1 className="text-4xl font-bold mb-2">
+        Getting distracted?
         </h1>
 
-        <div class="flex space-x-2 mb-4">
+        <p className="mt-2 mb-6">
+        productivity score: {{ productivityScore }}
+        </p>
+
+        <div class="flex space-x-2 mb-8">
             <button class="btn btn-primary" @click="closeWindow">👍 Yes</button>
             <button class="btn btn-secondary" @click="closeWindow">👎 No</button>
         </div>

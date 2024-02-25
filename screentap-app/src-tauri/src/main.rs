@@ -4,7 +4,6 @@
 extern crate screen_ocr_swift_rs;
 
 use chrono::NaiveDateTime;
-use tauri::NativeImage;
 use tauri::{Manager, SystemTray, SystemTrayEvent, SystemTrayMenu, CustomMenuItem, SystemTrayMenuItem};
 
 use std::collections::HashMap;

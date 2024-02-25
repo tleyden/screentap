@@ -175,13 +175,13 @@ impl FocusGuard {
             job_title,
             job_role,
             openai_api_key,
-            duration_between_checks: duration_between_checks,
-            duration_between_alerts: duration_between_alerts,
-            last_screentap_time: last_screentap_time,
-            last_distraction_alert_time: last_distraction_alert_time,
-            llava_backend: llava_backend,
-            productivity_score_threshold: productivity_score_threshold,
-            image_dimension_longest_side: image_dimension_longest_side,
+            duration_between_checks,
+            duration_between_alerts,
+            last_screentap_time,
+            last_distraction_alert_time,
+            llava_backend,
+            productivity_score_threshold,
+            image_dimension_longest_side,
             app_data_dir,
             dev_mode
         }
@@ -406,7 +406,7 @@ impl FocusGuard {
         match self.find_first_number(raw_llm_response) {
             Some(raw_result_i32) => Some(raw_result_i32),
             None => {
-                println!("Error parsing raw LLM response {} into number", raw_llm_response);
+                println!(r#"Error parsing raw LLM response "{}" into number"#, raw_llm_response);
                 None
             }
         }
@@ -637,6 +637,7 @@ impl FocusGuard {
 fn get_init_script(screenshot_id: i64, productivity_score: i32, raw_llm_result: &str) -> String {
 
     let raw_llm_result_base64: String = base64::encode(raw_llm_result);
+    
 
     format!(r#"    
         window.__SCREENTAP_SCREENSHOT__ = {{ id: '{}', productivity_score: '{}', raw_llm_result_base64: '{}' }};
