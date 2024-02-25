@@ -82,6 +82,8 @@ pub fn frontmost_app_or_browser_tab_changed(cur_frontmost_app: &str, last_frontm
     if cur_frontmost_app == "missing value" || last_frontmost_app == "missing value" {  // in yarn tauri dev mode, the bundle identifier will be this
         return false
     }
+
+    // TODO: make sure this works.  Needs to be syncd with tauri config
     if cur_frontmost_app == "com.screentap-app.dev" || last_frontmost_app == "com.screentap-app.dev" {
         return false
     }

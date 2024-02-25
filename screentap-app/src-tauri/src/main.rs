@@ -74,6 +74,7 @@ fn browse_screenshots(app_handle: tauri::AppHandle, cur_id: i32, direction: &str
 
     println!("browse_screenshots: cur_id: {}, direction: {}", cur_id, direction);
 
+
     let app_data_dir: PathBuf = get_effective_app_dir(app_handle);
 
     let db_filename_path = Path::new(DATABASE_FILENAME);
