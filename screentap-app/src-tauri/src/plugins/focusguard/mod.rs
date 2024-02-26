@@ -16,6 +16,8 @@ use regex::Regex;
 use base64::engine::Engine as _;
 use base64::engine::general_purpose::STANDARD as BASE64;
 
+mod utils;
+
 pub mod config;
 
 
@@ -282,7 +284,7 @@ impl FocusGuard {
                     LlavaBackendType::OpenAI => self.invoke_openai_vision_model(&prompt, &resized_png_data),
                     LlavaBackendType::Ollama => self.invoke_ollama_vision_model(&prompt, &resized_png_data),
                     LlavaBackendType::LlamaFile => self.invoke_openai_vision_model(&prompt, &resized_png_data),
-                    LlavaBackendType::LlamaFileSubprocess => self.invoke_subprocess_vision_model(&prompt, &png_image_path),
+                    LlavaBackendType::LlamaFileSubprocess => self.invoke_subprocess_vision_model(&prompt, png_image_path),
                 };
 
                 let time_to_infer = now2.elapsed();
@@ -293,7 +295,7 @@ impl FocusGuard {
                         (raw_result_i32, raw_result)
                     },
                     None => {
-                        println!("FocusGuard could not parsing raw result [{}] into number", raw_result);
+                        println!("FocusGuard could not parse raw result [{}] into number", raw_result);
                         return
                     }
                 }
@@ -405,7 +407,7 @@ impl FocusGuard {
 
         println!("Raw LLM response: {}", raw_llm_response);
 
-        match self.find_first_number(raw_llm_response) {
+        match utils::find_first_number(raw_llm_response) {
             Some(raw_result_i32) => Some(raw_result_i32),
             None => {
                 println!(r#"Error parsing raw LLM response "{}" into number"#, raw_llm_response);
@@ -415,14 +417,6 @@ impl FocusGuard {
 
     }
 
-    fn find_first_number(&self, text: &str) -> Option<i32> {
-        // Create a Regex to find numbers
-        let re = Regex::new(r"\d+").unwrap();
-    
-        // Search for the first match
-        re.find(text)
-            .and_then(|mat| mat.as_str().parse::<i32>().ok())
-    }
 
     fn convert_png_data_to_base_64(&self, png_data: &Vec<u8>) -> String {
         let base64_image = BASE64.encode(png_data);
