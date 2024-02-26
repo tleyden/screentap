@@ -6,7 +6,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "screentap-app",
+    "productName": "screentap-app-dev",
     "version": "0.0.0"
   },
   "tauri": {
