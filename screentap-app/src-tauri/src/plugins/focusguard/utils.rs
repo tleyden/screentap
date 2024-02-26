@@ -1,5 +1,22 @@
+use std::fs::File;
+use std::io::copy;
+use reqwest::blocking::Client;
+use std::error::Error;
 use regex::Regex;
 
+pub fn download_file(url: &str, output_path: &str) -> Result<(), Box<dyn Error>> {
+    let client = Client::new();
+    let mut response = client.get(url)
+        .send()? // Send the request and get the response
+        .error_for_status()?; // Ensure we got a 2xx response
+
+    let mut dest = File::create(output_path)?; // Create the output file
+
+    // Stream the response body directly into the file
+    copy(&mut response, &mut dest)?;
+
+    Ok(())
+}
 
 pub fn find_first_number(text: &str) -> Option<i32> {
     // Create a Regex to find numbers

@@ -14,6 +14,9 @@ use std::env;
 use std::str::FromStr;
 use base64::engine::Engine as _;
 use base64::engine::general_purpose::STANDARD as BASE64;
+use std::error::Error;
+use std::fs;
+use std::os::unix::fs::PermissionsExt;
 
 mod utils;
 
@@ -447,17 +450,34 @@ impl FocusGuard {
 
     }
 
+
+    fn download_llava_llamafile(&self, dest_file: &str) -> Result<(), Box<dyn Error>> {
+        let url = "https://huggingface.co/jartine/llava-v1.5-7B-GGUF/resolve/main/llava-v1.5-7b-q4.llamafile?download=true";
+        utils::download_file(url, dest_file)
+    }
+
     fn invoke_subprocess_vision_model(&self, prompt: &str, png_image_path: &Path) -> String {
 
         let full_prompt = format!("### User: {}\n ### Assistant:", prompt);
-
-        // before: Command::new("/Users/tleyden/Development/screentap/screentap-app/src-tauri/llava-v1.5-7b-q4.llamafile")
         let llamafile_path = self.app_data_dir.join("plugins").join("focusguard").join("llava-v1.5-7b-q4.llamafile");
         if !llamafile_path.exists() {
-            println!("Cannot find Llamafile at {}, skipping inference and returning empty string", llamafile_path.display());
-            return "".to_string();
+            println!("Cannot find Llamafile at {}, downloading it now.  This may take several minutes/hours ..", llamafile_path.display());
+            let dest_file: &str = llamafile_path.to_str().unwrap();
+            match self.download_llava_llamafile(dest_file) {
+                Ok(_) => { 
+                    println!("Downloaded Llamafile to {}", dest_file);
+                    let permissions = fs::Permissions::from_mode(0o755); // Equivalent to chmod +x
+                    let _ = fs::set_permissions(dest_file, permissions);
+                    println!("Set chmod +x permissions {}", dest_file);
+                },
+                Err(e) => {
+                    println!("Error downloading Llamafile: {}", e);
+                    return "".to_string();
+                }
+            }
         } 
 
+        println!("Invoking LlamaFile subprocess ..");
         // sh ./llava-v1.5-7b-q4.llamafile -ngl 9999 --image ~/Desktop/2024_02_15_10_24_53.png -e -p '### User: On a scale of 1 to 10, how much does this screenshot indicate..'
         let output = Command::new(llamafile_path)
             .arg("-ngl")
