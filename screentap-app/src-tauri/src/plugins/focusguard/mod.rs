@@ -12,7 +12,6 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::env;
 use std::str::FromStr;
-use regex::Regex;
 use base64::engine::Engine as _;
 use base64::engine::general_purpose::STANDARD as BASE64;
 
@@ -303,7 +302,7 @@ impl FocusGuard {
             }
         };
 
-        if (self.dev_mode == true) || (productivity_score < self.productivity_score_threshold) {
+        if self.dev_mode || (productivity_score < self.productivity_score_threshold) {
             if self.dev_mode {
                 println!("Dev mode is enabled, so showing productivity alert for score: {}", productivity_score);
             } else {
@@ -423,8 +422,7 @@ impl FocusGuard {
 
 
     fn convert_png_data_to_base_64(&self, png_data: &Vec<u8>) -> String {
-        let base64_image = BASE64.encode(png_data);
-        base64_image
+        BASE64.encode(png_data)
     }
 
     /**
@@ -602,7 +600,7 @@ impl FocusGuard {
         let choices = response_json["choices"].as_array();
         let first_choice = match choices {
             Some(choices) => {
-                if choices.len() == 0 {
+                if choices.is_empty() {
                     println!("No choices in response.  Raw response: {}", response_json);
                     return "".to_string();
                 }

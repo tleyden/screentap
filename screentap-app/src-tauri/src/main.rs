@@ -174,7 +174,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
         // Clone app_data_dir so focusguard can own the app data dir path instance
         // and we avoid reference lifetime issues
         // TODO: review this, it feels a bit overcomplicated
-        PathBuf::from(app_data_dir.clone()),  
+        app_data_dir.clone(),  
     );
     if focus_guard_option.is_none() {
         println!("FocusGuard not initialized");
@@ -226,22 +226,34 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
                 match screenshot_result {
                     Ok((png_data, ocr_text, png_image_path, screenshot_id)) => {
                         // Invoke plugins
-                        match focus_guard_option {
-
-                            // TODO: any way to avoid this confusing "ref mut" stuff?
-                            Some(ref mut focus_guard) => {
-                                focus_guard.handle_screentap_event(
-                                    &app_handle,
-                                    png_data,
-                                    png_image_path.as_path(),
-                                    screenshot_id,
-                                    ocr_text,
-                                    &last_frontmost_app,
-                                    frontmost_app_or_tab_changed
-                                );        
-                            },
-                            None => ()
+                        // TODO: any way to avoid this confusing "ref mut" stuff?
+                        if let Some(ref mut focus_guard) = focus_guard_option {
+                            focus_guard.handle_screentap_event(
+                                &app_handle,
+                                png_data,
+                                png_image_path.as_path(),
+                                screenshot_id,
+                                ocr_text,
+                                &last_frontmost_app,
+                                frontmost_app_or_tab_changed
+                            );        
                         }
+                        // match focus_guard_option {
+
+                        //     // TODO: any way to avoid this confusing "ref mut" stuff?
+                        //     Some(ref mut focus_guard) => {
+                        //         focus_guard.handle_screentap_event(
+                        //             &app_handle,
+                        //             png_data,
+                        //             png_image_path.as_path(),
+                        //             screenshot_id,
+                        //             ocr_text,
+                        //             &last_frontmost_app,
+                        //             frontmost_app_or_tab_changed
+                        //         );        
+                        //     },
+                        //     None => ()
+                        // }
                     },
                     Err(e) => {
                         println!("Error saving screenshot: {}", e);
@@ -281,11 +293,9 @@ fn should_capture_screenshot(last_screenshot_time: NaiveDateTime, now: NaiveDate
     let duration_since_last_screenshot = now.signed_duration_since(last_screenshot_time).num_seconds();
 
     if frontmost_app_changed {
-        return true;
-    } else if duration_since_last_screenshot > MAX_DURATION_BETWEEN_SCREEN_CAPTURES_SECS {
-        return true;
-    } else {
-        return false;
+        true
+    } else { 
+        duration_since_last_screenshot > MAX_DURATION_BETWEEN_SCREEN_CAPTURES_SECS
     }
 }
 
