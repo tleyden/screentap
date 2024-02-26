@@ -303,8 +303,12 @@ impl FocusGuard {
             }
         };
 
-        if self.dev_mode || productivity_score < self.productivity_score_threshold {
-            println!("Productivity score is low: {} for png_image_path: {}", productivity_score, png_image_path.display());
+        if (self.dev_mode == true) || (productivity_score < self.productivity_score_threshold) {
+            if self.dev_mode {
+                println!("Dev mode is enabled, so showing productivity alert for score: {}", productivity_score);
+            } else {
+                println!("Productivity score {} < {} for png_image_path: {}", productivity_score, self.productivity_score_threshold, png_image_path.display());
+            }
 
             self.show_productivity_alert(app, productivity_score, &raw_llm_result, png_image_path, screenshot_id);
 
