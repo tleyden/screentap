@@ -42,7 +42,7 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "screentap-app",
+        "title": "screentap-app-dev",
         "width": 800,
         "height": 600
       }
