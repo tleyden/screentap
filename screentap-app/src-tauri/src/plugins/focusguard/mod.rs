@@ -623,7 +623,7 @@ impl FocusGuard {
     fn create_prompt(&self) -> String {
         let prompt = format!(r###"On a scale of 1 to 10, how much does this screenshot indicate 
         a worker with job title of "{}" and job role of "{}" is currently engaged in work activities?  
-        Give a score and an explanation of your reasoning.
+        First provide the raw score in square brackets, followed by an explanation of your reasoning.
         When analyzing the screenshots, please note that:
         * In many apps such as VS Code and Slack, the project name is often displayed in the top left corner in a slightly larger 
         font than the rest of the text, and the project name should be considered very important when determining the result."###, self.job_title, self.job_role);
