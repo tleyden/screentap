@@ -132,18 +132,28 @@ impl FocusGuard {
                     return None
                 };
 
-                FocusGuard::new(
-                    config.job_title,
-                    config.job_role,
+                let duration_between_checks = Duration::from_secs(config.duration_between_checks_secs);
+                let duration_between_alerts = Duration::from_secs(config.duration_between_alerts_secs);
+        
+                // Initialize tracking vars so that it begins with an initial check
+                let last_screentap_time = Instant::now() - duration_between_checks - Duration::from_secs(1);
+                let last_distraction_alert_time = Instant::now() - duration_between_alerts - Duration::from_secs(1);
+        
+                FocusGuard {
+                    job_title: config.job_title,
+                    job_role: config.job_role,
                     openai_api_key,
-                    config.duration_between_checks_secs,
-                    config.duration_between_alerts_secs,
+                    duration_between_checks,
+                    duration_between_alerts,
+                    last_screentap_time,
+                    last_distraction_alert_time,
                     llava_backend,
-                    config.productivity_score_threshold,
-                    config.image_dimension_longest_side,
+                    productivity_score_threshold: config.productivity_score_threshold,
+                    image_dimension_longest_side: config.image_dimension_longest_side,
                     app_data_dir,
-                    config.dev_mode
-                )
+                    dev_mode: config.dev_mode
+                }
+
             },
             None => {
                 println!("Unable to load FocusGuard config.  This plugin will not be enabled");
@@ -152,42 +162,6 @@ impl FocusGuard {
         };
 
         Some(focus_guard)
-
-    }
-
-    pub fn new(job_title: String, 
-        job_role: String, 
-        openai_api_key: String, 
-        duration_between_checks_secs: u64,
-        duration_between_alerts_secs: u64,
-        llava_backend: LlavaBackendType,
-        productivity_score_threshold: i32,
-        image_dimension_longest_side: u32,
-        app_data_dir: PathBuf,
-        dev_mode: bool
-    ) -> FocusGuard {
-
-        let duration_between_checks = Duration::from_secs(duration_between_checks_secs);
-        let duration_between_alerts = Duration::from_secs(duration_between_alerts_secs);
-
-        // Initialize tracking vars so that it begins with an initial check
-        let last_screentap_time = Instant::now() - duration_between_checks - Duration::from_secs(1);
-        let last_distraction_alert_time = Instant::now() - duration_between_alerts - Duration::from_secs(1);
-
-        FocusGuard {
-            job_title,
-            job_role,
-            openai_api_key,
-            duration_between_checks,
-            duration_between_alerts,
-            last_screentap_time,
-            last_distraction_alert_time,
-            llava_backend,
-            productivity_score_threshold,
-            image_dimension_longest_side,
-            app_data_dir,
-            dev_mode
-        }
 
     }
 
@@ -231,6 +205,7 @@ impl FocusGuard {
 
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn handle_screentap_event(&mut self, app: &tauri::AppHandle, png_data: Vec<u8>, png_image_path: &Path, screenshot_id: i64, ocr_text: String, frontmost_app: &str, frontmost_app_changed: bool) {
 
         println!("FocusGuard handling screentap event # {} with len(ocr_text): {} and len(png_data): {} frontmost app: {}", screenshot_id, ocr_text.len(), png_data.len(), frontmost_app);

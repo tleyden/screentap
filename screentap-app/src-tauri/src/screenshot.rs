@@ -9,17 +9,19 @@ use super::db;
 use std::error::Error;
 
 
+pub struct ScreenshotSaveResult {
+    pub png_data: Vec<u8>,
+    pub ocr_text: String,
+    pub png_image_path: PathBuf,
+    pub screenshot_id: i64,
+}
+
 /**
  * Helper function to save a screenshot and OCR text to the dataset directory and DB
  * 
- * Return a Result with a generic Error, or a Tuple of:
- * 
- * - PNG data
- * - OCR text
- * - PNG file path
- * - Screenshot ID
+ * Return a Result with a generic Error, or a ScreenshotSaveResult
  */
-pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> Result<(Vec<u8>, String, PathBuf, i64), Box<dyn Error>> {
+pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> Result<ScreenshotSaveResult, Box<dyn Error>> {
 
     let now = Local::now().naive_utc();
 
@@ -43,7 +45,12 @@ pub fn save_screenshot(dataset_root: &Path, db_filename: &Path) -> Result<(Vec<u
     match save_result {
         Ok(screenshot_id) => { 
             format!("Screenshot #{} saved to DB successfully at {}", screenshot_id, current_time_formatted); 
-            Ok((png_data, ocr_text, target_png_file_path, screenshot_id))
+            Ok(ScreenshotSaveResult {
+                png_data,
+                ocr_text,
+                png_image_path: target_png_file_path,
+                screenshot_id
+            })
         },
         Err(e) => { 
             format!("Error occurred: {} at {}", e, current_time_formatted); 

@@ -224,7 +224,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
                 // Capture a screenshot, OCR and save it to DB
                 let screenshot_result = screenshot::save_screenshot(app_data_dir.as_path(), db_filename_path);
                 match screenshot_result {
-                    Ok((png_data, ocr_text, png_image_path, screenshot_id)) => {
+                    Ok(screenshot::ScreenshotSaveResult { png_data, ocr_text, png_image_path, screenshot_id}) => {
                         // Invoke plugins
                         // TODO: any way to avoid this confusing "ref mut" stuff?
                         if let Some(ref mut focus_guard) = focus_guard_option {
@@ -238,22 +238,6 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
                                 frontmost_app_or_tab_changed
                             );        
                         }
-                        // match focus_guard_option {
-
-                        //     // TODO: any way to avoid this confusing "ref mut" stuff?
-                        //     Some(ref mut focus_guard) => {
-                        //         focus_guard.handle_screentap_event(
-                        //             &app_handle,
-                        //             png_data,
-                        //             png_image_path.as_path(),
-                        //             screenshot_id,
-                        //             ocr_text,
-                        //             &last_frontmost_app,
-                        //             frontmost_app_or_tab_changed
-                        //         );        
-                        //     },
-                        //     None => ()
-                        // }
                     },
                     Err(e) => {
                         println!("Error saving screenshot: {}", e);
