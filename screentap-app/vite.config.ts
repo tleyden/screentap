@@ -23,7 +23,8 @@ export default defineConfig(async () => ({
       // Specify multiple entry points for HTML files
       input: {
         main: './index.html',
-        browse: './index_browse.html'
+        browse: './index_browse.html',
+        focus_guard: './index_focusguard.html'
       }
     }
   }
