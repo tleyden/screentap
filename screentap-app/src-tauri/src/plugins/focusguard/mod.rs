@@ -13,6 +13,8 @@ use std::process::Command;
 use std::env;
 use std::str::FromStr;
 use regex::Regex;
+use base64::engine::Engine as _;
+use base64::engine::general_purpose::STANDARD as BASE64;
 
 pub mod config;
 
@@ -348,7 +350,7 @@ impl FocusGuard {
 
 
 
-    fn show_productivity_alert(&self, app: &tauri::AppHandle, productivity_score: i32, raw_llm_result: &str, png_image_path: &Path, screenshot_id: i64) {
+    fn show_productivity_alert(&self, app: &tauri::AppHandle, productivity_score: i32, raw_llm_result: &str, _png_image_path: &Path, screenshot_id: i64) {
 
         println!("Showing productivity alert for score: {}", productivity_score);
 
@@ -363,7 +365,7 @@ impl FocusGuard {
                 w.set_focus().unwrap();
                 
                 let event_name = "update-screenshot-event"; // The event name to emit
-                let raw_llm_result_base64: String = base64::encode(raw_llm_result);
+                let raw_llm_result_base64: String = BASE64.encode(raw_llm_result);
 
                 let payload = serde_json::json!({
                     "screenshot_id": screenshot_id,
@@ -387,7 +389,7 @@ impl FocusGuard {
                 println!("init_script: {}", init_script);
 
                 // Create and show new window
-                let w = tauri::WindowBuilder::new(
+                let _w = tauri::WindowBuilder::new(
                     app,
                     "focusguard",
                     tauri::WindowUrl::App("index_focusguard.html".into())
@@ -423,7 +425,7 @@ impl FocusGuard {
     }
 
     fn convert_png_data_to_base_64(&self, png_data: &Vec<u8>) -> String {
-        let base64_image = base64::encode(png_data);
+        let base64_image = BASE64.encode(png_data);
         base64_image
     }
 
@@ -636,7 +638,7 @@ impl FocusGuard {
 
 fn get_init_script(screenshot_id: i64, productivity_score: i32, raw_llm_result: &str) -> String {
 
-    let raw_llm_result_base64: String = base64::encode(raw_llm_result);
+    let raw_llm_result_base64: String = BASE64.encode(raw_llm_result);
     
 
     format!(r#"    

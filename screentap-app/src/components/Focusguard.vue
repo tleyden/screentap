@@ -13,6 +13,13 @@ import {
   FwbAccordionPanel,
 } from 'flowbite-vue';
 
+// Let typescript know about this custom window property
+// https://stackoverflow.com/questions/12709074/how-do-you-explicitly-set-a-new-property-on-window-in-typescript
+declare global {
+    interface Window { __SCREENTAP_SCREENSHOT__: any; }
+}
+
+
 const closeWindow = async () => {
   try {
     await appWindow.close();

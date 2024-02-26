@@ -96,6 +96,6 @@ pub fn frontmost_app_or_browser_tab_changed(cur_frontmost_app: &str, last_frontm
         return cur_browser_tab != last_browser_tab
     }
 
-    return false
+    false
 
 }
