@@ -642,7 +642,7 @@ fn get_init_script(screenshot_id: i64, productivity_score: i32, raw_llm_result: 
     
 
     format!(r#"    
-        window.__SCREENTAP_SCREENSHOT__ = {{ id: '{}', productivity_score: '{}', raw_llm_result_base64: '{}' }};
+        window.__SCREENTAP_SCREENSHOT__ = {{ id: '{}', productivity_score: {}, raw_llm_result_base64: '{}' }};
 
     "#, screenshot_id, productivity_score, raw_llm_result_base64)
 }

@@ -19,6 +19,15 @@ declare global {
     interface Window { __SCREENTAP_SCREENSHOT__: any; }
 }
 
+interface ScreenshotEventPayload {
+  screenshot_id: number;
+  productivity_score: number;
+  raw_llm_result_base64: string;
+}
+
+interface ScreenshotEvent {
+  payload: ScreenshotEventPayload;
+}
 
 const closeWindow = async () => {
   try {
@@ -40,8 +49,7 @@ const explanationLLMInferResult = ref('');
 
 const isVisibleExplanationLLMInferResult = ref(false);
 
-const productivityScore = ref('');
-
+const productivityScore = ref(0);
 
 
 async function getScreenshot() {
@@ -90,7 +98,7 @@ function getBase64Image(dynamicBase64: string) {
 
 
 // Listen for the custom event emitted from Rust
-listen('update-screenshot-event', (event) => {
+listen('update-screenshot-event', (event: ScreenshotEvent) => {
   console.log('Event received from Rust:', event.payload);
   console.log('screenshot_id:', event.payload.screenshot_id);
   console.log('productivity_score:', event.payload.productivity_score);
