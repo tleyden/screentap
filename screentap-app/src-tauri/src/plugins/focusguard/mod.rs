@@ -74,15 +74,15 @@ impl FromStr for LlavaBackendType {
 
 #[derive(PartialEq)]
 enum FocusGuardState {
-    IDLE,
-    PRIMED,
+    Idle,
+    Primed,
 }
 
 impl fmt::Display for FocusGuardState {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            FocusGuardState::IDLE => write!(f, "IDLE"),
-            FocusGuardState::PRIMED => write!(f, "PRIMED"),
+            FocusGuardState::Idle => write!(f, "IDLE"),
+            FocusGuardState::Primed => write!(f, "PRIMED"),
         }
     }
     
@@ -98,9 +98,6 @@ pub struct FocusGuard {
 
     // How long to delay before showing next distraction alert (eg, 30 mins)
     duration_between_alerts: Duration,
-
-    // Track the last time a screentap event was handled
-    last_screentap_time: Instant,
 
     // Track the last time a distraction alert was shown
     last_distraction_alert_time: Instant,
@@ -160,7 +157,6 @@ impl FocusGuard {
                 let duration_between_alerts = Duration::from_secs(config.duration_between_alerts_secs);
         
                 // Initialize tracking vars so that it begins with an initial check
-                let last_screentap_time = Instant::now() - duration_between_checks - Duration::from_secs(1);
                 let last_distraction_alert_time = Instant::now() - duration_between_alerts - Duration::from_secs(1);
         
                 FocusGuard {
@@ -169,14 +165,13 @@ impl FocusGuard {
                     openai_api_key,
                     duration_between_checks,
                     duration_between_alerts,
-                    last_screentap_time,
                     last_distraction_alert_time,
                     llava_backend,
                     productivity_score_threshold: config.productivity_score_threshold,
                     image_dimension_longest_side: config.image_dimension_longest_side,
                     app_data_dir,
                     dev_mode: config.dev_mode,
-                    state: FocusGuardState::IDLE,
+                    state: FocusGuardState::Idle,
                 }
 
             },
@@ -205,33 +200,33 @@ impl FocusGuard {
         // Special handlers if the frontmost app is missing or the screentap app itself
         if frontmost_app == "missing value" || frontmost_app.starts_with("com.screentap-app") {  
             println!("FocusGuard or a missing value is the frontmost app, so not invoking vision model and resetting state to IDLE");
-            self.state = FocusGuardState::IDLE;
+            self.state = FocusGuardState::Idle;
             return false;
         };
 
         match self.state {
-            FocusGuardState::PRIMED => {
+            FocusGuardState::Primed => {
                 // the state is primed, meaning we have already gotten out of the IDLE state and may be ready to invoke the vision model
                 if !frontmost_app_or_tab_changed {
                     // The system is primed and the user is lingering in the same app or browser tab, 
                     // therefore we should invoke the vision model and reset the state to IDLE
                     println!("FocusGuard invoking vision model and resetting state to IDLE");
-                    self.state = FocusGuardState::IDLE;
+                    self.state = FocusGuardState::Idle;
                     true
                 } else {
                     // The system is primed but the user has switched to a different app or browser tab,
                     // reset the state to IDLE and do not invoke the vision model
                     println!("FocusGuard not invoking vision model, and resetting state to IDLE");
-                    self.state = FocusGuardState::IDLE;
+                    self.state = FocusGuardState::Idle;
                     false
                 }    
             },
-            FocusGuardState::IDLE => {
+            FocusGuardState::Idle => {
                 if !frontmost_app_or_tab_changed {
                     // If the app hasn't changed, then it looks like the user is lingering in the same app or browser tab,
                     // so we want to go into the PRIMED state
                     println!("FocusGuard not invoking vision model, and going into PRIMED state");
-                    self.state = FocusGuardState::PRIMED;
+                    self.state = FocusGuardState::Primed;
                 }
                 else {
                     // The app has changed so the user is still in transit between apps, stay in the IDLE state
@@ -254,8 +249,6 @@ impl FocusGuard {
         if !self.should_invoke_vision_model(frontmost_app, frontmost_browser_tab, frontmost_app_or_tab_changed) {
             return
         };
-
-        self.last_screentap_time = now;
 
         let prompt = self.create_prompt();
 
