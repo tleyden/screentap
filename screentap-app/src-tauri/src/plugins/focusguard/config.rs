@@ -7,7 +7,6 @@ use serde::Deserialize;
 pub struct FocusGuardConfig {
     pub job_title: String,
     pub job_role: String,
-    pub duration_between_checks_secs: u64,
     pub duration_between_alerts_secs: u64,
     pub llava_backend: String,
     pub productivity_score_threshold: i32,

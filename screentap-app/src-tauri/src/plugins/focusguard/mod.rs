@@ -93,9 +93,6 @@ pub struct FocusGuard {
     pub job_role: String,
     pub openai_api_key: String,
 
-    // The duration between focusguard checks (Vision Model invocations)
-    pub duration_between_checks: Duration,
-
     // How long to delay before showing next distraction alert (eg, 30 mins)
     duration_between_alerts: Duration,
 
@@ -153,7 +150,6 @@ impl FocusGuard {
                     return None
                 };
 
-                let duration_between_checks = Duration::from_secs(config.duration_between_checks_secs);
                 let duration_between_alerts = Duration::from_secs(config.duration_between_alerts_secs);
         
                 // Initialize tracking vars so that it begins with an initial check
@@ -163,7 +159,6 @@ impl FocusGuard {
                     job_title: config.job_title,
                     job_role: config.job_role,
                     openai_api_key,
-                    duration_between_checks,
                     duration_between_alerts,
                     last_distraction_alert_time,
                     llava_backend,
