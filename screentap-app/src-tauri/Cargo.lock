@@ -2691,6 +2691,7 @@ dependencies = [
  "tauri-build",
  "tempfile",
  "toml 0.8.10",
+ "url",
 ]
 
 [[package]]

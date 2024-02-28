@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 use chrono::NaiveDateTime;
+use url::Url;
 
 
 /**
@@ -51,8 +52,8 @@ pub fn get_frontmost_app_via_applescript() -> (String, String) {
 pub fn get_chrome_browser_tab_name() -> String {
     let script = r#"
         tell application "Google Chrome"
-            set theTitle to title of active tab of front window
-            return theTitle
+            set theURL to URL of active tab of front window
+            return theURL
         end tell
     "#;
     execute_applescript(script)
@@ -61,8 +62,8 @@ pub fn get_chrome_browser_tab_name() -> String {
 pub fn get_safari_browser_tab_name() -> String {
     let script = r#"
         tell application "Safari"
-            set theTitle to name of front document
-            return theTitle
+            set theURL to URL of front document
+            return theURL
         end tell
     "#;
     execute_applescript(script)
@@ -74,17 +75,30 @@ pub fn get_safari_browser_tab_name() -> String {
  * 
  * If the frontmost app has changed, return true.
  * Otherwise, if the frontmost app is a browser, check if the tab has changed
+ * 
+ * TODO: move this logic and state into focusguard 
  */
-pub fn frontmost_app_or_browser_tab_changed(cur_frontmost_app: &str, last_frontmost_app: &str, cur_browser_tab: &str, last_browser_tab: &str) -> bool {
+pub fn frontmost_app_or_browser_tab_changed(cur_frontmost_app: &str, last_frontmost_app: &str, cur_browser_tab_url: &str, last_browser_tab_url: &str) -> bool {
 
     if cur_frontmost_app != last_frontmost_app {
-        return true
-    }   
+        true
+    } else if cur_frontmost_app == "com.google.Chrome" || cur_frontmost_app == "com.apple.Safari" {
+        // Normalize the browser urls into domain names since a user might be opening multiple tabs on
+        // a distracting site like reddit.  Without this normalization, each web page on reddit would
+        // be considered a different context, but in fact we want each reddit tab to be considered the
+        // same context of the user surfing reddit.
+        let cur_url_domain = extract_domain_from_url(cur_browser_tab_url).unwrap_or("".to_string());
+        let last_url_domain = extract_domain_from_url(last_browser_tab_url).unwrap_or("".to_string());
 
-    if cur_frontmost_app == "com.google.Chrome" || cur_frontmost_app == "com.apple.Safari" {
-        return cur_browser_tab != last_browser_tab
+        cur_url_domain != last_url_domain
+    } else {
+        false
     }
 
-    false
+}
 
+
+fn extract_domain_from_url(url: &str) -> Result<String, &'static str> {
+    let parsed_url = Url::parse(url).map_err(|_| "Invalid URL")?;
+    parsed_url.host_str().map(|s| s.to_string()).ok_or("Domain not found")
 }
