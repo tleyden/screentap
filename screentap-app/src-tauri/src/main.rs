@@ -26,20 +26,10 @@ static DATABASE_FILENAME: &str = "screentap.db";
 
 
 /**
- * How often to check if it's time to capture a screenshot based on the
- * the following logic:
- * 
- * - If the frontmost app changes, capture a screenshot
- * - If more than MAX_DURATION_BETWEEN_SCREEN_CAPTURES_SECS has passed since the last screenshot, capture a screenshot
+ * Capture screenshots on a fixed schedule 
  */
-static DURATION_BETWEEN_SCREEN_CAPTURES_CHECKS: i64 = 5;
+static DURATION_BETWEEN_SCREEN_CAPTURES_CHECKS: i64 = 30;
 
-/**
- * The maximum duration between screenshots in seconds.  If the frontmost app changes frequently,
- * then more screenshots will be captured.  However if the frontmost app doesn't change, then
- * this timeout value will be used to trigger a screenshot capture.
- */
-static MAX_DURATION_BETWEEN_SCREEN_CAPTURES_SECS: i64 = 60;
 
 #[tauri::command]
 fn search_screenshots(app_handle: tauri::AppHandle, term: &str) -> Vec<HashMap<String, String>> {
@@ -159,7 +149,6 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
             println!("Error saving screenshot on startup: {}", e);
         }
     }
-    let mut last_screenshot_time = Local::now().naive_utc();
     let (mut last_frontmost_app, mut last_browser_tab) = utils::get_frontmost_app_via_applescript();
 
     // Create a compaction helper
@@ -207,43 +196,35 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
             // Get the name of the frontmost app and browser tab (if applicable)
             let (cur_frontmost_app, cur_browser_tab) = utils::get_frontmost_app_via_applescript();
             let frontmost_app_or_tab_changed = utils::frontmost_app_or_browser_tab_changed(&cur_frontmost_app, &last_frontmost_app, &cur_browser_tab, &last_browser_tab);
-            println!("frontmost_app_or_tab_changed: {} cur_frontmost_app: {} last_frontmost_app: {} cur_browser_tab: {}, last_browser_tab: {}", frontmost_app_or_tab_changed, &cur_frontmost_app, last_frontmost_app, cur_browser_tab, last_browser_tab);
+            println!("Capturing screenshot.  cur_frontmost_app: {} last_frontmost_app: {} cur_browser_tab: {}, last_browser_tab: {} frontmost_app_or_tab_changed: {} ", &cur_frontmost_app, last_frontmost_app, cur_browser_tab, last_browser_tab, frontmost_app_or_tab_changed);
+            
+            // Capture a screenshot, OCR and save it to DB
+            let screenshot_result = screenshot::save_screenshot(app_data_dir.as_path(), db_filename_path);
+            match screenshot_result {
+                Ok(screenshot::ScreenshotSaveResult { png_data, ocr_text, png_image_path, screenshot_id}) => {
+                    // Invoke plugins
+                    // TODO: any way to avoid this confusing "ref mut" stuff?
+                    if let Some(ref mut focus_guard) = focus_guard_option {
+                        focus_guard.handle_screentap_event(
+                            &app_handle,
+                            png_data,
+                            png_image_path.as_path(),
+                            screenshot_id,
+                            ocr_text,
+                            &cur_frontmost_app,
+                            &cur_browser_tab,
+                            frontmost_app_or_tab_changed
+                        );        
+                    }
+                },
+                Err(e) => {
+                    println!("Error saving screenshot: {}", e);
+                }
+            }
 
             // Update the last_ tracking variables to the current values
             last_frontmost_app = cur_frontmost_app;
             last_browser_tab = cur_browser_tab;
-
-            let should_capture = should_capture_screenshot(last_screenshot_time, now, frontmost_app_or_tab_changed);
-            println!("Should_capture: {} last_screenshot_time: {} now: {}", should_capture, last_screenshot_time, now);
-
-            if should_capture {
-
-                // Update tracking variables
-                last_screenshot_time = now;
-                
-                // Capture a screenshot, OCR and save it to DB
-                let screenshot_result = screenshot::save_screenshot(app_data_dir.as_path(), db_filename_path);
-                match screenshot_result {
-                    Ok(screenshot::ScreenshotSaveResult { png_data, ocr_text, png_image_path, screenshot_id}) => {
-                        // Invoke plugins
-                        // TODO: any way to avoid this confusing "ref mut" stuff?
-                        if let Some(ref mut focus_guard) = focus_guard_option {
-                            focus_guard.handle_screentap_event(
-                                &app_handle,
-                                png_data,
-                                png_image_path.as_path(),
-                                screenshot_id,
-                                ocr_text,
-                                &last_frontmost_app,
-                                frontmost_app_or_tab_changed
-                            );        
-                        }
-                    },
-                    Err(e) => {
-                        println!("Error saving screenshot: {}", e);
-                    }
-                }
-            }
 
             thread::sleep(Duration::from_secs(DURATION_BETWEEN_SCREEN_CAPTURES_CHECKS as u64));
 
@@ -271,17 +252,6 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
 
 }
 
-
-fn should_capture_screenshot(last_screenshot_time: NaiveDateTime, now: NaiveDateTime, frontmost_app_changed: bool) -> bool {
-
-    let duration_since_last_screenshot = now.signed_duration_since(last_screenshot_time).num_seconds();
-
-    if frontmost_app_changed {
-        true
-    } else { 
-        duration_since_last_screenshot > MAX_DURATION_BETWEEN_SCREEN_CAPTURES_SECS
-    }
-}
 
 fn create_browse_screenshots_window(app: &tauri::AppHandle) -> tauri::Window {
  

@@ -77,20 +77,9 @@ pub fn get_safari_browser_tab_name() -> String {
  */
 pub fn frontmost_app_or_browser_tab_changed(cur_frontmost_app: &str, last_frontmost_app: &str, cur_browser_tab: &str, last_browser_tab: &str) -> bool {
 
-    // Special handlers for switching between screentap itself and other apps .. just ignore these
-    // transitions for now since they are pure noise
-    if cur_frontmost_app == "missing value" || last_frontmost_app == "missing value" {  // in yarn tauri dev mode, the bundle identifier will be this
-        return false
-    }
-
-    // TODO: make sure this works.  Needs to be syncd with tauri config
-    if cur_frontmost_app == "com.screentap-app.dev" || last_frontmost_app == "com.screentap-app.dev" {
-        return false
-    }
-
     if cur_frontmost_app != last_frontmost_app {
         return true
-    }
+    }   
 
     if cur_frontmost_app == "com.google.Chrome" || cur_frontmost_app == "com.apple.Safari" {
         return cur_browser_tab != last_browser_tab

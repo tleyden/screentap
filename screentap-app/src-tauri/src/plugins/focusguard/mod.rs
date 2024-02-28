@@ -45,6 +45,8 @@ pub enum LlavaBackendType {
     Ollama,
 }
 
+
+
 impl fmt::Display for LlavaBackendType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -68,6 +70,22 @@ impl FromStr for LlavaBackendType {
             _ => Err(()),
         }
     }
+}
+
+#[derive(PartialEq)]
+enum FocusGuardState {
+    IDLE,
+    PRIMED,
+}
+
+impl fmt::Display for FocusGuardState {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            FocusGuardState::IDLE => write!(f, "IDLE"),
+            FocusGuardState::PRIMED => write!(f, "PRIMED"),
+        }
+    }
+    
 }
 
 pub struct FocusGuard {
@@ -104,6 +122,9 @@ pub struct FocusGuard {
 
     // Amorphous dev mode flag to speed up dev
     dev_mode: bool,
+
+    // The state used to determine when to invoke the vision model
+    state: FocusGuardState,
 
 }
 
@@ -154,7 +175,8 @@ impl FocusGuard {
                     productivity_score_threshold: config.productivity_score_threshold,
                     image_dimension_longest_side: config.image_dimension_longest_side,
                     app_data_dir,
-                    dev_mode: config.dev_mode
+                    dev_mode: config.dev_mode,
+                    state: FocusGuardState::IDLE,
                 }
 
             },
@@ -169,56 +191,69 @@ impl FocusGuard {
     }
 
     /**
-     * The logic is as follows:
+     * If this is called twice in a row with the same frontmost_app or browser tab, it means the user is "lingering" on 
+     * that app/tab rather than just in transit between apps.  It should invoke the vision model
      * 
-     * - First check if enough time has elapsed since the last distraction alert.  If not, return false.
-     * - Then check if either of the following conditions are true:
-     *   - The frontmost app has changed
-     *   - Enough time has elapsed since the last screentap event was processed
-     * 
+     * This expects to be called back from the screentap event handler every 30s.  If it was called back more frequently
+     * (eg, every 5s), it would have to also take timing into account.  But 30s is a good delay between state transitions
+     * from IDLE -> PRIMED.
      */
-    pub fn should_invoke_vision_model(&self, now: Instant, frontmost_app_changed: bool) -> bool {
+    pub fn should_invoke_vision_model(&mut self, frontmost_app: &str, frontmost_browser_tab: &str, frontmost_app_or_tab_changed: bool) -> bool {
 
-        // Check if enough time elapsed since last distraction alert.  We don't want to hound the user
-        // with alerts if they already know they're in a distraction state
-        let elapsed_alert = now.duration_since(self.last_distraction_alert_time);
-        let enough_time_elapsed_alert = elapsed_alert > self.duration_between_alerts;
-        if !enough_time_elapsed_alert {
-            println!("Not enough time elapsed since last distraction alert.  elapsed_alert: {:?}", elapsed_alert);
-            return false
+        println!("FocusGuard checking if should_invoke_vision_model: frontmost_app: {} frontmost_browser_tab: {} frontmost_app_or_tab_changed: {} cur state: {}", frontmost_app, frontmost_browser_tab, frontmost_app_or_tab_changed, self.state);
+
+        // Special handlers if the frontmost app is missing or the screentap app itself
+        if frontmost_app == "missing value" || frontmost_app.starts_with("com.screentap-app") {  
+            println!("FocusGuard or a missing value is the frontmost app, so not invoking vision model and resetting state to IDLE");
+            self.state = FocusGuardState::IDLE;
+            return false;
+        };
+
+        match self.state {
+            FocusGuardState::PRIMED => {
+                // the state is primed, meaning we have already gotten out of the IDLE state and may be ready to invoke the vision model
+                if !frontmost_app_or_tab_changed {
+                    // The system is primed and the user is lingering in the same app or browser tab, 
+                    // therefore we should invoke the vision model and reset the state to IDLE
+                    println!("FocusGuard invoking vision model and resetting state to IDLE");
+                    self.state = FocusGuardState::IDLE;
+                    true
+                } else {
+                    // The system is primed but the user has switched to a different app or browser tab,
+                    // reset the state to IDLE and do not invoke the vision model
+                    println!("FocusGuard not invoking vision model, and resetting state to IDLE");
+                    self.state = FocusGuardState::IDLE;
+                    false
+                }    
+            },
+            FocusGuardState::IDLE => {
+                if !frontmost_app_or_tab_changed {
+                    // If the app hasn't changed, then it looks like the user is lingering in the same app or browser tab,
+                    // so we want to go into the PRIMED state
+                    println!("FocusGuard not invoking vision model, and going into PRIMED state");
+                    self.state = FocusGuardState::PRIMED;
+                }
+                else {
+                    // The app has changed so the user is still in transit between apps, stay in the IDLE state
+                    println!("FocusGuard not invoking vision model, and staying in IDLE state");
+                }
+                false    
+            },
         }
-
-        // If the frontmost app changed, then we should invoke the vision model immediately, since it is 
-        // much more likely that the user has entered a distraction zone
-        if frontmost_app_changed {
-            println!("Frontmost app changed, so invoking vision model");
-            return true
-        }
-                
-        // If we got this far, check if enough time elapsed between checks to justify invoking the vision model  
-        let elapsed = now.duration_since(self.last_screentap_time);
-        let enough_time_elapsed = elapsed > self.duration_between_checks;
-        if enough_time_elapsed {
-            println!("Enough time elapsed since last screentap event and last distraction alert.  elapsed_alert: {:?} elapsed: {:?} ", elapsed_alert, elapsed);
-        } else {
-            println!("Not enough time elapsed since last screentap event and last distraction alert.  elapsed_alert: {:?} elapsed: {:?} ", elapsed_alert, elapsed);
-        }
-
-        enough_time_elapsed
-
+        
     }
 
     #[allow(clippy::too_many_arguments)]
-    pub fn handle_screentap_event(&mut self, app: &tauri::AppHandle, png_data: Vec<u8>, png_image_path: &Path, screenshot_id: i64, ocr_text: String, frontmost_app: &str, frontmost_app_changed: bool) {
+    pub fn handle_screentap_event(&mut self, app: &tauri::AppHandle, png_data: Vec<u8>, png_image_path: &Path, screenshot_id: i64, ocr_text: String, frontmost_app: &str, frontmost_browser_tab: &str, frontmost_app_or_tab_changed: bool) {
 
-        println!("FocusGuard handling screentap event # {} with len(ocr_text): {} and len(png_data): {} frontmost app: {}", screenshot_id, ocr_text.len(), png_data.len(), frontmost_app);
+        println!("FocusGuard handling screentap event # {} with len(ocr_text): {} and len(png_data): {} frontmost app: {} frontmost browser tab: {}", screenshot_id, ocr_text.len(), png_data.len(), frontmost_app, frontmost_browser_tab);
 
         // Get the current time
         let now = Instant::now();
 
-        if !self.should_invoke_vision_model(now, frontmost_app_changed) {
+        if !self.should_invoke_vision_model(frontmost_app, frontmost_browser_tab, frontmost_app_or_tab_changed) {
             return
-        }
+        };
 
         self.last_screentap_time = now;
 
@@ -280,15 +315,20 @@ impl FocusGuard {
             }
         };
 
-        if self.dev_mode || (productivity_score < self.productivity_score_threshold) {
-            if self.dev_mode {
-                println!("Dev mode is enabled, so showing productivity alert for score: {}", productivity_score);
+        // Record the productivity score in the database as this can be used for metrics tracking
+
+        if productivity_score < self.productivity_score_threshold {
+            println!("Productivity score {} < {} for png_image_path: {}", productivity_score, self.productivity_score_threshold, png_image_path.display());
+
+            // Check if enough time elapsed since last distraction alert.  We don't want to hound the user
+            // with alerts if they already know they're in a distraction state
+            let elapsed_alert = now.duration_since(self.last_distraction_alert_time);
+            let enough_time_elapsed_alert = elapsed_alert > self.duration_between_alerts;
+            if enough_time_elapsed_alert {
+                self.show_productivity_alert(app, productivity_score, &raw_llm_result, png_image_path, screenshot_id);
             } else {
-                println!("Productivity score {} < {} for png_image_path: {}", productivity_score, self.productivity_score_threshold, png_image_path.display());
+                println!("Not enough time elapsed {:?} since last distraction alert, not showing alert", elapsed_alert);
             }
-
-            self.show_productivity_alert(app, productivity_score, &raw_llm_result, png_image_path, screenshot_id);
-
             self.last_distraction_alert_time = Instant::now();
 
 
