@@ -3,7 +3,7 @@ FocusGuard is an OSX desktop app that helps you stay focused by analyzing your s
 You can choose between two vision models:
 
 1. OpenAI [GPT-Vision](https://platform.openai.com/docs/guides/vision) 
-2. Llava1.5 open source model
+2. [Llava1.5](https://llava-vl.github.io/) open source model
 
 FocusGuard runs in the background and analyzes your screen approximately every 30s.  When it detects you aren't working it will pop up a screen like this:
 
@@ -13,22 +13,16 @@ Expanding the "Details" section will show the screenshot that triggered the aler
 
 ![Screenshot](https://github.com/tleyden/screentap/assets/296876/25946863-e104-4dd9-835e-fc5cecdaee70)
 
-## Disclaimer
-
-The app is "pre-alpha" and is targeted towards folks that are interested and technical enough to deal with the lack of polish.  For example, currently you need to configure it with a text editor rather than the UI.
-
-Also only use this app if you understand the security risk of saving automatically collected screenshots to your system.  They may contain highly sensitive information such as passwords, personal financial details, etc.  They will NOT be transmitted, however just the act of saving them in an unencrypted format carries additional risks.
-
 ## System requirements
 
-1. If you configure it to use OpenAI [GPT-Vision](https://platform.openai.com/docs/guides/vision) you will need a subscription with [access to GPT-4](https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4) and API KEY).  This will cost approximately $1 / day to run, depending on your actual usage.
-2. Otherwise if you configure it to use Llava1.5 open source model you will need an M1 Mac with 5GB of free space.  This is free to run.
+1. If you configure it to use OpenAI [GPT-Vision](https://platform.openai.com/docs/guides/vision) you will need a paid [ChatGPT Plus](https://openai.com/blog/chatgpt-plus) subscription.
+2. Otherwise if you configure it to use Llava1.5 open source model you will need an M1 or later Mac with 5GB of free space.  See [llamafile](https://github.com/Mozilla-Ocho/llamafile) for detailed requirements.  This is of course free to run.
 
 ## Quick start
 
 ### Step 1: Download and run screentap
 
-Download [screentap](https://github.com/tleyden/screentap) from a pre-built binary (not available at time of writing) or by cloning the repo.
+Download [screentap](https://github.com/tleyden/screentap) from a pre-built binary (not available at time of writing) or by cloning the repo and building it locally.
 
 Run screentap and make sure its working (see [screentap README](https://github.com/tleyden/screentap))
 
@@ -74,6 +68,16 @@ Resized image length in bytes: 548430: time_to_resize: 14.5264895s
 Invoking OpenAI API
 time_to_infer: 10.707368s
 ```
+
+## Status
+
+The app is "pre-alpha" and is targeted towards folks that are interested and technical enough to deal with the lack of polish.  For example, currently you need to configure it with a text editor rather than the UI.
+
+Only use this app if you understand the security risk of saving automatically collected screenshots to your system.  They may contain highly sensitive information such as passwords, personal financial details, etc.  They will NOT be transmitted, however just the act of saving them in an unencrypted format carries additional risks.
+
+## License
+
+Apache 2 (same as screentap)
 
 ## How it works under the hood
 
