@@ -7,11 +7,12 @@ You can choose between two vision models:
 
 FocusGuard runs in the background and analyzes your screen approximately every 30s.  When it detects you aren't working it will pop up a screen like this:
 
-![Screenshot](https://github.com/tleyden/screentap/assets/296876/44a49ed2-84a2-46d7-bad9-b898571c848a)
+<img src="https://github.com/tleyden/screentap/assets/296876/44a49ed2-84a2-46d7-bad9-b898571c848a" height="300">
 
 Expanding the "Details" section will show the screenshot that triggered the alert, along with an explanation from the LLM as to why it thought you were getting distracted.
 
-![Screenshot](https://github.com/tleyden/screentap/assets/296876/25946863-e104-4dd9-835e-fc5cecdaee70)
+<img src="https://github.com/tleyden/screentap/assets/296876/25946863-e104-4dd9-835e-fc5cecdaee70" height="300">
+
 
 ## System requirements
 
@@ -52,7 +53,10 @@ If you are running the precompiled binary from the DMG file (as opposed to compi
 
 Your best bet is to use it for a few hours and purposely look at distracting content irrelevant to your job, then wait for distraction alerts.  There is intentionally a few minutes delay to reduce the noise from distraction alerts, so you will need to linger on distracting content for a few minutes to trigger it.
 
-If you are running from the CLI, you will be able to see the raw output when it invokes the AI vision model.  On startup, you should see messages like this on the terminal:
+If you are running from the CLI, you will be able to see the raw output when it invokes the AI vision model.  On startup, you should see messages like this on the terminal.
+
+<details open="false">
+<summary>Example logs</summary>
 
 ```
 FocusGuard config found at path: /Users/<your username>/Library/Application Support/com.screentap-app.dev/plugins/focusguard/config.toml
@@ -60,7 +64,12 @@ Capturing screenshot.  cur_frontmost_app: missing value last_frontmost_app: com.
 FocusGuard handling screentap event # 7849 with len(ocr_text): 139 and len(png_data): 494254 frontmost app: missing value frontmost browser tab:
 ```
 
+</details>
+
 and when it invokes the AI vision model, you should see messages like this on the terminal:
+
+<details open="false">
+<summary>Example logs</summary>
 
 ```
 FocusGuard analyzing image with OpenAI.  Resizing image at png_image_path: ..
@@ -68,6 +77,8 @@ Resized image length in bytes: 548430: time_to_resize: 14.5264895s
 Invoking OpenAI API
 time_to_infer: 10.707368s
 ```
+
+</details>
 
 ## Status
 
