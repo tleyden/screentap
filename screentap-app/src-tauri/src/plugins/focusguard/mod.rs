@@ -10,7 +10,6 @@ use image::{GenericImageView, imageops::FilterType};
 use std::io::Cursor;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use std::env;
 use std::str::FromStr;
 use base64::engine::Engine as _;
 use base64::engine::general_purpose::STANDARD as BASE64;
@@ -127,11 +126,6 @@ impl FocusGuard {
     pub fn new_from_config(app_data_dir: PathBuf) -> Option<FocusGuard> {
 
         // Register plugin - create a new focusguard struct
-        let openai_api_key = match env::var("OPENAI_API_KEY") {
-            Ok(open_api_key_val) => open_api_key_val,
-            Err(_) => "".to_string()
-        };
-
         let focus_guard_config = config::FocusGuardConfig::new(app_data_dir.as_path());
         let focus_guard = match focus_guard_config {
             
@@ -145,7 +139,7 @@ impl FocusGuard {
                     }
                 };
 
-                if llava_backend == LlavaBackendType::OpenAI && openai_api_key.is_empty() {
+                if llava_backend == LlavaBackendType::OpenAI && config.openai_api_key.is_empty() {
                     println!("OpenAI API key is required for OpenAI backend");
                     return None
                 };
@@ -158,7 +152,7 @@ impl FocusGuard {
                 FocusGuard {
                     job_title: config.job_title,
                     job_role: config.job_role,
-                    openai_api_key,
+                    openai_api_key: config.openai_api_key,
                     duration_between_alerts,
                     last_distraction_alert_time,
                     llava_backend,

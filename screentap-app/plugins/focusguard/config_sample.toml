@@ -10,7 +10,7 @@ llava_backend = "LlamaFileSubprocess"
 # llava_backend = "OpenAI"
 
 # Add your openai api key here if you chose the llava_backend to be "OpenAI"
-open_ai_api_key = ""
+openai_api_key = ""
 
 productivity_score_threshold = 6
 image_dimension_longest_side = 1200

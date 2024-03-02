@@ -9,6 +9,7 @@ pub struct FocusGuardConfig {
     pub job_role: String,
     pub duration_between_alerts_secs: u64,
     pub llava_backend: String,
+    pub openai_api_key: String,
     pub productivity_score_threshold: i32,
     pub image_dimension_longest_side: u32,
     pub dev_mode: bool,
