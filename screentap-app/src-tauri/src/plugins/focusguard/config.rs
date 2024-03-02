@@ -27,7 +27,15 @@ impl FocusGuardConfig {
         // If config.toml not found, return None
         if !toml_config.exists() {
             println!("FocusGuard config not found at path: {}", toml_config.display());
+
+            // Create the directory if it doesn't exist
+            fs::create_dir_all(toml_config.parent().unwrap())
+                .expect("Failed to create focusguard config directory");
+
+
             return None;
+        } else {
+            println!("FocusGuard config found at path: {}", toml_config.display());
         }
 
         let config_str = fs::read_to_string(toml_config)

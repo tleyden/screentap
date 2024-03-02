@@ -110,7 +110,6 @@ listen('update-screenshot-event', (event: ScreenshotEvent) => {
 
 });
 
-
 getScreenshot()
 
 </script>
