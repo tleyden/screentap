@@ -18,4 +18,14 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
+  build: {
+    rollupOptions: {
+      // Specify multiple entry points for HTML files
+      input: {
+        main: './index.html',
+        browse: './index_browse.html',
+        focus_guard: './index_focusguard.html'
+      }
+    }
+  }
 }));

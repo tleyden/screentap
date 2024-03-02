@@ -1,0 +1,18 @@
+job_title = "Software Engineer at Acme, Inc"
+job_role = "Software engineer with the tech stack: VS Code, iterm terminal, AWS console, GCP cloud console, and many other tools and technologies related to coding.  Pretty much any time I am writing code or looking at a terminal it is work related.  As a software engineer I have a broad role in technology and AI, and often have to read online content or watch technical youtube videos that are related to software engineering.  Also I have to use Slack a lot to communicate with my Acme inc teammates.  Some common distractions are: using iMessage and WhatsApp and non-Arcee Slack workspace to chat with friends about non work related stuff, checking the news and stocks.  Some websites like Reddit can be either work related or not work related, depending on the actual content.  Likewise, chatting with friends on iMessage or WhatsApp can sometimes be work related, or sometimes not be work related, depending on the context of the conversation"
+
+# The duration (in seconds) between distraction alerts.
+# Set this to a smaller number if you would like more 
+# frequent alerts
+duration_between_alerts_secs = 300 # 5 minutes
+
+llava_backend = "LlamaFileSubprocess"
+# llava_backend = "OpenAI"
+
+# Add your openai api key here if you chose the llava_backend to be "OpenAI"
+openai_api_key = ""
+
+productivity_score_threshold = 6
+image_dimension_longest_side = 1200
+
+dev_mode = false

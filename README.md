@@ -11,16 +11,20 @@ Screentap gives you a universal search interface to perform keyword searches acr
 
 You can also browse your screenshot history to see what you were doing on your computer during a given time period.
 
-**The Vision**
+**Plugins**
 
-The "tap" of your stream of screen activity is a very rich data source, especially when you further process it by OCR and newer multimodal vision models such as [Llava](https://llava-vl.github.io/).  
+The vision for screentap is to move beyond just searching and browsing your screenshot history, and provide an extensible plugin platform.
 
-The idea for screentap is to move beyond just searching and browsing your screenshot history, and provide an extensible platform that offers AI-powered plugins for use cases like:
+There is currently a single plugin available:
 
-* **Habit/behavior tracking and alerting** - Get alerted when spending too much time on addictive sites such as X.com, but skip the alerts for content that is relevant to your work or hobbies
-* **Billable hours tracking** - Freelancers and indie hackers that are juggling multiple projects could track billable hours
+* **FocusGuard distraction alerting** - see the [FocusGuard README](screentap-app/plugins/focusguard/) for details and installation quickstart.
+
+The "tap" of your stream of screen activity is a very rich data source, especially when you further process it by OCR and newer multimodal AI vision models.  Some ideas for other plugins:
+
 * **Efficiency suggestions** - Spot inefficiences in your workflows and get suggestions for improvements 
-* **ADHD metrics** - Measure how much you are switching contexts and track your focus ability over time
+* **Billable hours tracking** - Freelancers and indie hackers that are juggling multiple projects could track billable hours
+
+If you have an idea for a plugin you would want, feel free to [file an issue](https://github.com/tleyden/screentap/issues)!
 
 # Current status + limitations
 
@@ -29,6 +33,7 @@ This app is still pre-alpha.  Here's what you can currently do it with it:
 1. Run it in the background to periodically capture and OCR full-screen screenshots every 60s
 2. Search screenshots by keyword (25 results max)
 3. Browse the most recently captured screenshot (soon it will let you scroll through a timeline)
+4. Enable [FocusGuard](screentap-app/plugins/focusguard/) distraction alerts
 
 See the [issue list](https://github.com/tleyden/screentap/issues) for planned improvements. 
 
@@ -94,3 +99,4 @@ yarn tauri dev
 ## Proprietary
 
 * [rewind.ai](https://rewind.ai)
+* [rize.io](https://rize.io)

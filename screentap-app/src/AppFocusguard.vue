@@ -1,15 +1,13 @@
 <script setup lang="ts">
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import SearchScreenshots from "./components/SearchScreenshots.vue";
+import Focusguard from "./components/Focusguard.vue";
 </script>
 
 <template>
-  <div>
-    <h1>Search screenshots</h1>
-    
-    <SearchScreenshots />
-  </div>
+  
+  <Focusguard />
+      
 </template>
 
 <style scoped>

@@ -6,7 +6,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "screentap-app",
+    "productName": "screentap-app-dev",
     "version": "0.0.0"
   },
   "tauri": {
@@ -15,6 +15,9 @@
       "shell": {
         "all": false,
         "open": true
+      },
+      "window": {
+        "all": true
       }
     },
     "bundle": {
@@ -39,7 +42,7 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "screentap-app",
+        "title": "screentap-app-dev",
         "width": 800,
         "height": 600
       }

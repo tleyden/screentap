@@ -5,7 +5,7 @@ import BrowseScreenshots from "./components/BrowseScreenshots.vue";
 </script>
 
 <template>
-  <div class="container">
+  <div>
     <BrowseScreenshots />
   </div>
 </template>
