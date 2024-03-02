@@ -1,8 +1,10 @@
 job_title = "Software Engineer"
 job_role = "Backend Development"
 
-# Representing Duration as seconds for simplicity
-duration_between_alerts_secs = 1800 # 30 minutes
+# The duration (in seconds) between distraction alerts.
+# Set this to a smaller number if you would like more 
+# frequent alerts
+duration_between_alerts_secs = 300 # 5 minutes
 
 llava_backend = "LlamaFileSubprocess"
 # llava_backend = "OpenAI"
