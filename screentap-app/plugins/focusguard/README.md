@@ -21,6 +21,7 @@ Expanding the "Details" section will show the screenshot that triggered the aler
 
 1. If you configure it to use OpenAI [GPT-Vision](https://platform.openai.com/docs/guides/vision) you will need a paid [ChatGPT Plus](https://openai.com/blog/chatgpt-plus) subscription.
 2. Otherwise if you configure it to use Llava1.5 open source model you will need an M1 or later Mac with 5GB of free space.  See [llamafile](https://github.com/Mozilla-Ocho/llamafile) for detailed requirements.  This is of course free to run.
+3. OSX Ventura
 
 ## Quick start
 
