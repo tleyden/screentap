@@ -61,15 +61,12 @@ async function getScreenshot() {
     }
 
     if (window.__SCREENTAP_SCREENSHOT__ && window.__SCREENTAP_SCREENSHOT__.hasOwnProperty('productivity_score')) {
-        console.log('Productivity score:', window.__SCREENTAP_SCREENSHOT__.productivity_score);
         productivityScore.value = window.__SCREENTAP_SCREENSHOT__.productivity_score;
     } else {
         console.error('window.__SCREENTAP_SCREENSHOT__.productivity_score is not defined');
     }
 
     if (window.__SCREENTAP_SCREENSHOT__ && window.__SCREENTAP_SCREENSHOT__.hasOwnProperty('raw_llm_result_base64')) {
-        console.log('Raw LLM result:', window.__SCREENTAP_SCREENSHOT__.raw_llm_result);
-        // decode window.__SCREENTAP_SCREENSHOT__.raw_llm_result from base64 into a string
         explanationLLMInferResult.value = atob(window.__SCREENTAP_SCREENSHOT__.raw_llm_result_base64);
     } else {
         console.error('window.__SCREENTAP_SCREENSHOT__.raw_llm_result_base64 is not defined');
@@ -78,13 +75,11 @@ async function getScreenshot() {
 }
 
 async function getScreenshotById(id: number) {
-    console.log('getScreenshotById:', id);
     screenshotId.value = id;
     getScreenshotResult.value = await invoke("browse_screenshots", { 
             curId: id, 
             direction: "exact" 
         });
-    console.log('/getScreenshotById:', id);
 }
 
 async function explainLLMInfer() {
@@ -99,11 +94,7 @@ function getBase64Image(dynamicBase64: string) {
 
 // Listen for the custom event emitted from Rust
 listen('update-screenshot-event', (event: ScreenshotEvent) => {
-  console.log('Event received from Rust:', event.payload);
-  console.log('screenshot_id:', event.payload.screenshot_id);
-  console.log('productivity_score:', event.payload.productivity_score);
   productivityScore.value = event.payload.productivity_score;
-  console.log('raw_llm_result_base64:', event.payload.raw_llm_result_base64);
   explanationLLMInferResult.value = atob(event.payload.raw_llm_result_base64);
   getScreenshotById(event.payload.screenshot_id);
 
