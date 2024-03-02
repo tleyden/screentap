@@ -7,12 +7,15 @@ You can choose between two vision models:
 
 FocusGuard runs in the background and analyzes your screen approximately every 30s.  When it detects you aren't working it will pop up a screen like this:
 
-<img src="https://github.com/tleyden/screentap/assets/296876/44a49ed2-84a2-46d7-bad9-b898571c848a" height="300">
+<p align="center">
+  <img src="https://github.com/tleyden/screentap/assets/296876/44a49ed2-84a2-46d7-bad9-b898571c848a" height="300">
+</p>
 
 Expanding the "Details" section will show the screenshot that triggered the alert, along with an explanation from the LLM as to why it thought you were getting distracted.
 
-<img src="https://github.com/tleyden/screentap/assets/296876/25946863-e104-4dd9-835e-fc5cecdaee70" height="300">
-
+<p align="center">
+  <img src="https://github.com/tleyden/screentap/assets/296876/25946863-e104-4dd9-835e-fc5cecdaee70" height="300">
+</p>
 
 ## System requirements
 
