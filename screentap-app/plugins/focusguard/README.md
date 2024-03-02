@@ -58,7 +58,7 @@ Your best bet is to use it for a few hours and purposely look at distracting con
 
 If you are running from the CLI, you will be able to see the raw output when it invokes the AI vision model.  On startup, you should see messages like this on the terminal.
 
-<details open="false">
+<details>
 <summary>Example logs</summary>
 
 ```
@@ -71,7 +71,7 @@ FocusGuard handling screentap event # 7849 with len(ocr_text): 139 and len(png_d
 
 and when it invokes the AI vision model, you should see messages like this on the terminal:
 
-<details open="false">
+<details>
 <summary>Example logs</summary>
 
 ```
