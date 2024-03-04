@@ -23,6 +23,8 @@ Expanding the "Details" section will show the screenshot that triggered the aler
 2. Otherwise if you configure it to use Llava1.5 open source model you will need an M1 or later Mac with 5GB of free space.  See [llamafile](https://github.com/Mozilla-Ocho/llamafile) for detailed requirements.  
 3. OSX Ventura
 
+The app is "pre-alpha" and is targeted towards folks that are interested and technical enough to deal with the lack of polish.  For example, currently you need to configure it with a text editor rather than the UI.
+
 ## Quick start
 
 ### Step 1: Download and run screentap
@@ -86,9 +88,7 @@ time_to_infer: 10.707368s
 
 </details>
 
-## Status
-
-The app is "pre-alpha" and is targeted towards folks that are interested and technical enough to deal with the lack of polish.  For example, currently you need to configure it with a text editor rather than the UI.
+## Security Risks
 
 Only use this app if you understand the security risk of:
 
@@ -101,7 +101,7 @@ Feel free to read the source code and build from source if you have any concerns
 
 Apache 2 (same as screentap)
 
-## How it works under the hood (for the curious)
+## How it works under the hood
 
 FocusGuard is designed as a [screentap](https://github.com/tleyden/screentap) plugin that is optionally enabled if a configuration file is present. 
 
