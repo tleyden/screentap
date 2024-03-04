@@ -20,18 +20,20 @@ Expanding the "Details" section will show the screenshot that triggered the aler
 ## System requirements
 
 1. If you configure it to use OpenAI [GPT-Vision](https://platform.openai.com/docs/guides/vision) you will need a paid [ChatGPT Plus](https://openai.com/blog/chatgpt-plus) subscription.
-2. Otherwise if you configure it to use Llava1.5 open source model you will need an M1 or later Mac with 5GB of free space.  See [llamafile](https://github.com/Mozilla-Ocho/llamafile) for detailed requirements.  This is of course free to run.
+2. Otherwise if you configure it to use Llava1.5 open source model you will need an M1 or later Mac with 5GB of free space.  See [llamafile](https://github.com/Mozilla-Ocho/llamafile) for detailed requirements.  
 3. OSX Ventura
 
 ## Quick start
 
 ### Step 1: Download and run screentap
 
-Download [screentap](https://github.com/tleyden/screentap) from a pre-built binary (not available at time of writing) or by cloning the repo and building it locally.
+Download the [screentap v0.1.0-alpha release](https://github.com/tleyden/screentap/releases/tag/v0.1.0-alpha) from a pre-built binary, or by git cloning the repo and building screentap locally based on the instructions in the [screentap README](https://github.com/tleyden/screentap/blob/main/README.md).
 
-Run screentap and make sure its working (see [screentap README](https://github.com/tleyden/screentap))
+First run screentap without the plugin and make sure its working (see [screentap README](https://github.com/tleyden/screentap/blob/main/README.md)).  You will need to give it permission with MacOS to record your screen.
 
 ### Step 2: Create FocusGuard configuration 
+
+FocusGuard is already built into screentap, but it needs to be activated with a configuration file.
 
 Download the [FocusGuard config sample](screentap-app/plugins/focusguard/config_sample.toml) to your computer and save it to this location:
 
