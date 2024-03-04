@@ -90,13 +90,18 @@ time_to_infer: 10.707368s
 
 The app is "pre-alpha" and is targeted towards folks that are interested and technical enough to deal with the lack of polish.  For example, currently you need to configure it with a text editor rather than the UI.
 
-Only use this app if you understand the security risk of saving automatically collected screenshots to your system.  They may contain highly sensitive information such as passwords, personal financial details, etc.  They will NOT be transmitted, however just the act of saving them in an unencrypted format carries additional risks.
+Only use this app if you understand the security risk of:
+
+* Saving automatically collected screenshots to your hard drive.  They may contain highly sensitive information such as passwords, personal financial details, etc.  
+* Sent to OpenAI over an encrypted HTTPS connection.  They will not be transmitted anywhere else.
+
+Feel free to read the source code and build from source if you have any concerns.
 
 ## License
 
 Apache 2 (same as screentap)
 
-## How it works under the hood
+## How it works under the hood (for the curious)
 
 FocusGuard is designed as a [screentap](https://github.com/tleyden/screentap) plugin that is optionally enabled if a configuration file is present. 
 
