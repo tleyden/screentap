@@ -93,9 +93,9 @@ time_to_infer: 10.707368s
 Only use this app if you understand the security risk of:
 
 * Saving automatically collected screenshots to your hard drive.  They may contain highly sensitive information such as passwords, personal financial details, etc.  
-* Sent to OpenAI over an encrypted HTTPS connection.  They will not be transmitted anywhere else.
+* Sending captured screenshots to OpenAI's servers over an encrypted HTTPS connection.  
 
-Feel free to read the source code and build from source if you have any concerns.
+The captured screenshots will not be transmitted anywhere else.  You can audit the source code and build from source if you have any concerns.
 
 ## License
 
