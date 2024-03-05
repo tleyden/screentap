@@ -1,4 +1,9 @@
+# Set your job title.  Or if you don't have a job, set it to what you
+# want to spend your time doing that you consider productive, like 
+# "Looking for a job as a <something>"
 job_title = "Software Engineer at Acme, Inc"
+
+# Set the detailed description of your job or however you define productivity.
 job_role = "Software engineer with the tech stack: VS Code, iterm terminal, AWS console, GCP cloud console, and many other tools and technologies related to coding.  Pretty much any time I am writing code or looking at a terminal it is work related.  As a software engineer I have a broad role in technology and AI, and often have to read online content or watch technical youtube videos that are related to software engineering.  Also I have to use Slack a lot to communicate with my Acme inc teammates.  Some common distractions are: using iMessage and WhatsApp and non-Arcee Slack workspace to chat with friends about non work related stuff, checking the news and stocks.  Some websites like Reddit can be either work related or not work related, depending on the actual content.  Likewise, chatting with friends on iMessage or WhatsApp can sometimes be work related, or sometimes not be work related, depending on the context of the conversation"
 
 # The duration (in seconds) between distraction alerts.
@@ -10,9 +15,16 @@ llava_backend = "LlamaFileSubprocess"
 # llava_backend = "OpenAI"
 
 # Add your openai api key here if you chose the llava_backend to be "OpenAI"
+# WARNING: this can cost a lot of money to run.  See the README for details
 openai_api_key = ""
 
+# The threshold for the productivity score before it considers it a distraction
 productivity_score_threshold = 6
+
+# When resizing images, resize the longest size to this pixel value.
+# Set this to a lower value to reduce the OpenAI token costs, at the
+# expense of results quality.
 image_dimension_longest_side = 1200
 
+# Ignore this param, just internal stuff
 dev_mode = false

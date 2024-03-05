@@ -17,9 +17,25 @@ Expanding the "Details" section will show the screenshot that triggered the aler
   <img src="https://github.com/tleyden/screentap/assets/296876/25946863-e104-4dd9-835e-fc5cecdaee70" height="300">
 </p>
 
+
+## ⚠️ Reasons not to run this app
+
+### 💸 Cost
+
+When configured to use the OpenAI GPT-Vision model, the cost to run FocusGuard is currently _crazy expensive_, on the order of $150-200/month.
+
+### 🔓 Security Risks
+
+Only use this app if you understand the security risk of:
+
+* Saving automatically collected screenshots to your hard drive.  They may contain highly sensitive information such as passwords, personal financial details, etc.  
+* Sending captured screenshots to OpenAI's servers.  While it is over an encrypted HTTPS connection, there is still risks of sharing sensitive information to any 3rd party (data breaches, etc)  
+
+The captured screenshots will not be transmitted anywhere else.  You can audit the source code and build from source if you have any concerns.
+
 ## System requirements
 
-1. If you configure it to use OpenAI [GPT-Vision](https://platform.openai.com/docs/guides/vision) you will need a paid [ChatGPT Plus](https://openai.com/blog/chatgpt-plus) subscription.
+1. If you configure it to use OpenAI [GPT-Vision](https://platform.openai.com/docs/guides/vision) you will need to have [API access to GPT-4](https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4).
 2. Otherwise if you configure it to use Llava1.5 open source model you will need an M1 or later Mac with 5GB of free space.  See [llamafile](https://github.com/Mozilla-Ocho/llamafile) for detailed requirements.  
 3. OSX Ventura
 
@@ -88,14 +104,7 @@ time_to_infer: 10.707368s
 
 </details>
 
-## Security Risks
 
-Only use this app if you understand the security risk of:
-
-* Saving automatically collected screenshots to your hard drive.  They may contain highly sensitive information such as passwords, personal financial details, etc.  
-* Sending captured screenshots to OpenAI's servers over an encrypted HTTPS connection.  
-
-The captured screenshots will not be transmitted anywhere else.  You can audit the source code and build from source if you have any concerns.
 
 ## License
 
