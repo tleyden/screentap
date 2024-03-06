@@ -21,7 +21,7 @@ use ollama_rs::{
     generation::images::Image,
     Ollama,
 };
-use async_std::task;
+use tokio::runtime;
 
 mod utils;
 
@@ -488,7 +488,7 @@ impl FocusGuard {
         let ollama = Ollama::default();
 
         // For custom values:
-        let ollama = Ollama::new("http://localhost".to_string(), 11434);
+        // let ollama = Ollama::new("http://localhost".to_string(), 11434);
 
         let model = "llava:7b-v1.6-mistral-q4_0".to_string();
 
@@ -501,8 +501,11 @@ impl FocusGuard {
             prompt.to_string()
         ).add_image(image);
 
+        let rt = runtime::Runtime::new().unwrap();
+
         let result_future = ollama.generate(req);
-        let result = task::block_on(result_future);
+
+        let result = rt.block_on(result_future);
 
         match result {
             Ok(res) => {
@@ -510,12 +513,11 @@ impl FocusGuard {
                 res.response.to_string()
             },
             Err(e) => {
-                println!("Error invoking Ollama: {}", e);
+                println!("Error invoking Ollama: {}.  Is Ollama running?", e);
                 "".to_string()
             }
         }
 
-        // "TODO".to_string()
 
     }
 
