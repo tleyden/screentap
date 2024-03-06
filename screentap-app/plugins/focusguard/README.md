@@ -26,7 +26,7 @@ When configured to use the OpenAI GPT-Vision model, the cost to run FocusGuard i
 
 ### 🔓 Security Risks
 
-Only use this app if you understand the security risk of:
+Only use this app if you understand the security risks of:
 
 * Saving automatically collected screenshots to your hard drive.  They may contain highly sensitive information such as passwords, personal financial details, etc.  
 * Sending captured screenshots to OpenAI's servers.  While it is over an encrypted HTTPS connection, there is still risks of sharing sensitive information to any 3rd party (data breaches, etc)  
