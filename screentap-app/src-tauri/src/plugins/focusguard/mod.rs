@@ -1,5 +1,6 @@
 
 use std::time::{Instant, Duration};
+use ollama_rs::models::pull;
 use serde::Serialize;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use reqwest::blocking::Response;
@@ -478,9 +479,80 @@ impl FocusGuard {
 
     // }
 
+
+    fn download_ollama_model(&self, model_name: &str) -> Result<(), Box<dyn Error>> {
+
+        println!("Downloading Ollama model {}, this could take a while ...", model_name);
+
+        // By default it will connect to localhost:11434
+        let ollama = Ollama::default();
+
+        // This is a hack needed to make this a blocking call rather than async
+        let rt = runtime::Runtime::new().unwrap();
+
+        // Pull model 
+        let pull_model_future = ollama.pull_model(model_name.to_string(), true);
+
+        // Block on the future
+        let pull_model_result = rt.block_on(pull_model_future);
+
+        match pull_model_result {
+            Ok(_) => {
+                println!("Successfully pulled Olllama model {}", model_name);
+                Ok(())
+            },
+            Err(e) => {
+                println!("Error pulling Ollama model: {}", e);
+                Err(Box::new(e))
+            }
+        }
+
+
+    }
+
+    fn download_ollama_model_if_missing(&self, model_name: &str) -> Result<(), Box<dyn Error>> {
+
+        // By default it will connect to localhost:11434
+        let ollama = Ollama::default();
+
+        // This is a hack needed to make this a blocking call rather than async
+        let rt = runtime::Runtime::new().unwrap();
+
+        let model_list_future = ollama.list_local_models();
+
+        let model_list = rt.block_on(model_list_future);
+
+        match model_list {
+            Ok(model_list) => {
+
+                // Does model_list contain a local model with name == model_name
+                for model in &model_list {
+                    if model.name == model_name {
+                        println!("Model {} already exists locally", model_name);
+                        return Ok(())
+                    }
+                }
+
+                println!("Model {} not found, downloading it now", model_name);
+                let download_model_result = self.download_ollama_model(model_name);
+                match download_model_result {
+                    Ok(_) => Ok(()),
+                    Err(e) => {
+                        println!("Error downloading Ollama model: {}", e);
+                        Err(e)
+                    }
+                }                
+            },
+            Err(e) => {
+                println!("Error listing Ollama models: {}", e);
+                Err(Box::new(e))
+            }
+        }
+
+    }
+
     fn invoke_ollama_vision_model(&self, prompt: &str, png_data: &Vec<u8>) -> String {
         
-        // TODO: if Ollama is not detected, throw an error
 
         // TODO: list models, and if its not present, download it first
         
@@ -490,7 +562,16 @@ impl FocusGuard {
         // For custom values:
         // let ollama = Ollama::new("http://localhost".to_string(), 11434);
 
-        let model = "llava:7b-v1.6-mistral-q4_0".to_string();
+        let model = "llava:7b-v1.6-mistral-q5_0".to_string();
+
+        let download_model_result = self.download_ollama_model_if_missing(&model);
+        match download_model_result {
+            Ok(_) => println!("Downloaded model {} or it already existed", model),
+            Err(e) => {
+                println!("Error downloading Ollama model: {}", e);
+                return "".to_string();
+            }
+        }
 
         // Getting the base64 string
         let base64_image = self.convert_png_data_to_base_64(png_data);
@@ -501,10 +582,13 @@ impl FocusGuard {
             prompt.to_string()
         ).add_image(image);
 
+        // This is a hack needed to make this a blocking call rather than async
         let rt = runtime::Runtime::new().unwrap();
 
+        // Generate the response from the model
         let result_future = ollama.generate(req);
 
+        // Block on the future
         let result = rt.block_on(result_future);
 
         match result {
