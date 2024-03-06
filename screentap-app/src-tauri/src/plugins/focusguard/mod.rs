@@ -16,6 +16,12 @@ use base64::engine::general_purpose::STANDARD as BASE64;
 use std::error::Error;
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
+use ollama_rs::{
+    generation::completion::request::GenerationRequest,
+    generation::images::Image,
+    Ollama,
+};
+use async_std::task;
 
 mod utils;
 
@@ -432,43 +438,84 @@ impl FocusGuard {
      * $ ctl-c
      * $ ollama serve
      */
+    // fn invoke_ollama_vision_model_old(&self, prompt: &str, png_data: &Vec<u8>) -> String {
+
+    //     // Getting the base64 string
+    //     let base64_image = self.convert_png_data_to_base_64(png_data);
+
+    //     let client = reqwest::blocking::Client::new();
+
+    //     let payload = json!({
+    //         "model": "llava",
+    //         "prompt": prompt.to_string(),
+    //         "stream": false,
+    //         "images": [base64_image]
+    //     });
+
+    //     let target_url = "http://localhost:11434/api/generate";
+
+    //     let response_result = client.post(target_url)
+    //         .json(&payload)
+    //         .send();
+
+    //     let response = match response_result {
+    //         Ok(response) => response,
+    //         Err(e) => {
+    //             println!("Error invoking vision model: {}", e);
+    //             return "".to_string();
+    //         }
+    //     };
+
+    //     let response_json = match response.json::<serde_json::Value>() {
+    //         Ok(response_json) => response_json,
+    //         Err(e) => {
+    //             println!("Error parsing response JSON: {}", e);
+    //             return "".to_string();
+    //         }
+    //     };
+
+    //     response_json["response"].to_string()
+
+    // }
+
     fn invoke_ollama_vision_model(&self, prompt: &str, png_data: &Vec<u8>) -> String {
+        
+        // TODO: if Ollama is not detected, throw an error
+
+        // TODO: list models, and if its not present, download it first
+        
+        // By default it will connect to localhost:11434
+        let ollama = Ollama::default();
+
+        // For custom values:
+        let ollama = Ollama::new("http://localhost".to_string(), 11434);
+
+        let model = "llava:7b-v1.6-mistral-q4_0".to_string();
 
         // Getting the base64 string
         let base64_image = self.convert_png_data_to_base_64(png_data);
 
-        let client = reqwest::blocking::Client::new();
+        let image = Image::from_base64(&base64_image);
+        let req = GenerationRequest::new(
+            model, 
+            prompt.to_string()
+        ).add_image(image);
 
-        let payload = json!({
-            "model": "llava",
-            "prompt": prompt.to_string(),
-            "stream": false,
-            "images": [base64_image]
-        });
+        let result_future = ollama.generate(req);
+        let result = task::block_on(result_future);
 
-        let target_url = "http://localhost:11434/api/generate";
-
-        let response_result = client.post(target_url)
-            .json(&payload)
-            .send();
-
-        let response = match response_result {
-            Ok(response) => response,
+        match result {
+            Ok(res) => {
+                println!("Ollama result: {:?}", res.response);
+                res.response.to_string()
+            },
             Err(e) => {
-                println!("Error invoking vision model: {}", e);
-                return "".to_string();
+                println!("Error invoking Ollama: {}", e);
+                "".to_string()
             }
-        };
+        }
 
-        let response_json = match response.json::<serde_json::Value>() {
-            Ok(response_json) => response_json,
-            Err(e) => {
-                println!("Error parsing response JSON: {}", e);
-                return "".to_string();
-            }
-        };
-
-        response_json["response"].to_string()
+        // "TODO".to_string()
 
     }
 
