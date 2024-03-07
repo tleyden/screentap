@@ -11,8 +11,16 @@ job_role = "Software engineer with the tech stack: VS Code, iterm terminal, AWS 
 # frequent alerts
 duration_between_alerts_secs = 300 # 5 minutes
 
+# Choose the llava vision model backend.  Valid values are:
+# - "LlamaFileSubprocess"
+# - "OpenAI" 
+# - "Ollama"
+# 
+# Note that:
+# - LlamaFileSubprocess uses Llava 1.5, and requires no further installation steps.
+# - Ollama requires Ollama to be installed from https://ollama.com/
+# - OpenAI requires setting a valid openai_api_key with access to GPT Vision (see README for details)
 llava_backend = "LlamaFileSubprocess"
-# llava_backend = "OpenAI"
 
 # Add your openai api key here if you chose the llava_backend to be "OpenAI"
 # WARNING: this can cost a lot of money to run.  See the README for details
