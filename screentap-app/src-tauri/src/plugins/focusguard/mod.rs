@@ -1,11 +1,9 @@
 
 use std::time::{Instant, Duration};
-use ollama_rs::models::pull;
 use serde::Serialize;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use reqwest::blocking::Response;
 use tauri::Manager;
-use serde_json::json;
 use std::fmt;
 use image::{GenericImageView, imageops::FilterType};
 use std::io::Cursor;
