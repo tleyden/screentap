@@ -305,7 +305,7 @@ impl FocusGuard {
         // Record the productivity score in the database as this can be used for metrics tracking
 
         if productivity_score < self.productivity_score_threshold {
-            println!("Productivity score {} < {} for png_image_path: {}", productivity_score, self.productivity_score_threshold, png_image_path.display());
+            println!("Productivity score {} is below threshold {} for png_image_path: {}", productivity_score, self.productivity_score_threshold, png_image_path.display());
 
             // Check if enough time elapsed since last distraction alert.  We don't want to hound the user
             // with alerts if they already know they're in a distraction state
@@ -313,11 +313,11 @@ impl FocusGuard {
             let enough_time_elapsed_alert = elapsed_alert > self.duration_between_alerts;
             if enough_time_elapsed_alert {
                 self.show_productivity_alert(app, productivity_score, &raw_llm_result, png_image_path, screenshot_id);
+                self.last_distraction_alert_time = Instant::now();
             } else {
                 println!("Not enough time elapsed {:?} since last distraction alert, not showing alert", elapsed_alert);
             }
-            self.last_distraction_alert_time = Instant::now();
-
+            
 
         } else {
             println!("Woohoo!  Looks like you're working.  Score is: {} for png_image_path: {}", productivity_score, png_image_path.display());
@@ -430,54 +430,6 @@ impl FocusGuard {
         BASE64.encode(png_data)
     }
 
-    /**
-     * To run it with ollama, you need to have it running on localhost:11434.  
-     * 
-     * $ ollama run llava
-     * $ ctl-c
-     * $ ollama serve
-     */
-    // fn invoke_ollama_vision_model_old(&self, prompt: &str, png_data: &Vec<u8>) -> String {
-
-    //     // Getting the base64 string
-    //     let base64_image = self.convert_png_data_to_base_64(png_data);
-
-    //     let client = reqwest::blocking::Client::new();
-
-    //     let payload = json!({
-    //         "model": "llava",
-    //         "prompt": prompt.to_string(),
-    //         "stream": false,
-    //         "images": [base64_image]
-    //     });
-
-    //     let target_url = "http://localhost:11434/api/generate";
-
-    //     let response_result = client.post(target_url)
-    //         .json(&payload)
-    //         .send();
-
-    //     let response = match response_result {
-    //         Ok(response) => response,
-    //         Err(e) => {
-    //             println!("Error invoking vision model: {}", e);
-    //             return "".to_string();
-    //         }
-    //     };
-
-    //     let response_json = match response.json::<serde_json::Value>() {
-    //         Ok(response_json) => response_json,
-    //         Err(e) => {
-    //             println!("Error parsing response JSON: {}", e);
-    //             return "".to_string();
-    //         }
-    //     };
-
-    //     response_json["response"].to_string()
-
-    // }
-
-
     fn download_ollama_model(&self, model_name: &str) -> Result<(), Box<dyn Error>> {
 
         println!("Downloading Ollama model {}, this could take a while ...", model_name);
@@ -516,14 +468,16 @@ impl FocusGuard {
         // This is a hack needed to make this a blocking call rather than async
         let rt = runtime::Runtime::new().unwrap();
 
+        // List local models to see if we already have the model
         let model_list_future = ollama.list_local_models();
 
+        // Block on the future
         let model_list = rt.block_on(model_list_future);
 
         match model_list {
             Ok(model_list) => {
 
-                // Does model_list contain a local model with name == model_name
+                // Does model_list contain a local model with name == model_name?
                 for model in &model_list {
                     if model.name == model_name {
                         println!("Model {} already exists locally", model_name);
@@ -550,15 +504,9 @@ impl FocusGuard {
     }
 
     fn invoke_ollama_vision_model(&self, prompt: &str, png_data: &Vec<u8>) -> String {
-        
-
-        // TODO: list models, and if its not present, download it first
-        
+                
         // By default it will connect to localhost:11434
         let ollama = Ollama::default();
-
-        // For custom values:
-        // let ollama = Ollama::new("http://localhost".to_string(), 11434);
 
         let model = "llava:7b-v1.6-mistral-q5_0".to_string();
 
@@ -767,12 +715,14 @@ impl FocusGuard {
     }
 
     fn create_prompt(&self) -> String {
-        let prompt = format!(r###"On a scale of 1 to 10, how much does this screenshot indicate 
+        let prompt = format!(r###"On a scale of 1 to 10, with 1 indicating the least amount
+        of engagement and 10 indicating the most amount of engagement, how much does this screenshot indicate 
         a worker with job title of "{}" and job role of "{}" is currently engaged in work activities?  
-        First provide the raw score in square brackets, followed by an explanation of your reasoning.
         When analyzing the screenshots, please note that:
         * In many apps such as VS Code and Slack, the project name is often displayed in the top left corner in a slightly larger 
-        font than the rest of the text, and the project name should be considered very important when determining the result."###, self.job_title, self.job_role);
+        font than the rest of the text, and the project name should be considered very important when determining the result.
+        First provide the raw score as a number between 1 and 10 in square brackets, followed by an explanation of your reasoning.
+        "###, self.job_title, self.job_role);
         println!("Prompt: {}", prompt);
         prompt
     }
