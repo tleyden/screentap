@@ -238,11 +238,22 @@ impl FocusGuard {
         println!("FocusGuard handling screentap event # {} with len(ocr_text): {} and len(png_data): {} frontmost app: {} frontmost browser tab: {}", screenshot_id, ocr_text.len(), png_data.len(), frontmost_app, frontmost_browser_tab);
 
         // Get the current time
-        let now = Instant::now();
+        let mut now = Instant::now();
 
+        // Check if we should invoke the vision model based on current frontmost app
         if !self.should_invoke_vision_model(frontmost_app, frontmost_browser_tab, frontmost_app_or_tab_changed) {
             return
         };
+
+        // Check if enough time elapsed since last distraction alert.  If not, short circuit the screen 
+        // analysis to reduce expensive vision model calls.  NOTE: this short-circuit will interfere with 
+        // analytics tracking, so it may need to be removed once that is implemented
+        let elapsed_alert = now.duration_since(self.last_distraction_alert_time);
+        let enough_time_elapsed_alert = elapsed_alert > self.duration_between_alerts;
+        if !enough_time_elapsed_alert {
+            println!("FocusGuard: not enough time elapsed {:?} since last distraction alert, not analyzing screenshot", elapsed_alert);
+            return;
+        }
 
         let prompt = self.create_prompt();
 
@@ -255,7 +266,7 @@ impl FocusGuard {
                 // Invoke the actual vision model
                 println!("FocusGuard analyzing image with {}.  Resizing image at png_image_path: {}", self.llava_backend, png_image_path.display());
 
-                let now = Instant::now();
+                now = Instant::now();
 
                 // Resize the image before sending to the vision model
                 // TODO: just capture image in target dimensions in the first place, this will save a lot of resources.
@@ -277,7 +288,7 @@ impl FocusGuard {
                 let time_to_resize = now.elapsed();
                 println!("Resized image length in bytes: {}: time_to_resize: {:?}", resized_png_data.len(), time_to_resize);
 
-                let now2 = Instant::now();
+                now = Instant::now();
 
                 let raw_result = match self.llava_backend {
                     LlavaBackendType::OpenAI => self.invoke_openai_vision_model(&prompt, &resized_png_data),
@@ -286,7 +297,7 @@ impl FocusGuard {
                     LlavaBackendType::LlamaFileSubprocess => self.invoke_subprocess_vision_model(&prompt, png_image_path),
                 };
 
-                let time_to_infer = now2.elapsed();
+                let time_to_infer = now.elapsed();
                 println!("time_to_infer: {:?}", time_to_infer);
 
                 match self.process_vision_model_result(&raw_result) { 
@@ -307,17 +318,8 @@ impl FocusGuard {
         if productivity_score < self.productivity_score_threshold {
             println!("Productivity score {} is below threshold {} for png_image_path: {}", productivity_score, self.productivity_score_threshold, png_image_path.display());
 
-            // Check if enough time elapsed since last distraction alert.  We don't want to hound the user
-            // with alerts if they already know they're in a distraction state
-            let elapsed_alert = now.duration_since(self.last_distraction_alert_time);
-            let enough_time_elapsed_alert = elapsed_alert > self.duration_between_alerts;
-            if enough_time_elapsed_alert {
-                self.show_productivity_alert(app, productivity_score, &raw_llm_result, png_image_path, screenshot_id);
-                self.last_distraction_alert_time = Instant::now();
-            } else {
-                println!("Not enough time elapsed {:?} since last distraction alert, not showing alert", elapsed_alert);
-            }
-            
+            self.show_productivity_alert(app, productivity_score, &raw_llm_result, png_image_path, screenshot_id);
+            self.last_distraction_alert_time = Instant::now();
 
         } else {
             println!("Woohoo!  Looks like you're working.  Score is: {} for png_image_path: {}", productivity_score, png_image_path.display());
@@ -396,7 +398,6 @@ impl FocusGuard {
                 // did not work in my testing.  Maybe it's not ready for events yet as some sort
                 // of race condition?
                 let init_script = get_init_script(screenshot_id, productivity_score, raw_llm_result);
-                println!("init_script: {}", init_script);
 
                 // Create and show new window
                 let _w = tauri::WindowBuilder::new(
