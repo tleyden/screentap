@@ -58,9 +58,9 @@ fn search_screenshots(app_handle: tauri::AppHandle, term: &str) -> Vec<HashMap<S
 }
 
 #[tauri::command]
-fn browse_screenshots(app_handle: tauri::AppHandle, cur_id: i32, direction: &str) -> Vec<HashMap<String, String>> {
+fn browse_screenshots(state: tauri::State<HashMap<&str, &str>>, app_handle: tauri::AppHandle, cur_id: i32, direction: &str) -> Vec<HashMap<String, String>> {
 
-    println!("browse_screenshots: cur_id: {}, direction: {}", cur_id, direction);
+    println!("browse_screenshots: cur_id: {}, direction: {} state: {:?}", cur_id, direction, state);
 
 
     let app_data_dir: PathBuf = get_effective_app_dir(app_handle);
@@ -119,6 +119,11 @@ fn get_effective_app_dir(app_handle: tauri::AppHandle) -> PathBuf {
     app_data_dir
 }
 
+fn setup_handler2(app: &mut tauri::App, focusguard: focusguard::FocusGuard) -> Result<(), Box<dyn std::error::Error + 'static>> {
+    println!("setup_handler2 called with focusguard");
+    setup_handler(app)
+}   
+
 fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error + 'static>> {
 
     let app_handle = app.handle();
@@ -166,7 +171,7 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
     );
     if focus_guard_option.is_none() {
         println!("FocusGuard not initialized");
-    }
+    } 
 
     // Get an app handle from the app since this can be moved to threads
     let app_handle = app.app_handle();
@@ -310,6 +315,13 @@ fn main() {
 
     println!("Starting screentap...");
 
+    let mut state = HashMap::new();
+    state.insert("k", "v");
+
+    let fake_path_buf = PathBuf::from("/Users/tleyden/Library/Application Support/com.screentap-app.dev");
+    let focus_guard_option = focusguard::FocusGuard::new_from_config(fake_path_buf);
+    let focus_guard = focus_guard_option.unwrap();
+
     let quit = CustomMenuItem::new("quit".to_string(), "Quit").accelerator("Cmd+Q");
     let show_hide_window = CustomMenuItem::new("search".to_string(), "Search");
     let browse_screenshots_menu_item = CustomMenuItem::new("browse_screenshots".to_string(), "Browse");
@@ -321,9 +333,12 @@ fn main() {
         .add_item(quit);
 
     tauri::Builder::default()
-    .setup(setup_handler)
+    .setup(|app| {
+        setup_handler2(app, focus_guard)
+    })
     .system_tray(SystemTray::new().with_menu(system_tray_menu))
     .on_system_tray_event(handle_system_tray_event)
+    .manage(state)
     .invoke_handler(tauri::generate_handler![
         search_screenshots, 
         browse_screenshots]

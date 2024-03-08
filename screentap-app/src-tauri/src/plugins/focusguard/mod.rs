@@ -128,6 +128,10 @@ pub struct FocusGuard {
 
 impl FocusGuard {
 
+    pub fn tauri_handler(&mut self, app: &tauri::AppHandle, event: String, payload: String) {
+        println!("FocusGuard received event: {} with payload: {}", event, payload);
+    }
+
     pub fn new_from_config(app_data_dir: PathBuf) -> Option<FocusGuard> {
 
         // Register plugin - create a new focusguard struct
