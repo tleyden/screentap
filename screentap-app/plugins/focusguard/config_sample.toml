@@ -33,7 +33,7 @@ productivity_score_threshold = 6
 # When resizing images, resize the longest size to this pixel value.
 # Set this to a lower value to reduce the OpenAI token costs, at the
 # expense of results quality.
-image_dimension_longest_side = 1200
+image_dimension_longest_side = 1600
 
 # Ignore this param, just internal stuff
 dev_mode = false
