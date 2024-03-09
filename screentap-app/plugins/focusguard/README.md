@@ -47,7 +47,20 @@ The app is "pre-alpha" and is targeted towards folks that are interested and tec
 
 Download the [screentap v0.1.0-alpha release](https://github.com/tleyden/screentap/releases/tag/v0.1.0-alpha) from a pre-built binary, or by git cloning the repo and building screentap locally based on the instructions in the [screentap README](https://github.com/tleyden/screentap/blob/main/README.md).
 
-First run screentap without the plugin and make sure its working (see [screentap README](https://github.com/tleyden/screentap/blob/main/README.md)).  You will need to give it permission with MacOS to record your screen.
+You may hit this error when trying to run it: 
+
+<p align="center">
+  <img src="https://github.com/tleyden/screentap/assets/296876/3c9b2e9d-c6cc-4fc3-a9c6-875d0440469d" height="300">
+</p>
+
+I think it's related to the app not being signed.  Still WIP.
+
+First run screentap without the plugin and make sure its working.  You will need to give it permission with MacOS to record your screen.
+
+<p align="center">
+  <img src="https://github.com/tleyden/screentap/assets/296876/5c24097c-f05c-4f97-a4b6-f4ebaa2b9676" height="300">
+</p>
+
 
 ### Step 2: Create FocusGuard configuration 
 
