@@ -13,6 +13,9 @@ pub fn distraction_alert_rating(app_handle: tauri::AppHandle, liked: bool, scree
 
     // Copy the image file to a specific location
 
+    // Get the job role and description used for inference on the LLM, to help measure prompt engineering
+    
+
 
 
 }

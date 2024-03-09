@@ -389,6 +389,8 @@ impl FocusGuard {
                     "productivity_score": productivity_score,
                     "raw_llm_result_base64": raw_llm_result_base64,
                     "png_image_path": png_image_path.to_str().unwrap(),
+                    "job_title": self.job_title,
+                    
                 });
 
                 // Emitting the event to the JavaScript running in the window
