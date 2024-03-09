@@ -137,7 +137,7 @@ pub struct FocusGuard {
 
 impl FocusGuard {
 
-    fn get_db_conn(screentap_db_path: &PathBuf) -> rusqlite::Connection {
+    pub fn get_db_conn(screentap_db_path: &PathBuf) -> rusqlite::Connection {
         rusqlite::Connection::open(screentap_db_path).unwrap()
     }
 
