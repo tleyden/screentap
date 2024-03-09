@@ -21,8 +21,11 @@ use ollama_rs::{
     Ollama,
 };
 use tokio::runtime;
+use rusqlite::Result;
+
 
 mod utils;
+pub mod handlers;
 
 pub mod config;
 
@@ -30,6 +33,7 @@ pub mod config;
 // Create an enum with three possible values: openai, llamafile, and ollama
 #[allow(dead_code)]
 #[derive(PartialEq)]
+#[derive(Clone)]
 pub enum LlavaBackendType {
 
     // This works
@@ -77,6 +81,7 @@ impl FromStr for LlavaBackendType {
 }
 
 #[derive(PartialEq)]
+#[derive(Clone)]
 enum FocusGuardState {
     Idle,
     Primed,
@@ -92,6 +97,7 @@ impl fmt::Display for FocusGuardState {
     
 }
 
+#[derive(Clone)]
 pub struct FocusGuard {
     pub job_title: String,
     pub job_role: String,
@@ -118,6 +124,9 @@ pub struct FocusGuard {
     // the Llamafile binary
     app_data_dir: PathBuf,
 
+    // The path to the screentap database, where focusguard will store its own tables
+    screentap_db_path: PathBuf,
+
     // Amorphous dev mode flag to speed up dev
     dev_mode: bool,
 
@@ -128,7 +137,34 @@ pub struct FocusGuard {
 
 impl FocusGuard {
 
-    pub fn new_from_config(app_data_dir: PathBuf) -> Option<FocusGuard> {
+    pub fn get_db_conn(screentap_db_path: &PathBuf) -> rusqlite::Connection {
+        rusqlite::Connection::open(screentap_db_path).unwrap()
+    }
+
+    fn create_table_if_doesnt_exist(screentap_db_path: &PathBuf) -> Result<()> {
+
+        // Create the focusguard database table if it doesn't exist
+        let conn = FocusGuard::get_db_conn(screentap_db_path);
+
+        // Create a table with the desired columns
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS focusguard_distraction_alerts (
+                    id INTEGER PRIMARY KEY,
+                    screenshot_id INTEGER,
+                    user_rating INTEGER,
+                    timestamp TIMESTAMP NOT NULL,
+                    file_path TEXT NOT NULL,
+                    job_title TEXT NOT NULL,
+                    job_role TEXT NOT NULL
+                )",
+            [],
+        )?;
+
+        Ok(())
+    
+    }
+
+    pub fn new_from_config(app_data_dir: PathBuf, screentap_db_path: PathBuf) -> Option<FocusGuard> {
 
         // Register plugin - create a new focusguard struct
         let focus_guard_config = config::FocusGuardConfig::new(app_data_dir.as_path());
@@ -153,6 +189,8 @@ impl FocusGuard {
         
                 // Initialize tracking vars so that it begins with an initial check
                 let last_distraction_alert_time = Instant::now() - duration_between_alerts - Duration::from_secs(1);
+
+                FocusGuard::create_table_if_doesnt_exist(&screentap_db_path).expect("Error creating focusguard tables");
         
                 FocusGuard {
                     job_title: config.job_title,
@@ -164,6 +202,7 @@ impl FocusGuard {
                     productivity_score_threshold: config.productivity_score_threshold,
                     image_dimension_longest_side: config.image_dimension_longest_side,
                     app_data_dir,
+                    screentap_db_path,
                     dev_mode: config.dev_mode,
                     state: FocusGuardState::Idle,
                 }
@@ -362,7 +401,7 @@ impl FocusGuard {
 
 
 
-    fn show_productivity_alert(&self, app: &tauri::AppHandle, productivity_score: i32, raw_llm_result: &str, _png_image_path: &Path, screenshot_id: i64) {
+    fn show_productivity_alert(&self, app: &tauri::AppHandle, productivity_score: i32, raw_llm_result: &str, png_image_path: &Path, screenshot_id: i64) {
 
         println!("Showing productivity alert for score: {}", productivity_score);
 
@@ -383,6 +422,10 @@ impl FocusGuard {
                     "screenshot_id": screenshot_id,
                     "productivity_score": productivity_score,
                     "raw_llm_result_base64": raw_llm_result_base64,
+                    "png_image_path": png_image_path.to_str().unwrap(),
+                    "job_title": self.job_title,
+                    "job_role": self.job_role,
+                    
                 });
 
                 // Emitting the event to the JavaScript running in the window
@@ -397,7 +440,14 @@ impl FocusGuard {
                 // Use an init script approach when creating a new window, since sending an event
                 // did not work in my testing.  Maybe it's not ready for events yet as some sort
                 // of race condition?
-                let init_script = get_init_script(screenshot_id, productivity_score, raw_llm_result);
+                let init_script = get_init_script(
+                    screenshot_id, 
+                    productivity_score, 
+                    raw_llm_result, 
+                    png_image_path.to_str().unwrap(),
+                    &self.job_title,
+                    &self.job_role
+                );
 
                 // Create and show new window
                 let _w = tauri::WindowBuilder::new(
@@ -731,15 +781,24 @@ impl FocusGuard {
 }
 
 
-fn get_init_script(screenshot_id: i64, productivity_score: i32, raw_llm_result: &str) -> String {
+fn get_init_script(screenshot_id: i64, productivity_score: i32, raw_llm_result: &str, png_image_path: &str, job_title: &str, job_role: &str) -> String {
 
     let raw_llm_result_base64: String = BASE64.encode(raw_llm_result);
     
+    let png_image_path_base_64: String = BASE64.encode(png_image_path);
+
+    let job_title_base_64: String = BASE64.encode(job_title);
+
+    let job_role_base_64: String = BASE64.encode(job_role);
 
     format!(r#"    
-        window.__SCREENTAP_SCREENSHOT__ = {{ id: '{}', productivity_score: {}, raw_llm_result_base64: '{}' }};
-
-    "#, screenshot_id, productivity_score, raw_llm_result_base64)
+        window.__SCREENTAP_SCREENSHOT__ = {{ id: '{}', productivity_score: {}, raw_llm_result_base64: '{}', png_image_path_base_64: '{}', job_title_base_64: '{}', job_role_base_64: '{}' }};
+    "#, screenshot_id, 
+        productivity_score, 
+        raw_llm_result_base64, 
+        png_image_path_base_64, 
+        job_title_base_64, 
+        job_role_base_64)
 }
 
 // Structs for payload

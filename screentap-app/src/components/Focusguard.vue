@@ -23,6 +23,9 @@ interface ScreenshotEventPayload {
   screenshot_id: number;
   productivity_score: number;
   raw_llm_result_base64: string;
+  png_image_path: string;
+  job_title: string;
+  job_role: string;
 }
 
 interface ScreenshotEvent {
@@ -47,9 +50,21 @@ const getScreenshotResult = ref([]);
 // Explanation of LLM infer result
 const explanationLLMInferResult = ref('');
 
+const pngImagePath = ref('');
+
 const isVisibleExplanationLLMInferResult = ref(false);
 
 const productivityScore = ref(0);
+
+const jobTitle = ref('');
+
+const jobRole = ref('');
+
+async function recordDistractionAlertFeedback(liked: boolean) {
+  await invoke("distraction_alert_rating", { liked: liked, screenshotId: screenshotId.value, pngImagePath: pngImagePath.value, jobTitle: jobTitle.value, jobRole: jobRole.value});
+  console.log('screenshot id', screenshotId.value);
+  closeWindow();
+}
 
 
 async function getScreenshot() {
@@ -71,6 +86,25 @@ async function getScreenshot() {
     } else {
         console.error('window.__SCREENTAP_SCREENSHOT__.raw_llm_result_base64 is not defined');
     }
+
+    if (window.__SCREENTAP_SCREENSHOT__ && window.__SCREENTAP_SCREENSHOT__.hasOwnProperty('png_image_path_base_64')) {
+        pngImagePath.value = atob(window.__SCREENTAP_SCREENSHOT__.png_image_path_base_64);
+    } else {
+        console.error('window.__SCREENTAP_SCREENSHOT__.png_image_path_base_64 is not defined');
+    }
+
+    if (window.__SCREENTAP_SCREENSHOT__ && window.__SCREENTAP_SCREENSHOT__.hasOwnProperty('job_title_base_64')) {
+        jobTitle.value = atob(window.__SCREENTAP_SCREENSHOT__.job_title_base_64);
+    } else {
+        console.error('window.__SCREENTAP_SCREENSHOT__.job_title_base_64 is not defined');
+    }
+
+    if (window.__SCREENTAP_SCREENSHOT__ && window.__SCREENTAP_SCREENSHOT__.hasOwnProperty('job_role_base_64')) {
+        jobRole.value = atob(window.__SCREENTAP_SCREENSHOT__.job_role_base_64);
+    } else {
+        console.error('window.__SCREENTAP_SCREENSHOT__.job_role_base_64 is not defined');
+    }
+
 
 }
 
@@ -97,8 +131,9 @@ listen('update-screenshot-event', (event: ScreenshotEvent) => {
   productivityScore.value = event.payload.productivity_score;
   explanationLLMInferResult.value = atob(event.payload.raw_llm_result_base64);
   getScreenshotById(event.payload.screenshot_id);
-
-
+  pngImagePath.value = event.payload.png_image_path;
+  jobTitle.value = event.payload.job_title;
+  jobRole.value = event.payload.job_role;
 });
 
 getScreenshot()
@@ -119,8 +154,8 @@ getScreenshot()
         </p>
 
         <div class="flex space-x-2 mb-8">
-            <button class="btn btn-primary" @click="closeWindow">👍 Yes</button>
-            <button class="btn btn-secondary" @click="closeWindow">👎 No</button>
+            <button class="btn btn-primary" @click="recordDistractionAlertFeedback(true)">👍 Yes</button>
+            <button class="btn btn-secondary" @click="recordDistractionAlertFeedback(false)">👎 No</button>
         </div>
 
         <fwb-accordion class="mt-4 mx-4 mb-4" :open-first-item="false">
