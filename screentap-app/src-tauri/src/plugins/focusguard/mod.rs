@@ -320,7 +320,7 @@ impl FocusGuard {
         // TODO: just capture image in target dimensions in the first place, this will save a lot of resources.
         // TODO: or if that's not possible, move the resizing to native swift libraries to take adcantage of apple silicon
         let resize_img_result = FocusGuard::resize_image(
-            png_data, 
+            &png_data, 
             self.image_dimension_longest_side
         );
 
@@ -395,7 +395,7 @@ impl FocusGuard {
         let result = match &self.previous_phash_opt {
             Some(previous_phash) => {
                 let dist: u32 = phash.dist(&previous_phash);
-                let phash_threshold = 100;  // TODO: move to config.toml
+                let phash_threshold = 200;  // TODO: move to config.toml
                 if dist < phash_threshold {  // TODO: tune this threshold
                     println!("phash delta is {}, which is below {} and not enough to warrant a new analysis", dist, phash_threshold);
                     false
@@ -417,7 +417,7 @@ impl FocusGuard {
 
 
 
-    fn resize_image(png_data: Vec<u8>, max_dimension: u32) -> Result<Vec<u8>, image::ImageError> {
+    fn resize_image(png_data: &Vec<u8>, max_dimension: u32) -> Result<Vec<u8>, image::ImageError> {
 
         // Load the image from a byte slice (&[u8])
         let img = image::load_from_memory(&png_data)?;
