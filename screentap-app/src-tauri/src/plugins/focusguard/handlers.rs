@@ -4,10 +4,11 @@ use chrono::Local;
 use crate::plugins::focusguard::FocusGuard;
 use crate::plugins::focusguard::config::FocusGuardConfig;
 use std::path::PathBuf;
+use std::path::Path;
 
 
 #[tauri::command]
-pub fn distraction_alert_rating(app_handle: tauri::AppHandle, liked: bool, screenshot_id: i64, png_image_path: &str, job_title: &str, job_role: &str) -> () {
+pub fn distraction_alert_rating(app_handle: tauri::AppHandle, liked: bool, screenshot_id: i64, png_image_path: &str, job_title: &str, job_role: &str) {
 
     println!("Distraction alert rating received: liked: {}, screenshot_id: {} png_image_path: {}", 
         liked, screenshot_id, png_image_path);
@@ -36,12 +37,10 @@ pub fn distraction_alert_rating(app_handle: tauri::AppHandle, liked: bool, scree
         job_role
     );
 
-
-
 }
 
 
-fn insert_distraction_alert_record(screentap_db_path: &PathBuf, screenshot_id: i64, user_rating: i32, file_path: &str, job_title: &str, job_role: &str) -> () {
+fn insert_distraction_alert_record(screentap_db_path: &PathBuf, screenshot_id: i64, user_rating: i32, file_path: &str, job_title: &str, job_role: &str) {
 
     let conn = crate::plugins::focusguard::FocusGuard::get_db_conn(screentap_db_path);
 
@@ -58,7 +57,7 @@ fn insert_distraction_alert_record(screentap_db_path: &PathBuf, screenshot_id: i
 
 }
 
-fn copy_image_to_distraction_alerts_screenshots_dir(app_data_dir: &PathBuf, png_image_path: &str, screenshot_id: i64) -> std::path::PathBuf {
+fn copy_image_to_distraction_alerts_screenshots_dir(app_data_dir: &Path, png_image_path: &str, screenshot_id: i64) -> std::path::PathBuf {
  
     // Copy the image file to a specific location so it doesn't get compacted into an mp4
     let focusguard_root_dir = FocusGuardConfig::get_focusguard_root_dir(app_data_dir);
