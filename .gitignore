@@ -7,4 +7,4 @@ screentap-app/plugins/focusguard/*.llamafile
 screentap-app/plugins/focusguard/config.toml
 
 # Ignore all emacs backup files
-*~
+**/*~
