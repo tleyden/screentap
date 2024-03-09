@@ -1,6 +1,8 @@
 use tauri::Manager;
 use rusqlite::params;
 use chrono::Local;
+use crate::plugins::focusguard::FocusGuard;
+use crate::plugins::focusguard::config::FocusGuardConfig;
 
 #[tauri::command]
 pub fn distraction_alert_rating(app_handle: tauri::AppHandle, liked: bool, screenshot_id: i64, png_image_path: &str, job_title: &str, job_role: &str) -> () {
@@ -8,7 +10,7 @@ pub fn distraction_alert_rating(app_handle: tauri::AppHandle, liked: bool, scree
     println!("Distraction alert rating received: liked: {}, screenshot_id: {} png_image_path: {} job_title: {} job_role: {}", 
         liked, screenshot_id, png_image_path, job_title, job_role);
 
-    let focus_guard_clone: tauri::State<Option<crate::plugins::focusguard::FocusGuard>> = app_handle.state();
+    let focus_guard_clone: tauri::State<Option<FocusGuard>> = app_handle.state();
 
     let focus_guard_ref = focus_guard_clone.as_ref().unwrap();
 
@@ -17,6 +19,9 @@ pub fn distraction_alert_rating(app_handle: tauri::AppHandle, liked: bool, scree
     let conn = crate::plugins::focusguard::FocusGuard::get_db_conn(&focus_guard_ref.screentap_db_path);
 
     // Copy the image file to a specific location so it doesn't get compacted into an mp4
+    let focusguard_root_dir = FocusGuardConfig::get_focusguard_root_dir(&focus_guard_ref.app_data_dir);
+
+    println!("focusguard_root_dir: {:?}", focusguard_root_dir);
 
     // Insert a new record into the DB, using the dataset dir 
 
