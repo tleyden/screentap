@@ -157,14 +157,23 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
     );
 
     // Create a focusguard instance
+    let screentap_db_filename_fq_path = app_data_dir.join(db_filename_path);
     let mut focus_guard_option = focusguard::FocusGuard::new_from_config(
         // Clone app_data_dir so focusguard can own the app data dir path instance
         // and we avoid reference lifetime issues
         // TODO: review this, it feels a bit overcomplicated
-        app_data_dir.clone(),  
+        app_data_dir.clone(),
+        screentap_db_filename_fq_path,
     );
+
     if focus_guard_option.is_none() {
         println!("FocusGuard not initialized");
+    } else {
+        // Put a copy of the focusguard instance into the app managed state,
+        // so we can at least access the configuration from handlers.
+        // Why a clone?  If the original focusguard is moved into the managed
+        // state, then the closure below passed to the thread will no longer work        
+        app.manage(focus_guard_option.clone());
     }
 
     // Get an app handle from the app since this can be moved to threads
