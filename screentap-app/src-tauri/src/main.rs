@@ -210,15 +210,6 @@ fn setup_handler(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error +
             match screenshot_result {
                 Ok(screenshot::ScreenshotSaveResult { png_data, ocr_text, png_image_path, screenshot_id}) => {
 
-                    println!("Resizing screenshot with swift...");
-                    let resized_img = screen_ocr_swift_rs::resize_image(png_data.clone());
-
-                    // Write resized image to disk
-                    let path = Path::new("/tmp/resized_rust.png");
-                    std::fs::write(path, &resized_img).unwrap();
-                    println!("Wrote resized image to disk: /tmp/resized_rust.png");
-
-
                     // Invoke plugins
                     // TODO: any way to avoid this confusing "ref mut" stuff?
                     if let Some(ref mut focus_guard) = focus_guard_option {

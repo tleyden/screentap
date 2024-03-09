@@ -1,3 +1,4 @@
+extern crate screen_ocr_swift_rs;
 
 use std::time::{Instant, Duration};
 use serde::Serialize;
@@ -370,32 +371,13 @@ impl FocusGuard {
 
     fn resize_image(png_data: Vec<u8>, max_dimension: u32) -> Result<Vec<u8>, image::ImageError> {
 
-        // Load the image from a byte slice (&[u8])
-        let img = image::load_from_memory(&png_data)?;
-    
-        // Calculate the new dimensions
-        let (width, height) = img.dimensions();
-        let aspect_ratio = width as f32 / height as f32;
-        let (new_width, new_height) = if width > height {
-            let new_width = max_dimension;
-            let new_height = (max_dimension as f32 / aspect_ratio).round() as u32;
-            (new_width, new_height)
-        } else {
-            let new_height = max_dimension;
-            let new_width = (max_dimension as f32 * aspect_ratio).round() as u32;
-            (new_width, new_height)
-        };
-    
-        // Resize the image
-        let resized = img.resize_exact(
-            new_width, 
-            new_height, 
-            FilterType::Lanczos3
-        );
-    
-        let mut bytes = Cursor::new(Vec::new());
-        resized.write_to(&mut bytes, image::ImageOutputFormat::Png)?;
-        Ok(bytes.into_inner())
+        println!("Resizing screenshot with swift...");
+
+        // TODO: respect the max dimension, or maybe just take in a scale ratio and pass that into the swift code
+
+        let resized_img = screen_ocr_swift_rs::resize_image(png_data.clone());  // TODO: remove this clone, pass a reference
+
+        Ok(resized_img)
 
     }
 

@@ -22,12 +22,6 @@ pub fn extract_frame_from_mp4(mp4_path: &str, frame_id: isize) -> Option<SRData>
 
 pub fn resize_image(png_data: Vec<u8>) -> Vec<u8> {
 
-    // let str: &str = "hello";
-    // let bytes: Vec<u8> = str.as_bytes().to_vec();
-
-    // let swift_byte: SRData = SRData::from(&bytes);
-    // let swift_byte: SRData = SRData::from(&*bytes);
-
     // Convert the vector to a SRData
     let image = SRData::from(&*png_data);
 
