@@ -27,7 +27,7 @@ static DATABASE_FILENAME: &str = "screentap.db";
 /**
  * Capture screenshots on a fixed schedule 
  */
-static DURATION_BETWEEN_SCREEN_CAPTURES_CHECKS: i64 = 5;
+static DURATION_BETWEEN_SCREEN_CAPTURES_CHECKS: i64 = 30;
 
 
 #[tauri::command]
