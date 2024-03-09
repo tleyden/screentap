@@ -361,12 +361,6 @@ impl FocusGuard {
 
         self.previous_phash_opt = Some(phash);
 
-        // if ( phash - previous_phash) < 10 {
-        //     println!("Image has not changed enough to warrant a new analysis");
-        //     return
-        // }
-
-
         let prompt = self.create_prompt();
 
         let (productivity_score, raw_llm_result) = {
