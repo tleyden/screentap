@@ -58,9 +58,9 @@ fn search_screenshots(app_handle: tauri::AppHandle, term: &str) -> Vec<HashMap<S
 }
 
 #[tauri::command]
-fn browse_screenshots(state: tauri::State<HashMap<&str, &str>>, app_handle: tauri::AppHandle, cur_id: i32, direction: &str) -> Vec<HashMap<String, String>> {
+fn browse_screenshots(state: tauri::State<focusguard::FocusGuard>, app_handle: tauri::AppHandle, cur_id: i32, direction: &str) -> Vec<HashMap<String, String>> {
 
-    println!("browse_screenshots: cur_id: {}, direction: {} state: {:?}", cur_id, direction, state);
+    println!("browse_screenshots: cur_id: {}, direction: {} state: {:?}", cur_id, direction, state.job_role);
 
 
     let app_data_dir: PathBuf = get_effective_app_dir(app_handle);
@@ -119,10 +119,10 @@ fn get_effective_app_dir(app_handle: tauri::AppHandle) -> PathBuf {
     app_data_dir
 }
 
-fn setup_handler2(app: &mut tauri::App, focusguard: focusguard::FocusGuard) -> Result<(), Box<dyn std::error::Error + 'static>> {
-    let my_state: tauri::State<HashMap<&str, &str>> = app.state();
+fn setup_handler2(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error + 'static>> {
+    let my_state: tauri::State<focusguard::FocusGuard> = app.state();
 
-    println!("setup_handler2 called with focusguard.  my_state: {:?}", my_state);
+    println!("setup_handler2 called with focusguard.  job_role: {:?}", my_state.job_role);
     setup_handler(app)
 }   
 
@@ -335,9 +335,9 @@ fn main() {
         .add_item(quit);
 
     tauri::Builder::default()
-    .manage(state)
+    .manage(focus_guard)
     .setup(|app| {
-        setup_handler2(app, focus_guard)
+        setup_handler2(app)
     })
     .system_tray(SystemTray::new().with_menu(system_tray_menu))
     .on_system_tray_event(handle_system_tray_event)
