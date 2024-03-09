@@ -395,7 +395,7 @@ impl FocusGuard {
         let result = match &self.previous_phash_opt {
             Some(previous_phash) => {
                 let dist: u32 = phash.dist(&previous_phash);
-                let phash_threshold = 30;
+                let phash_threshold = 100;  // TODO: move to config.toml
                 if dist < phash_threshold {  // TODO: tune this threshold
                     println!("phash delta is {}, which is below {} and not enough to warrant a new analysis", dist, phash_threshold);
                     false
