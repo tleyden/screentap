@@ -21,6 +21,20 @@ pub fn distraction_alert_rating(app_handle: tauri::AppHandle, liked: bool, scree
     // Copy the image file to a specific location so it doesn't get compacted into an mp4
     let focusguard_root_dir = FocusGuardConfig::get_focusguard_root_dir(&focus_guard_ref.app_data_dir);
 
+    // Is there a distraction alert screenshots dir?  If not, create it
+    let distraction_alerts_screenshots_dir = focusguard_root_dir.join("distraction_alert_screenshots");
+    if !distraction_alerts_screenshots_dir.exists() {
+        std::fs::create_dir_all(&distraction_alerts_screenshots_dir).expect("Failed to create distraction_alerts_screenshots_dir");
+    }
+
+    // Get the filename part of the png_image_path
+    let png_image_path = std::path::Path::new(png_image_path);
+    let png_image_filename = png_image_path.file_name().unwrap();
+
+    // Copy the image to the distraction_alert_screenshots dir
+    let target_image_path = distraction_alerts_screenshots_dir.join(format!("{}_{}.png", screenshot_id, png_image_filename.to_str().unwrap()));
+    std::fs::copy(png_image_path, &target_image_path).expect("Failed to copy image to distraction_alerts_screenshots_dir");
+    
     println!("focusguard_root_dir: {:?}", focusguard_root_dir);
 
     // Insert a new record into the DB, using the dataset dir 
@@ -31,7 +45,7 @@ pub fn distraction_alert_rating(app_handle: tauri::AppHandle, liked: bool, scree
 
     let result = conn.execute(
         "INSERT INTO focusguard_distraction_alerts (timestamp, screenshot_id, user_rating, file_path, job_title, job_role) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-        params![now.timestamp(), screenshot_id, user_rating, png_image_path, job_title, job_role],
+        params![now.timestamp(), screenshot_id, user_rating, target_image_path.to_str(), job_title, job_role],
     );
     match result {
         Ok(_) => println!("Inserted new record into focusguard_distraction_alerts"),

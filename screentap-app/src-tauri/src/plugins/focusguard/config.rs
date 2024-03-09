@@ -29,10 +29,6 @@ impl FocusGuardConfig {
         let focusguard_root_dir = FocusGuardConfig::get_focusguard_root_dir(&app_data_dir.to_path_buf());
 
         // Build path to config.toml in expected place
-        // let toml_config = app_data_dir
-        //     .join("plugins")
-        //     .join("focusguard")
-        //     .join("config.toml");
         let toml_config = focusguard_root_dir
             .join("config.toml");
 
