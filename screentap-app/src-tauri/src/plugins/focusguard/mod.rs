@@ -313,7 +313,6 @@ impl FocusGuard {
             return;
         }
         
-
         println!("FocusGuard: resizing image (can be slow) ..");
         now = Instant::now();
 
@@ -337,29 +336,12 @@ impl FocusGuard {
         let time_to_resize = now.elapsed();
         println!("Resized image length in bytes: {}: time_to_resize: {:?}", resized_png_data.len(), time_to_resize);
 
-        // Calculate the perceptual hash and compare it with the 
-        // previous perceptual hash to see if the image has changed enough to warrant a new analysis
-        println!("Calculating perceptual hash of image");
-        let phash: ImageHash = FocusGuard::calculate_perceptual_hash(&resized_png_data);
-
-        match &self.previous_phash_opt {
-            Some(previous_phash) => {
-                let dist: u32 = phash.dist(&previous_phash);
-                let phash_threshold = 30;
-                if dist < phash_threshold {  // TODO: tune this threshold
-                    println!("phash delta is {}, which is below {} and not enough to warrant a new analysis", dist, phash_threshold);
-                    return
-                } else {
-                    println!("phash delta is {}, which is above {} and enough to warrant a new analysis", dist, phash_threshold);
-                }
-            },
-            None => {
-                // TODO: capture previous phash more aggressively
-                println!("phash: {}, but no previous phash to compare to, so analyzing image", phash.to_base64());
-            }
+        // Is the perceptual hash delta above the threshold?  If not, short circuit the call to the vision model
+        // for massive cost savings in tokens and/or compute budget. 
+        let above_threshold = self.phash_delta_above_threshold(&resized_png_data);
+        if !above_threshold {
+            return
         }
-
-        self.previous_phash_opt = Some(phash);
 
         let prompt = self.create_prompt();
 
@@ -404,6 +386,35 @@ impl FocusGuard {
 
 
     }
+
+    pub fn phash_delta_above_threshold(&mut self, png_data: &Vec<u8>) -> bool {
+
+        println!("Calculating perceptual hash of image ...");
+        let phash: ImageHash = FocusGuard::calculate_perceptual_hash(&png_data);
+
+        let result = match &self.previous_phash_opt {
+            Some(previous_phash) => {
+                let dist: u32 = phash.dist(&previous_phash);
+                let phash_threshold = 30;
+                if dist < phash_threshold {  // TODO: tune this threshold
+                    println!("phash delta is {}, which is below {} and not enough to warrant a new analysis", dist, phash_threshold);
+                    false
+                } else {
+                    println!("phash delta is {}, which is above {} and enough to warrant a new analysis", dist, phash_threshold);
+                    true
+                }
+            },
+            None => {
+                println!("phash: {}, but no previous phash to compare to.  Assume delta not above threshold.", phash.to_base64());
+                false
+            }
+        };
+
+        self.previous_phash_opt = Some(phash);
+        
+        result
+    }
+
 
 
     fn resize_image(png_data: Vec<u8>, max_dimension: u32) -> Result<Vec<u8>, image::ImageError> {
