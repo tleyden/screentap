@@ -120,7 +120,9 @@ fn get_effective_app_dir(app_handle: tauri::AppHandle) -> PathBuf {
 }
 
 fn setup_handler2(app: &mut tauri::App, focusguard: focusguard::FocusGuard) -> Result<(), Box<dyn std::error::Error + 'static>> {
-    println!("setup_handler2 called with focusguard");
+    let my_state: tauri::State<HashMap<&str, &str>> = app.state();
+
+    println!("setup_handler2 called with focusguard.  my_state: {:?}", my_state);
     setup_handler(app)
 }   
 
@@ -333,12 +335,13 @@ fn main() {
         .add_item(quit);
 
     tauri::Builder::default()
+    .manage(state)
     .setup(|app| {
         setup_handler2(app, focus_guard)
     })
     .system_tray(SystemTray::new().with_menu(system_tray_menu))
     .on_system_tray_event(handle_system_tray_event)
-    .manage(state)
+    
     .invoke_handler(tauri::generate_handler![
         search_screenshots, 
         browse_screenshots]
