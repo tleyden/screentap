@@ -1,9 +1,10 @@
 
 #[tauri::command]
 // pub fn distraction_alert_rating(app_handle: tauri::AppHandle, liked: bool, productivity_score: i32, raw_llm_result: &str, screenshot_id: i64) -> () {
-pub fn distraction_alert_rating(app_handle: tauri::AppHandle, liked: bool, screenshot_id: i64, png_image_path: &str) -> () {
+pub fn distraction_alert_rating(app_handle: tauri::AppHandle, liked: bool, screenshot_id: i64, png_image_path: &str, job_title: &str, job_role: &str) -> () {
 
-    println!("Distraction alert rating received: liked: {}, screenshot_id: {} png_image_path: {}", liked, screenshot_id, png_image_path);
+    println!("Distraction alert rating received: liked: {}, screenshot_id: {} png_image_path: {} job_title: {} job_role: {}", 
+        liked, screenshot_id, png_image_path, job_title, job_role);
 
     // Figure out the path to the DB by calling a static method
 

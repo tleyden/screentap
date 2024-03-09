@@ -390,6 +390,7 @@ impl FocusGuard {
                     "raw_llm_result_base64": raw_llm_result_base64,
                     "png_image_path": png_image_path.to_str().unwrap(),
                     "job_title": self.job_title,
+                    "job_role": self.job_role,
                     
                 });
 
@@ -405,7 +406,14 @@ impl FocusGuard {
                 // Use an init script approach when creating a new window, since sending an event
                 // did not work in my testing.  Maybe it's not ready for events yet as some sort
                 // of race condition?
-                let init_script = get_init_script(screenshot_id, productivity_score, raw_llm_result, png_image_path.to_str().unwrap());
+                let init_script = get_init_script(
+                    screenshot_id, 
+                    productivity_score, 
+                    raw_llm_result, 
+                    png_image_path.to_str().unwrap(),
+                    &self.job_title,
+                    &self.job_role
+                );
 
                 // Create and show new window
                 let _w = tauri::WindowBuilder::new(
@@ -739,16 +747,24 @@ impl FocusGuard {
 }
 
 
-fn get_init_script(screenshot_id: i64, productivity_score: i32, raw_llm_result: &str, png_image_path: &str) -> String {
+fn get_init_script(screenshot_id: i64, productivity_score: i32, raw_llm_result: &str, png_image_path: &str, job_title: &str, job_role: &str) -> String {
 
     let raw_llm_result_base64: String = BASE64.encode(raw_llm_result);
     
     let png_image_path_base_64: String = BASE64.encode(png_image_path);
 
-    format!(r#"    
-        window.__SCREENTAP_SCREENSHOT__ = {{ id: '{}', productivity_score: {}, raw_llm_result_base64: '{}', png_image_path_base_64: '{}' }};
+    let job_title_base_64: String = BASE64.encode(job_title);
 
-    "#, screenshot_id, productivity_score, raw_llm_result_base64, png_image_path_base_64)
+    let job_role_base_64: String = BASE64.encode(job_role);
+
+    format!(r#"    
+        window.__SCREENTAP_SCREENSHOT__ = {{ id: '{}', productivity_score: {}, raw_llm_result_base64: '{}', png_image_path_base_64: '{}', job_title_base_64: '{}', job_role_base_64: '{}' }};
+    "#, screenshot_id, 
+        productivity_score, 
+        raw_llm_result_base64, 
+        png_image_path_base_64, 
+        job_title_base_64, 
+        job_role_base_64)
 }
 
 // Structs for payload
