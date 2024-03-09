@@ -338,7 +338,7 @@ impl FocusGuard {
 
         // Is the perceptual hash delta above the threshold?  If not, short circuit the call to the vision model
         // for massive cost savings in tokens and/or compute budget. 
-        let above_threshold = self.phash_delta_above_threshold(&resized_png_data);
+        let above_threshold = self.phash_delta_above_threshold(&resized_png_data, &png_image_path);
         if !above_threshold {
             return
         }
@@ -387,9 +387,9 @@ impl FocusGuard {
 
     }
 
-    pub fn phash_delta_above_threshold(&mut self, png_data: &Vec<u8>) -> bool {
+    pub fn phash_delta_above_threshold(&mut self, png_data: &Vec<u8>, png_image_path: &Path) -> bool {
 
-        println!("Calculating perceptual hash of image ...");
+        println!("Calculating perceptual hash of image {} ...", png_image_path.display());
         let phash: ImageHash = FocusGuard::calculate_perceptual_hash(&png_data);
 
         let result = match &self.previous_phash_opt {
