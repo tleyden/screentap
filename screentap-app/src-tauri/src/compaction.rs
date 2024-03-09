@@ -6,7 +6,10 @@ use rusqlite::params;
 
 
 // The maximum number of image files allowed to accumulate before compacting to an MP4
-pub const DEFAULT_MAX_IMAGE_FILES: u32 = 150;
+// 
+// TODO: make this configurable via toml file.  
+//       I need to make it larger for dev purposes, but it should be more like 100
+pub const DEFAULT_MAX_IMAGE_FILES: u32 = 500;
 
 
 /**
