@@ -23,6 +23,7 @@ use ollama_rs::{
 use tokio::runtime;
 
 mod utils;
+pub mod handlers;
 
 pub mod config;
 

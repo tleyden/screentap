@@ -51,6 +51,12 @@ const isVisibleExplanationLLMInferResult = ref(false);
 
 const productivityScore = ref(0);
 
+async function recordDistractionAlertFeedback(liked: boolean) {
+  await invoke("distraction_alert_rating", { liked: liked, screenshotId: screenshotId.value });
+  console.log('screenshot id', screenshotId.value);
+  closeWindow();
+}
+
 
 async function getScreenshot() {
     // The __SCREENTAP_SCREENSHOT__ window property is set by the rust backend before showing the window
@@ -119,8 +125,8 @@ getScreenshot()
         </p>
 
         <div class="flex space-x-2 mb-8">
-            <button class="btn btn-primary" @click="closeWindow">👍 Yes</button>
-            <button class="btn btn-secondary" @click="closeWindow">👎 No</button>
+            <button class="btn btn-primary" @click="recordDistractionAlertFeedback(true)">👍 Yes</button>
+            <button class="btn btn-secondary" @click="recordDistractionAlertFeedback(false)">👎 No</button>
         </div>
 
         <fwb-accordion class="mt-4 mx-4 mb-4" :open-first-item="false">
