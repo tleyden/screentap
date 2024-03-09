@@ -22,6 +22,7 @@ use ollama_rs::{
 };
 use tokio::runtime;
 use rusqlite::Result;
+use image_hasher::{HasherConfig, ImageHash};
 
 
 mod utils;
@@ -133,9 +134,19 @@ pub struct FocusGuard {
     // The state used to determine when to invoke the vision model
     state: FocusGuardState,
 
+    // The previous perceptual hash of the image
+    previous_phash_opt: Option<ImageHash>,
+
 }
 
 impl FocusGuard {
+
+    fn calculate_perceptual_hash(png_data: &Vec<u8>) -> ImageHash {
+        let hasher_config = HasherConfig::new().hash_size(32, 32).preproc_dct();
+        let hasher = hasher_config.to_hasher();
+        let img = image::load_from_memory(png_data).unwrap();
+        hasher.hash_image(&img)
+    }
 
     pub fn get_db_conn(screentap_db_path: &PathBuf) -> rusqlite::Connection {
         rusqlite::Connection::open(screentap_db_path).unwrap()
@@ -205,6 +216,7 @@ impl FocusGuard {
                     screentap_db_path,
                     dev_mode: config.dev_mode,
                     state: FocusGuardState::Idle,
+                    previous_phash_opt: None,
                 }
 
             },
@@ -243,7 +255,7 @@ impl FocusGuard {
                 if !frontmost_app_or_tab_changed {
                     // The system is primed and the user is lingering in the same app or browser tab, 
                     // therefore we should invoke the vision model and reset the state to IDLE
-                    println!("FocusGuard invoking vision model and resetting state to IDLE");
+                    println!("FocusGuard invoking vision model ...");
                     self.state = FocusGuardState::Idle;
                     true
                 } else {
@@ -294,66 +306,98 @@ impl FocusGuard {
             return;
         }
 
-        let prompt = self.create_prompt();
+        // If dev mode is enabled, don't invoke the vision model and short-circuit the processing
+        if self.dev_mode {
+            println!("FocusGuard: dev mode is enabled, not invoking vision model");
+            println!("FocusGuard returning hardcoded productivity score");
+            return;
+        }
+        
 
-        let (productivity_score, raw_llm_result) = match self.dev_mode {
-            true => {
-                println!("FocusGuard returning hardcoded productivity score");
-                (2, "".to_string())
-            },  
-            false => {
-                // Invoke the actual vision model
-                println!("FocusGuard analyzing image with {}.  Resizing image at png_image_path: {}", self.llava_backend, png_image_path.display());
+        println!("FocusGuard: resizing image (can be slow) ..");
+        now = Instant::now();
 
-                now = Instant::now();
+        // Resize the image before sending to the vision model
+        // TODO: just capture image in target dimensions in the first place, this will save a lot of resources.
+        // TODO: or if that's not possible, move the resizing to native swift libraries to take adcantage of apple silicon
+        let resize_img_result = FocusGuard::resize_image(
+            png_data, 
+            self.image_dimension_longest_side
+        );
 
-                // Resize the image before sending to the vision model
-                // TODO: just capture image in target dimensions in the first place, this will save a lot of resources.
-                // TODO: or if that's not possible, move the resizing to native swift libraries to take adcantage of apple silicon
-                let resize_img_result = FocusGuard::resize_image(
-                    png_data, 
-                    self.image_dimension_longest_side
-                );
-
-                // Get the resized png data
-                let resized_png_data = match resize_img_result {
-                    Ok(resized_img) => resized_img,
-                    Err(e) => {
-                        println!("Error resizing image: {}", e);
-                        return
-                    }
-                };
-
-                let time_to_resize = now.elapsed();
-                println!("Resized image length in bytes: {}: time_to_resize: {:?}", resized_png_data.len(), time_to_resize);
-
-                now = Instant::now();
-
-                let raw_result = match self.llava_backend {
-                    LlavaBackendType::OpenAI => self.invoke_openai_vision_model(&prompt, &resized_png_data),
-                    LlavaBackendType::Ollama => self.invoke_ollama_vision_model(&prompt, &resized_png_data),
-                    LlavaBackendType::LlamaFile => self.invoke_openai_vision_model(&prompt, &resized_png_data),
-                    LlavaBackendType::LlamaFileSubprocess => self.invoke_subprocess_vision_model(&prompt, png_image_path),
-                };
-
-                let time_to_infer = now.elapsed();
-                println!("time_to_infer: {:?}", time_to_infer);
-
-                match self.process_vision_model_result(&raw_result) { 
-                    Some(raw_result_i32) => {
-                        (raw_result_i32, raw_result)
-                    },
-                    None => {
-                        println!("FocusGuard could not parse raw result [{}] into number", raw_result);
-                        return
-                    }
-                }
-
+        // Get the resized png data
+        let resized_png_data = match resize_img_result {
+            Ok(resized_img) => resized_img,
+            Err(e) => {
+                println!("Error resizing image: {}", e);
+                return
             }
         };
 
-        // Record the productivity score in the database as this can be used for metrics tracking
+        let time_to_resize = now.elapsed();
+        println!("Resized image length in bytes: {}: time_to_resize: {:?}", resized_png_data.len(), time_to_resize);
 
+        // Calculate the perceptual hash and compare it with the 
+        // previous perceptual hash to see if the image has changed enough to warrant a new analysis
+        println!("Calculating perceptual hash of image");
+        let phash: ImageHash = FocusGuard::calculate_perceptual_hash(&resized_png_data);
+
+        match &self.previous_phash_opt {
+            Some(previous_phash) => {
+                let dist: u32 = phash.dist(&previous_phash);
+                let phash_threshold = 30;
+                if dist < phash_threshold {  // TODO: tune this threshold
+                    println!("phash delta is {}, which is below {} and not enough to warrant a new analysis", dist, phash_threshold);
+                    return
+                } else {
+                    println!("phash delta is {}, which is above {} and enough to warrant a new analysis", dist, phash_threshold);
+                }
+            },
+            None => {
+                // TODO: capture previous phash more aggressively
+                println!("phash: {}, but no previous phash to compare to, so analyzing image", phash.to_base64());
+            }
+        }
+
+        self.previous_phash_opt = Some(phash);
+
+        // if ( phash - previous_phash) < 10 {
+        //     println!("Image has not changed enough to warrant a new analysis");
+        //     return
+        // }
+
+
+        let prompt = self.create_prompt();
+
+        let (productivity_score, raw_llm_result) = {
+            // Invoke the actual vision model
+            println!("FocusGuard analyzing image with {}.  Resizing image at png_image_path: {}", self.llava_backend, png_image_path.display());
+
+            now = Instant::now();
+
+            let raw_result = match self.llava_backend {
+                LlavaBackendType::OpenAI => self.invoke_openai_vision_model(&prompt, &resized_png_data),
+                LlavaBackendType::Ollama => self.invoke_ollama_vision_model(&prompt, &resized_png_data),
+                LlavaBackendType::LlamaFile => self.invoke_openai_vision_model(&prompt, &resized_png_data),
+                LlavaBackendType::LlamaFileSubprocess => self.invoke_subprocess_vision_model(&prompt, png_image_path),
+            };
+
+            let time_to_infer = now.elapsed();
+            println!("time_to_infer: {:?}", time_to_infer);
+
+            match self.process_vision_model_result(&raw_result) { 
+                Some(raw_result_i32) => {
+                    (raw_result_i32, raw_result)
+                },
+                None => {
+                    println!("FocusGuard could not parse raw result [{}] into number", raw_result);
+                    return
+                }
+            }
+    
+        };
+
+        // Record the productivity score in the database as this can be used for metrics tracking
         if productivity_score < self.productivity_score_threshold {
             println!("Productivity score {} is below threshold {} for png_image_path: {}", productivity_score, self.productivity_score_threshold, png_image_path.display());
 
