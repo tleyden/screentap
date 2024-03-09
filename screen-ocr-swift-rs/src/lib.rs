@@ -9,6 +9,7 @@ swift!(fn screen_capture_swift() -> Option<SRData>);
 swift!(fn write_images_in_dir_to_mp4_swift(directory_path: &SRString, target_filename: &SRString, use_bitrate_key: Bool) -> ());
 swift!(fn extract_frame_from_mp4_swift(mp4_path: &SRString, frame_id: Int) -> Option<SRData>);    
 swift!(fn get_frontmost_app_swift() -> SRString);
+swift!(fn resize_image_swift(image: SRData) ->  Option<SRData>);
 
 
 pub fn extract_frame_from_mp4(mp4_path: &str, frame_id: isize) -> Option<SRData> {
@@ -19,6 +20,22 @@ pub fn extract_frame_from_mp4(mp4_path: &str, frame_id: isize) -> Option<SRData>
 }
 
 
+pub fn resize_image(png_data: Vec<u8>) -> Vec<u8> {
+
+    // let str: &str = "hello";
+    // let bytes: Vec<u8> = str.as_bytes().to_vec();
+
+    // let swift_byte: SRData = SRData::from(&bytes);
+    // let swift_byte: SRData = SRData::from(&*bytes);
+
+    // Convert the vector to a SRData
+    let image = SRData::from(&*png_data);
+
+    let result = unsafe { resize_image_swift(image) };
+    
+    result.unwrap().to_vec()
+
+}
 
 /**
  * Given a path to a directory of images, write them to an mp4
