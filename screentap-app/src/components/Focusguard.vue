@@ -23,6 +23,7 @@ interface ScreenshotEventPayload {
   screenshot_id: number;
   productivity_score: number;
   raw_llm_result_base64: string;
+  png_image_path: string;
 }
 
 interface ScreenshotEvent {
@@ -47,12 +48,14 @@ const getScreenshotResult = ref([]);
 // Explanation of LLM infer result
 const explanationLLMInferResult = ref('');
 
+const pngImagePath = ref('');
+
 const isVisibleExplanationLLMInferResult = ref(false);
 
 const productivityScore = ref(0);
 
 async function recordDistractionAlertFeedback(liked: boolean) {
-  await invoke("distraction_alert_rating", { liked: liked, screenshotId: screenshotId.value });
+  await invoke("distraction_alert_rating", { liked: liked, screenshotId: screenshotId.value, pngImagePath: pngImagePath.value });
   console.log('screenshot id', screenshotId.value);
   closeWindow();
 }
@@ -77,6 +80,13 @@ async function getScreenshot() {
     } else {
         console.error('window.__SCREENTAP_SCREENSHOT__.raw_llm_result_base64 is not defined');
     }
+
+    if (window.__SCREENTAP_SCREENSHOT__ && window.__SCREENTAP_SCREENSHOT__.hasOwnProperty('png_image_path_base_64')) {
+        pngImagePath.value = atob(window.__SCREENTAP_SCREENSHOT__.png_image_path_base_64);
+    } else {
+        console.error('window.__SCREENTAP_SCREENSHOT__.png_image_path_base_64 is not defined');
+    }
+
 
 }
 
@@ -103,8 +113,7 @@ listen('update-screenshot-event', (event: ScreenshotEvent) => {
   productivityScore.value = event.payload.productivity_score;
   explanationLLMInferResult.value = atob(event.payload.raw_llm_result_base64);
   getScreenshotById(event.payload.screenshot_id);
-
-
+  pngImagePath.value = event.payload.png_image_path;
 });
 
 getScreenshot()

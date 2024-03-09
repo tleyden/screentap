@@ -367,7 +367,7 @@ impl FocusGuard {
 
 
 
-    fn show_productivity_alert(&self, app: &tauri::AppHandle, productivity_score: i32, raw_llm_result: &str, _png_image_path: &Path, screenshot_id: i64) {
+    fn show_productivity_alert(&self, app: &tauri::AppHandle, productivity_score: i32, raw_llm_result: &str, png_image_path: &Path, screenshot_id: i64) {
 
         println!("Showing productivity alert for score: {}", productivity_score);
 
@@ -388,6 +388,7 @@ impl FocusGuard {
                     "screenshot_id": screenshot_id,
                     "productivity_score": productivity_score,
                     "raw_llm_result_base64": raw_llm_result_base64,
+                    "png_image_path": png_image_path.to_str().unwrap(),
                 });
 
                 // Emitting the event to the JavaScript running in the window
@@ -402,7 +403,7 @@ impl FocusGuard {
                 // Use an init script approach when creating a new window, since sending an event
                 // did not work in my testing.  Maybe it's not ready for events yet as some sort
                 // of race condition?
-                let init_script = get_init_script(screenshot_id, productivity_score, raw_llm_result);
+                let init_script = get_init_script(screenshot_id, productivity_score, raw_llm_result, png_image_path.to_str().unwrap());
 
                 // Create and show new window
                 let _w = tauri::WindowBuilder::new(
@@ -736,15 +737,16 @@ impl FocusGuard {
 }
 
 
-fn get_init_script(screenshot_id: i64, productivity_score: i32, raw_llm_result: &str) -> String {
+fn get_init_script(screenshot_id: i64, productivity_score: i32, raw_llm_result: &str, png_image_path: &str) -> String {
 
     let raw_llm_result_base64: String = BASE64.encode(raw_llm_result);
     
+    let png_image_path_base_64: String = BASE64.encode(png_image_path);
 
     format!(r#"    
-        window.__SCREENTAP_SCREENSHOT__ = {{ id: '{}', productivity_score: {}, raw_llm_result_base64: '{}' }};
+        window.__SCREENTAP_SCREENSHOT__ = {{ id: '{}', productivity_score: {}, raw_llm_result_base64: '{}', png_image_path_base_64: '{}' }};
 
-    "#, screenshot_id, productivity_score, raw_llm_result_base64)
+    "#, screenshot_id, productivity_score, raw_llm_result_base64, png_image_path_base_64)
 }
 
 // Structs for payload
