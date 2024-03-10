@@ -140,10 +140,21 @@ pub struct FocusGuard {
 impl FocusGuard {
 
     fn calculate_perceptual_hash(png_data: &Vec<u8>) -> ImageHash {
+
+        // Get the current time
+        let now = Instant::now();
+
         let hasher_config = HasherConfig::new().hash_size(32, 32).preproc_dct();
         let hasher = hasher_config.to_hasher();
         let img = image::load_from_memory(png_data).unwrap();
-        hasher.hash_image(&img)
+        let hashed_img = hasher.hash_image(&img);
+
+        // calculate the time it took to hash the image
+        let time_to_hash = now.elapsed();
+        println!("Time to calculate perceptual hash: {:?}", time_to_hash);
+
+        hashed_img
+
     }
 
     pub fn get_db_conn(screentap_db_path: &PathBuf) -> rusqlite::Connection {
