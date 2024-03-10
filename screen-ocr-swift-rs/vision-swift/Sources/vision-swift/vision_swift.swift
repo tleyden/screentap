@@ -81,7 +81,7 @@ public func get_frontmost_app() -> SRString {
 
 @_cdecl("resize_image_swift")
 @available(macOS 10.15, *)
-public func resize_image(image: SRData) -> SRData? {
+public func resize_image(image: SRData, scale: Float) -> SRData? {
 
     // Convert the byte array to CGImage
     let byteArray = image.toArray()
@@ -89,7 +89,7 @@ public func resize_image(image: SRData) -> SRData? {
     if let cgImage = byteArrayToCGImage(byteArray: byteArray) {
 
         // Resize the image
-        if let resizedCGImage = resizedImage(image: cgImage, scale: 0.5) {
+        if let resizedCGImage = resizedImage(image: cgImage, scale: CGFloat(scale)) {
 
             // Convert the resized CGImage to byte array
             if let resizedByteArray = convertCGImageToByteArray(image: resizedCGImage) {

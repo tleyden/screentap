@@ -6,8 +6,6 @@ use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use reqwest::blocking::Response;
 use tauri::Manager;
 use std::fmt;
-use image::{GenericImageView, imageops::FilterType};
-use std::io::Cursor;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::str::FromStr;
@@ -116,10 +114,9 @@ pub struct FocusGuard {
     // The threshold to be considered in "flow state"
     productivity_score_threshold: i32,
 
-    // The size of the largest image dimension (width or height) to send to the vision model.
-    // For OpenAI, the max is 2000 pixels.  Using a smaller value will cause the model
-    // to consume less tokens during inference. 
-    image_dimension_longest_side: u32,
+    // How much to scale down the raw screenshot before sending to the vision model.
+    // This must be a number between 0.1 and 1.0.
+    image_resize_scale: f32,
 
     // The path to the app data directory in order to find plugin assets like
     // the Llamafile binary
@@ -201,7 +198,7 @@ impl FocusGuard {
                     last_distraction_alert_time,
                     llava_backend,
                     productivity_score_threshold: config.productivity_score_threshold,
-                    image_dimension_longest_side: config.image_dimension_longest_side,
+                    image_resize_scale: config.image_resize_scale,
                     app_data_dir,
                     screentap_db_path,
                     dev_mode: config.dev_mode,
@@ -313,7 +310,7 @@ impl FocusGuard {
                 // TODO: or if that's not possible, move the resizing to native swift libraries to take adcantage of apple silicon
                 let resize_img_result = FocusGuard::resize_image(
                     png_data, 
-                    self.image_dimension_longest_side
+                    self.image_resize_scale
                 );
 
                 // Get the resized png data
@@ -326,7 +323,7 @@ impl FocusGuard {
                 };
 
                 let time_to_resize = now.elapsed();
-                println!("Resized image length in bytes: {}: time_to_resize: {:?}", resized_png_data.len(), time_to_resize);
+                println!("Resized image by {} to {} bytes: time_to_resize: {:?}", self.image_resize_scale, resized_png_data.len(), time_to_resize);
 
                 now = Instant::now();
 
@@ -369,13 +366,11 @@ impl FocusGuard {
     }
 
 
-    fn resize_image(png_data: Vec<u8>, max_dimension: u32) -> Result<Vec<u8>, image::ImageError> {
+    fn resize_image(png_data: Vec<u8>, scale: f32) -> Result<Vec<u8>, image::ImageError> {
 
         println!("Resizing screenshot with swift...");
 
-        // TODO: respect the max dimension, or maybe just take in a scale ratio and pass that into the swift code
-
-        let resized_img = screen_ocr_swift_rs::resize_image(png_data.clone());  // TODO: remove this clone, pass a reference
+        let resized_img = screen_ocr_swift_rs::resize_image(png_data, scale);  // TODO: remove this clone, pass a reference
 
         Ok(resized_img)
 
