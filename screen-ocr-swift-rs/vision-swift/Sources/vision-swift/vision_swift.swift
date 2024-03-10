@@ -89,7 +89,7 @@ public func resize_image(image: SRData, scale: Float) -> SRData? {
     if let cgImage = byteArrayToCGImage(byteArray: byteArray) {
 
         // Resize the image
-        if let resizedCGImage = resizedImage(image: cgImage, scale: CGFloat(scale)) {
+        if let resizedCGImage = resizeImage(image: cgImage, scale: CGFloat(scale)) {
 
             // Convert the resized CGImage to byte array
             if let resizedByteArray = convertCGImageToByteArray(image: resizedCGImage) {
@@ -515,7 +515,7 @@ func convertCGImageToByteArray(image: CGImage) -> [UInt8]? {
     return byteArray
 }
 
-func resizedImage(image: CGImage, scale: CGFloat) -> CGImage? {
+func resizeImage(image: CGImage, scale: CGFloat) -> CGImage? {
     
     let sharedContext = CIContext(options: [.useSoftwareRenderer : false])
     
