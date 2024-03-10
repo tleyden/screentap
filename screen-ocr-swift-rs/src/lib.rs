@@ -20,10 +20,10 @@ pub fn extract_frame_from_mp4(mp4_path: &str, frame_id: isize) -> Option<SRData>
 }
 
 
-pub fn resize_image(png_data: Vec<u8>, scale: f32) -> Vec<u8> {
+pub fn resize_image(png_data: &[u8], scale: f32) -> Vec<u8> {
 
-    // Convert the vector to a SRData
-    let image = SRData::from(&*png_data);
+      // Convert the vector to a SRData
+    let image = SRData::from(png_data);
 
     let result = unsafe { resize_image_swift(image, scale) };
     

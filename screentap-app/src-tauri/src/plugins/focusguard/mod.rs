@@ -306,9 +306,8 @@ impl FocusGuard {
                 now = Instant::now();
 
                 // Resize the image before sending to the vision model
-                // TODO: figure out how to pass a reference of png_data to avoid moving it (in case we need it later)
                 let resize_img_result = FocusGuard::resize_image(
-                    png_data, 
+                    &png_data, 
                     self.image_resize_scale
                 );
 
@@ -367,9 +366,9 @@ impl FocusGuard {
     /**
      * Resize the image using the native Swift code
      */
-    fn resize_image(png_data: Vec<u8>, scale: f32) -> Result<Vec<u8>, image::ImageError> {
+    fn resize_image(png_data: &[u8], scale: f32) -> Result<Vec<u8>, image::ImageError> {
 
-        let resized_img = screen_ocr_swift_rs::resize_image(png_data, scale);  // TODO: remove this clone, pass a reference
+        let resized_img = screen_ocr_swift_rs::resize_image(png_data, scale);
 
         Ok(resized_img)
 
