@@ -1,3 +1,4 @@
+extern crate screen_ocr_swift_rs;
 
 use std::time::{Instant, Duration};
 use serde::Serialize;
@@ -5,8 +6,6 @@ use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use reqwest::blocking::Response;
 use tauri::Manager;
 use std::fmt;
-use image::{GenericImageView, imageops::FilterType};
-use std::io::Cursor;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::str::FromStr;
@@ -115,10 +114,9 @@ pub struct FocusGuard {
     // The threshold to be considered in "flow state"
     productivity_score_threshold: i32,
 
-    // The size of the largest image dimension (width or height) to send to the vision model.
-    // For OpenAI, the max is 2000 pixels.  Using a smaller value will cause the model
-    // to consume less tokens during inference. 
-    image_dimension_longest_side: u32,
+    // How much to scale down the raw screenshot before sending to the vision model.
+    // This must be a number between 0.1 and 1.0.
+    image_resize_scale: f32,
 
     // The path to the app data directory in order to find plugin assets like
     // the Llamafile binary
@@ -200,7 +198,7 @@ impl FocusGuard {
                     last_distraction_alert_time,
                     llava_backend,
                     productivity_score_threshold: config.productivity_score_threshold,
-                    image_dimension_longest_side: config.image_dimension_longest_side,
+                    image_resize_scale: config.image_resize_scale,
                     app_data_dir,
                     screentap_db_path,
                     dev_mode: config.dev_mode,
@@ -308,24 +306,22 @@ impl FocusGuard {
                 now = Instant::now();
 
                 // Resize the image before sending to the vision model
-                // TODO: just capture image in target dimensions in the first place, this will save a lot of resources.
-                // TODO: or if that's not possible, move the resizing to native swift libraries to take adcantage of apple silicon
                 let resize_img_result = FocusGuard::resize_image(
-                    png_data, 
-                    self.image_dimension_longest_side
+                    &png_data, 
+                    self.image_resize_scale
                 );
 
                 // Get the resized png data
                 let resized_png_data = match resize_img_result {
-                    Ok(resized_img) => resized_img,
-                    Err(e) => {
-                        println!("Error resizing image: {}", e);
+                    Some(resized_img) => resized_img,
+                    None => {
+                        println!("Error resizing image: see logs.  FocusGuard will not analyze this screenshot.");
                         return
                     }
                 };
 
                 let time_to_resize = now.elapsed();
-                println!("Resized image length in bytes: {}: time_to_resize: {:?}", resized_png_data.len(), time_to_resize);
+                println!("Resized image by {} to {} bytes: time_to_resize: {:?}", self.image_resize_scale, resized_png_data.len(), time_to_resize);
 
                 now = Instant::now();
 
@@ -367,35 +363,12 @@ impl FocusGuard {
 
     }
 
+    /**
+     * Resize the image using the native Swift code
+     */
+    fn resize_image(png_data: &[u8], scale: f32) -> Option<Vec<u8>> {
 
-    fn resize_image(png_data: Vec<u8>, max_dimension: u32) -> Result<Vec<u8>, image::ImageError> {
-
-        // Load the image from a byte slice (&[u8])
-        let img = image::load_from_memory(&png_data)?;
-    
-        // Calculate the new dimensions
-        let (width, height) = img.dimensions();
-        let aspect_ratio = width as f32 / height as f32;
-        let (new_width, new_height) = if width > height {
-            let new_width = max_dimension;
-            let new_height = (max_dimension as f32 / aspect_ratio).round() as u32;
-            (new_width, new_height)
-        } else {
-            let new_height = max_dimension;
-            let new_width = (max_dimension as f32 * aspect_ratio).round() as u32;
-            (new_width, new_height)
-        };
-    
-        // Resize the image
-        let resized = img.resize_exact(
-            new_width, 
-            new_height, 
-            FilterType::Lanczos3
-        );
-    
-        let mut bytes = Cursor::new(Vec::new());
-        resized.write_to(&mut bytes, image::ImageOutputFormat::Png)?;
-        Ok(bytes.into_inner())
+        screen_ocr_swift_rs::resize_image(png_data, scale)
 
     }
 

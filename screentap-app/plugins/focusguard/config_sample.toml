@@ -30,10 +30,11 @@ openai_api_key = ""
 # The threshold for the productivity score before it considers it a distraction
 productivity_score_threshold = 6
 
-# When resizing images, resize the longest size to this pixel value.
-# Set this to a lower value to reduce the OpenAI token costs, at the
-# expense of results quality.
-image_dimension_longest_side = 1600
+# How much to scale down the raw screenshot before sending to the vision model.
+# This must be a number between 0.1 and 1.0.  
+# Setting this to a smaller value will consume less tokens on the vision model,
+# at the cost of quality.
+image_resize_scale = 0.65
 
 # Ignore this param, just internal stuff
 dev_mode = false

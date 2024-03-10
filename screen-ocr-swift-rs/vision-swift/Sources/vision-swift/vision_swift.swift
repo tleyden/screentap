@@ -79,13 +79,42 @@ public func get_frontmost_app() -> SRString {
     }
 }
 
+@_cdecl("resize_image_swift")
+@available(macOS 10.15, *)
+public func resize_image(image: SRData, scale: Float) -> SRData? {
+
+    // Convert the byte array to CGImage
+    let byteArray = image.toArray()
+
+    if let cgImage = byteArrayToCGImage(byteArray: byteArray) {
+
+        // Resize the image
+        if let resizedCGImage = resizeImage(image: cgImage, scale: CGFloat(scale)) {
+
+            // Convert the resized CGImage to byte array
+            if let resizedByteArray = convertCGImageToByteArray(image: resizedCGImage) {
+                return SRData(resizedByteArray)
+            } else {
+                print("Failed to convert resized CGImage to byte array")
+            }
+
+        } else {
+            print("Failed to resize image")
+        }
+
+    } else {
+        print("Failed to convert byte array to CGImage")
+    }
+
+    return nil
+}
+
 /**
  * Capture the screen and return the image as a PNG encoded byte array
  */
 @_cdecl("screen_capture_swift")
 @available(macOS 10.15, *)
 public func screen_capture() -> SRData? {
-
 
     // Specify the display to capture (main display in this case)
     let displayID = CGMainDisplayID()
@@ -484,4 +513,25 @@ func convertCGImageToByteArray(image: CGImage) -> [UInt8]? {
     // Convert NSData to Byte Array
     let byteArray = [UInt8](imageData)
     return byteArray
+}
+
+func resizeImage(image: CGImage, scale: CGFloat) -> CGImage? {
+    
+    let sharedContext = CIContext(options: [.useSoftwareRenderer : false])
+    
+    // Convert CGImage to CIImage
+    let ciImage = CIImage(cgImage: image)
+    
+    let filter = CIFilter(name: "CILanczosScaleTransform")
+    filter?.setValue(ciImage, forKey: kCIInputImageKey)
+    filter?.setValue(scale, forKey: kCIInputScaleKey)
+
+    guard let outputCIImage = filter?.outputImage,
+        let outputCGImage = sharedContext.createCGImage(outputCIImage,
+                                                        from: outputCIImage.extent)
+    else {
+        return nil
+    }
+
+    return outputCGImage
 }
