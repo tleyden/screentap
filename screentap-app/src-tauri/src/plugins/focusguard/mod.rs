@@ -313,9 +313,9 @@ impl FocusGuard {
 
                 // Get the resized png data
                 let resized_png_data = match resize_img_result {
-                    Ok(resized_img) => resized_img,
-                    Err(e) => {
-                        println!("Error resizing image: {}", e);
+                    Some(resized_img) => resized_img,
+                    None => {
+                        println!("Error resizing image: see logs.  FocusGuard will not analyze this screenshot.");
                         return
                     }
                 };
@@ -366,11 +366,9 @@ impl FocusGuard {
     /**
      * Resize the image using the native Swift code
      */
-    fn resize_image(png_data: &[u8], scale: f32) -> Result<Vec<u8>, image::ImageError> {
+    fn resize_image(png_data: &[u8], scale: f32) -> Option<Vec<u8>> {
 
-        let resized_img = screen_ocr_swift_rs::resize_image(png_data, scale);
-
-        Ok(resized_img)
+        screen_ocr_swift_rs::resize_image(png_data, scale)
 
     }
 
