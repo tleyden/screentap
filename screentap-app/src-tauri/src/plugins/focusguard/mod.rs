@@ -306,8 +306,7 @@ impl FocusGuard {
                 now = Instant::now();
 
                 // Resize the image before sending to the vision model
-                // TODO: just capture image in target dimensions in the first place, this will save a lot of resources.
-                // TODO: or if that's not possible, move the resizing to native swift libraries to take adcantage of apple silicon
+                // TODO: figure out how to pass a reference of png_data to avoid moving it (in case we need it later)
                 let resize_img_result = FocusGuard::resize_image(
                     png_data, 
                     self.image_resize_scale
@@ -365,10 +364,10 @@ impl FocusGuard {
 
     }
 
-
+    /**
+     * Resize the image using the native Swift code
+     */
     fn resize_image(png_data: Vec<u8>, scale: f32) -> Result<Vec<u8>, image::ImageError> {
-
-        println!("Resizing screenshot with swift...");
 
         let resized_img = screen_ocr_swift_rs::resize_image(png_data, scale);  // TODO: remove this clone, pass a reference
 
