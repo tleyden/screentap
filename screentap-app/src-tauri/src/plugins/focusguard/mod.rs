@@ -139,7 +139,7 @@ pub struct FocusGuard {
 
 impl FocusGuard {
 
-    fn calculate_perceptual_hash(png_data: &Vec<u8>) -> ImageHash {
+    fn calculate_perceptual_hash(png_data: &[u8]) -> ImageHash {
 
         // Get the current time
         let now = Instant::now();
@@ -345,7 +345,7 @@ impl FocusGuard {
 
         // Is the perceptual hash delta above the threshold?  If not, short circuit the call to the vision model
         // for massive cost savings in tokens and/or compute budget. 
-        let above_threshold = self.phash_delta_above_threshold(&resized_png_data, &png_image_path);
+        let above_threshold = self.phash_delta_above_threshold(&resized_png_data, png_image_path);
         if !above_threshold {
             return
         }
@@ -403,14 +403,14 @@ impl FocusGuard {
 
     }
 
-    pub fn phash_delta_above_threshold(&mut self, png_data: &Vec<u8>, png_image_path: &Path) -> bool {
+    pub fn phash_delta_above_threshold(&mut self, png_data: &[u8], png_image_path: &Path) -> bool {
 
         println!("Calculating perceptual hash of image {} ...", png_image_path.display());
-        let phash: ImageHash = FocusGuard::calculate_perceptual_hash(&png_data);
+        let phash: ImageHash = FocusGuard::calculate_perceptual_hash(png_data);
 
         let result = match &self.previous_phash_opt {
             Some(previous_phash) => {
-                let dist: u32 = phash.dist(&previous_phash);
+                let dist: u32 = phash.dist(previous_phash);
                 let phash_threshold = 200;  // TODO: move to config.toml
                 if dist < phash_threshold {  // TODO: tune this threshold
                     println!("phash delta is {}, which is below {} and not enough to warrant a new analysis", dist, phash_threshold);
