@@ -21,6 +21,7 @@ use ollama_rs::{
 };
 use tokio::runtime;
 use rusqlite::Result;
+use image_hasher::{HasherConfig, ImageHash};
 
 
 mod utils;
@@ -131,9 +132,30 @@ pub struct FocusGuard {
     // The state used to determine when to invoke the vision model
     state: FocusGuardState,
 
+    // The previous perceptual hash of the image
+    previous_phash_opt: Option<ImageHash>,
+
 }
 
 impl FocusGuard {
+
+    fn calculate_perceptual_hash(png_data: &[u8]) -> ImageHash {
+
+        // Get the current time
+        let now = Instant::now();
+
+        let hasher_config = HasherConfig::new().hash_size(32, 32).preproc_dct();
+        let hasher = hasher_config.to_hasher();
+        let img = image::load_from_memory(png_data).unwrap();
+        let hashed_img = hasher.hash_image(&img);
+
+        // calculate the time it took to hash the image
+        let time_to_hash = now.elapsed();
+        println!("Time to calculate perceptual hash: {:?}", time_to_hash);
+
+        hashed_img
+
+    }
 
     pub fn get_db_conn(screentap_db_path: &PathBuf) -> rusqlite::Connection {
         rusqlite::Connection::open(screentap_db_path).unwrap()
@@ -203,6 +225,7 @@ impl FocusGuard {
                     screentap_db_path,
                     dev_mode: config.dev_mode,
                     state: FocusGuardState::Idle,
+                    previous_phash_opt: None,
                 }
 
             },
@@ -241,7 +264,7 @@ impl FocusGuard {
                 if !frontmost_app_or_tab_changed {
                     // The system is primed and the user is lingering in the same app or browser tab, 
                     // therefore we should invoke the vision model and reset the state to IDLE
-                    println!("FocusGuard invoking vision model and resetting state to IDLE");
+                    println!("FocusGuard invoking vision model ...");
                     self.state = FocusGuardState::Idle;
                     true
                 } else {
@@ -292,18 +315,15 @@ impl FocusGuard {
             return;
         }
 
-        let prompt = self.create_prompt();
-
-        let (productivity_score, raw_llm_result) = match self.dev_mode {
-            true => {
-                println!("FocusGuard returning hardcoded productivity score");
-                (2, "".to_string())
-            },  
-            false => {
-                // Invoke the actual vision model
-                println!("FocusGuard analyzing image with {}.  Resizing image at png_image_path: {}", self.llava_backend, png_image_path.display());
-
-                now = Instant::now();
+        // If dev mode is enabled, don't invoke the vision model and short-circuit the processing
+        if self.dev_mode {
+            println!("FocusGuard: dev mode is enabled, not invoking vision model");
+            println!("FocusGuard returning hardcoded productivity score");
+            return;
+        }
+        
+        println!("FocusGuard: resizing image (can be slow) ..");
+        now = Instant::now();
 
                 // Resize the image before sending to the vision model
                 let resize_img_result = FocusGuard::resize_image(
@@ -320,36 +340,47 @@ impl FocusGuard {
                     }
                 };
 
-                let time_to_resize = now.elapsed();
-                println!("Resized image by {} to {} bytes: time_to_resize: {:?}", self.image_resize_scale, resized_png_data.len(), time_to_resize);
+        let time_to_resize = now.elapsed();
+        println!("Resized image by {} to {} bytes: time_to_resize: {:?}", self.image_resize_scale, resized_png_data.len(), time_to_resize);
 
-                now = Instant::now();
+        // Is the perceptual hash delta above the threshold?  If not, short circuit the call to the vision model
+        // for massive cost savings in tokens and/or compute budget. 
+        let above_threshold = self.phash_delta_above_threshold(&resized_png_data, png_image_path);
+        if !above_threshold {
+            return
+        }
 
-                let raw_result = match self.llava_backend {
-                    LlavaBackendType::OpenAI => self.invoke_openai_vision_model(&prompt, &resized_png_data),
-                    LlavaBackendType::Ollama => self.invoke_ollama_vision_model(&prompt, &resized_png_data),
-                    LlavaBackendType::LlamaFile => self.invoke_openai_vision_model(&prompt, &resized_png_data),
-                    LlavaBackendType::LlamaFileSubprocess => self.invoke_subprocess_vision_model(&prompt, png_image_path),
-                };
+        let prompt = self.create_prompt();
 
-                let time_to_infer = now.elapsed();
-                println!("time_to_infer: {:?}", time_to_infer);
+        let (productivity_score, raw_llm_result) = {
+            // Invoke the actual vision model
+            println!("FocusGuard analyzing image with {}.  Resizing image at png_image_path: {}", self.llava_backend, png_image_path.display());
 
-                match self.process_vision_model_result(&raw_result) { 
-                    Some(raw_result_i32) => {
-                        (raw_result_i32, raw_result)
-                    },
-                    None => {
-                        println!("FocusGuard could not parse raw result [{}] into number", raw_result);
-                        return
-                    }
+            now = Instant::now();
+
+            let raw_result = match self.llava_backend {
+                LlavaBackendType::OpenAI => self.invoke_openai_vision_model(&prompt, &resized_png_data),
+                LlavaBackendType::Ollama => self.invoke_ollama_vision_model(&prompt, &resized_png_data),
+                LlavaBackendType::LlamaFile => self.invoke_openai_vision_model(&prompt, &resized_png_data),
+                LlavaBackendType::LlamaFileSubprocess => self.invoke_subprocess_vision_model(&prompt, png_image_path),
+            };
+
+            let time_to_infer = now.elapsed();
+            println!("time_to_infer: {:?}", time_to_infer);
+
+            match self.process_vision_model_result(&raw_result) { 
+                Some(raw_result_i32) => {
+                    (raw_result_i32, raw_result)
+                },
+                None => {
+                    println!("FocusGuard could not parse raw result [{}] into number", raw_result);
+                    return
                 }
-
             }
+    
         };
 
         // Record the productivity score in the database as this can be used for metrics tracking
-
         if productivity_score < self.productivity_score_threshold {
             println!("Productivity score {} is below threshold {} for png_image_path: {}", productivity_score, self.productivity_score_threshold, png_image_path.display());
 
@@ -372,7 +403,33 @@ impl FocusGuard {
 
     }
 
+    pub fn phash_delta_above_threshold(&mut self, png_data: &[u8], png_image_path: &Path) -> bool {
 
+        println!("Calculating perceptual hash of image {} ...", png_image_path.display());
+        let phash: ImageHash = FocusGuard::calculate_perceptual_hash(png_data);
+
+        let result = match &self.previous_phash_opt {
+            Some(previous_phash) => {
+                let dist: u32 = phash.dist(previous_phash);
+                let phash_threshold = 200;  // TODO: move to config.toml
+                if dist < phash_threshold {  // TODO: tune this threshold
+                    println!("phash delta is {}, which is below {} and not enough to warrant a new analysis", dist, phash_threshold);
+                    false
+                } else {
+                    println!("phash delta is {}, which is above {} and enough to warrant a new analysis", dist, phash_threshold);
+                    true
+                }
+            },
+            None => {
+                println!("phash: {}, but no previous phash to compare to.  Assume delta not above threshold.", phash.to_base64());
+                false
+            }
+        };
+
+        self.previous_phash_opt = Some(phash);
+        
+        result
+    }
 
     fn show_productivity_alert(&self, app: &tauri::AppHandle, productivity_score: i32, raw_llm_result: &str, png_image_path: &Path, screenshot_id: i64) {
 
