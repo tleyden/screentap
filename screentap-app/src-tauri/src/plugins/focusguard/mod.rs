@@ -250,7 +250,7 @@ impl FocusGuard {
      * (eg, every 5s), it would have to also take timing into account.  But 30s is a good delay between state transitions
      * from IDLE -> PRIMED.
      */
-    pub fn should_invoke_vision_model(&mut self, frontmost_app: &str, frontmost_browser_tab: &str, frontmost_app_or_tab_changed: bool) -> bool {
+    pub fn should_invoke_vision_model(&mut self, frontmost_app: &str, frontmost_browser_tab: &str, frontmost_app_or_tab_changed: bool) -> Option<SkipVisionModelReason>  {
 
         println!("FocusGuard checking if should_invoke_vision_model: frontmost_app: {} frontmost_browser_tab: {} frontmost_app_or_tab_changed: {} cur state: {}", frontmost_app, frontmost_browser_tab, frontmost_app_or_tab_changed, self.state);
 
@@ -258,7 +258,7 @@ impl FocusGuard {
         if frontmost_app == "missing value" || frontmost_app.starts_with("com.screentap-app") {  
             println!("FocusGuard or a missing value is the frontmost app, so not invoking vision model and resetting state to IDLE");
             self.state = FocusGuardState::Idle;
-            return false;
+            return Some(SkipVisionModelReason::InvalidFrontmostApp);
         };
 
         match self.state {
@@ -269,13 +269,13 @@ impl FocusGuard {
                     // therefore we should invoke the vision model and reset the state to IDLE
                     println!("FocusGuard invoking vision model ...");
                     self.state = FocusGuardState::Idle;
-                    true
+                    None
                 } else {
                     // The system is primed but the user has switched to a different app or browser tab,
                     // reset the state to IDLE and do not invoke the vision model
                     println!("FocusGuard not invoking vision model, and resetting state to IDLE");
                     self.state = FocusGuardState::Idle;
-                    false
+                    Some(SkipVisionModelReason::NotPrimed)
                 }    
             },
             FocusGuardState::Idle => {
@@ -289,7 +289,7 @@ impl FocusGuard {
                     // The app has changed so the user is still in transit between apps, stay in the IDLE state
                     println!("FocusGuard not invoking vision model, and staying in IDLE state");
                 }
-                false    
+                Some(SkipVisionModelReason::NotPrimed)    
             },
         }
         
@@ -304,12 +304,12 @@ impl FocusGuard {
         let mut now = Instant::now();
 
         // Check if we should invoke the vision model based on current frontmost app
-        if !self.should_invoke_vision_model(cb_event.frontmost_app, cb_event.frontmost_browser_tab, cb_event.frontmost_app_or_tab_changed) {
+        let should_skip_vision_model = self.should_invoke_vision_model(cb_event.frontmost_app, cb_event.frontmost_browser_tab, cb_event.frontmost_app_or_tab_changed);
+        if let Some(reason) = should_skip_vision_model {
             cb_result.invoked_vision_model = false;
-            // TODO: return reason from should_invoke_vision_model, InvalidFrontmostApp is not 100% correct
-            cb_result.skip_vision_model_reason = Some(SkipVisionModelReason::InvalidFrontmostApp);
+            cb_result.skip_vision_model_reason = Some(reason);
             return cb_result;
-        };
+        }
 
 
         // Check if enough time elapsed since last distraction alert.  If not, short circuit the screen 
@@ -421,8 +421,6 @@ impl FocusGuard {
     #[allow(clippy::too_many_arguments)]
     pub fn handle_screentap_event(&mut self, app: &tauri::AppHandle, png_data: Vec<u8>, png_image_path: &Path, screenshot_id: i64, ocr_text: String, frontmost_app: &str, frontmost_browser_tab: &str, frontmost_app_or_tab_changed: bool) {
 
-        println!("FocusGuard handling screentap event # {} with len(ocr_text): {} and len(png_data): {} frontmost app: {} frontmost browser tab: {}", screenshot_id, ocr_text.len(), png_data.len(), frontmost_app, frontmost_browser_tab);
-
         let focusguard_event = FocusGuardCallbackEvent {
             app,
             png_data: &png_data,
@@ -434,16 +432,12 @@ impl FocusGuard {
             frontmost_app_or_tab_changed
         };
 
-        println!("FocusGuard Event: {}", focusguard_event);
-
+        println!("Handling FocusGuard Event: {}", focusguard_event);
 
         let focus_guard_result = self.process_focus_guard_event(focusguard_event);
 
         // self.record_result(focus_guard_result)
         println!("Focus guard result: {:?}", focus_guard_result);
-
-
-
 
 
     }
