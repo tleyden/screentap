@@ -183,6 +183,8 @@ impl FocusGuard {
             [],
         )?;
 
+        // TOOD: create the event log table
+
         Ok(())
     
     }
@@ -338,7 +340,7 @@ impl FocusGuard {
 
                 // Resize the image before sending to the vision model
                 let resize_img_result = FocusGuard::resize_image(
-                    &cb_event.png_data, 
+                    cb_event.png_data, 
                     self.image_resize_scale
                 );
 
@@ -436,8 +438,10 @@ impl FocusGuard {
 
         let focus_guard_result = self.process_focus_guard_event(focusguard_event);
 
-        // self.record_result(focus_guard_result)
         println!("Focus guard result: {:?}", focus_guard_result);
+
+        // self.record_result(focus_guard_result)
+
 
 
     }

@@ -25,9 +25,6 @@ pub enum SkipVisionModelReason {
     InvalidFrontmostApp,
     NotEnoughTimeElapsedSinceAlert,
     PerceptualHashDuplicate,
-    EmbeddingsDuplicate,
-    ScreenLocked,
-    ScreenBlack,
     DevMode,
     Error
 }
