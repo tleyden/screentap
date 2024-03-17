@@ -142,6 +142,7 @@ pub fn save_screenshot_meta(screenshot_file_path: &Path, ocr_text: &str, dataset
     let screenshot_file_path_str = screenshot_file_path.to_str().expect("Failed to get screenshot_file_path_str");
 
     // TODO: change table name to 'screenshots'
+    // TODO: record frontmost app and browser url (if in a browser)
     conn.execute(
         "INSERT INTO documents (timestamp, ocr_text, file_path, mp4_file_path) VALUES (?1, ?2, ?3, ?4)",
         params![now.timestamp(), ocr_text, screenshot_file_path_str, ""],

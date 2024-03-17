@@ -24,6 +24,7 @@ use rusqlite::Result;
 use image_hasher::{HasherConfig, ImageHash};
 use event::FocusGuardCallbackEvent;
 use result::{FocusGuardCallbackResult, SkipVisionModelReason};
+use rusqlite::params;
 
 mod utils;
 pub mod handlers;
@@ -191,7 +192,9 @@ impl FocusGuard {
                     invoked_vision_model INTEGER,
                     vision_model_success INTEGER,
                     vision_model_descriptor TEXT NOT NULL,
-                    skip_vision_model_reason TEXT NOT NULL
+                    skip_vision_model_reason TEXT NOT NULL,
+                    productivity_score INTEGER,
+                    vision_model_response TEXT NOT NULL
                 )",
             [],
         )?;
@@ -454,9 +457,33 @@ impl FocusGuard {
 
         println!("Focus guard result: {:?}", focus_guard_result);
 
-        // self.record_result(focus_guard_result)
+        self.record_result_event_log(screenshot_id, focus_guard_result)
 
 
+
+    }
+
+    fn record_result_event_log(&self, screenshot_id: i64, cb_result: FocusGuardCallbackResult) {
+
+        let conn = Self::get_db_conn(&self.screentap_db_path);
+
+        // Convert the skip model reason enum to a string
+        let skip_vision_model_reason = format!("{:?}", cb_result.skip_vision_model_reason);
+
+        // The DB expects a string for the vision_model_response, so convert to empty string if no value
+        let vision_model_response = match cb_result.vision_model_response {
+            None => String::new(),
+            Some(model_response) => model_response
+        };
+
+        let result = conn.execute(
+            "INSERT INTO focusguard_event_log (screenshot_id, invoked_vision_model, vision_model_success, vision_model_descriptor, skip_vision_model_reason, productivity_score, vision_model_response) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+            params![screenshot_id, cb_result.invoked_vision_model, cb_result.vision_model_success, cb_result.vision_model_descriptor, skip_vision_model_reason, cb_result.productivity_score, vision_model_response],
+        );
+        match result {
+            Ok(_) => println!("Inserted new record into focusguard_event_log"),
+            Err(e) => println!("Error inserting new record into focusguard_event_log: {:?}", e),
+        }
 
     }
 
