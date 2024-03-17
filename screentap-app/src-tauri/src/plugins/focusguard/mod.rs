@@ -184,7 +184,7 @@ impl FocusGuard {
             [],
         )?;
 
-        // TOOD: create the event log table
+        // Create the event log table
         conn.execute(
             "CREATE TABLE IF NOT EXISTS focusguard_event_log (
                     id INTEGER PRIMARY KEY,
@@ -398,7 +398,7 @@ impl FocusGuard {
             };
 
             cb_result.invoked_vision_model = true;
-            cb_result.vision_model_descriptor = format!("{}", self.llava_backend);
+            cb_result.vision_model_descriptor = Some(format!("{}", self.llava_backend));
 
             let time_to_infer = now.elapsed();
             println!("time_to_infer: {:?}", time_to_infer);
@@ -476,9 +476,11 @@ impl FocusGuard {
             Some(model_response) => model_response
         };
 
+        let vision_model_descriptor = cb_result.vision_model_descriptor.unwrap_or(String::from("Unknown vision model"));
+
         let result = conn.execute(
             "INSERT INTO focusguard_event_log (screenshot_id, invoked_vision_model, vision_model_success, vision_model_descriptor, skip_vision_model_reason, productivity_score, vision_model_response) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-            params![screenshot_id, cb_result.invoked_vision_model, cb_result.vision_model_success, cb_result.vision_model_descriptor, skip_vision_model_reason, cb_result.productivity_score, vision_model_response],
+            params![screenshot_id, cb_result.invoked_vision_model, cb_result.vision_model_success, vision_model_descriptor, skip_vision_model_reason, cb_result.productivity_score, vision_model_response],
         );
         match result {
             Ok(_) => println!("Inserted new record into focusguard_event_log"),
