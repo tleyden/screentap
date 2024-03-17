@@ -184,6 +184,18 @@ impl FocusGuard {
         )?;
 
         // TOOD: create the event log table
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS focusguard_event_log (
+                    id INTEGER PRIMARY KEY,
+                    screenshot_id INTEGER,
+                    invoked_vision_model INTEGER,
+                    vision_model_success INTEGER,
+                    vision_model_descriptor TEXT NOT NULL,
+                    skip_vision_model_reason TEXT NOT NULL
+                )",
+            [],
+        )?;
+
 
         Ok(())
     
@@ -401,8 +413,6 @@ impl FocusGuard {
     
         };
 
-        cb_result.vision_model_success = true;
-
         // Record the productivity score in the database as this can be used for metrics tracking
         if productivity_score < self.productivity_score_threshold {
             println!("Productivity score {} is below threshold {} for png_image_path: {}", productivity_score, self.productivity_score_threshold, cb_event.png_image_path.display());
@@ -413,6 +423,10 @@ impl FocusGuard {
         } else {
             println!("Woohoo!  Looks like you're working.  Score is: {} for png_image_path: {}", productivity_score, cb_event.png_image_path.display());
         }
+
+        cb_result.vision_model_success = true;
+        cb_result.productivity_score = productivity_score;
+        cb_result.vision_model_response = Some(raw_llm_result);
 
         cb_result
 
