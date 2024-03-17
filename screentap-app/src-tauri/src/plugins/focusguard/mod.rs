@@ -22,12 +22,15 @@ use ollama_rs::{
 use tokio::runtime;
 use rusqlite::Result;
 use image_hasher::{HasherConfig, ImageHash};
-
+use event::FocusGuardCallbackEvent;
+use result::{FocusGuardCallbackResult, SkipVisionModelReason};
 
 mod utils;
 pub mod handlers;
 
 pub mod config;
+pub mod event;
+pub mod result;
 
 
 // Create an enum with three possible values: openai, llamafile, and ollama
@@ -292,18 +295,22 @@ impl FocusGuard {
         
     }
 
-    #[allow(clippy::too_many_arguments)]
-    pub fn handle_screentap_event(&mut self, app: &tauri::AppHandle, png_data: Vec<u8>, png_image_path: &Path, screenshot_id: i64, ocr_text: String, frontmost_app: &str, frontmost_browser_tab: &str, frontmost_app_or_tab_changed: bool) {
 
-        println!("FocusGuard handling screentap event # {} with len(ocr_text): {} and len(png_data): {} frontmost app: {} frontmost browser tab: {}", screenshot_id, ocr_text.len(), png_data.len(), frontmost_app, frontmost_browser_tab);
+    fn process_focus_guard_event(&mut self, cb_event: FocusGuardCallbackEvent) -> FocusGuardCallbackResult {
+
+        let mut cb_result = FocusGuardCallbackResult::new();
 
         // Get the current time
         let mut now = Instant::now();
 
         // Check if we should invoke the vision model based on current frontmost app
-        if !self.should_invoke_vision_model(frontmost_app, frontmost_browser_tab, frontmost_app_or_tab_changed) {
-            return
+        if !self.should_invoke_vision_model(cb_event.frontmost_app, cb_event.frontmost_browser_tab, cb_event.frontmost_app_or_tab_changed) {
+            cb_result.invoked_vision_model = false;
+            // TODO: return reason from should_invoke_vision_model, InvalidFrontmostApp is not 100% correct
+            cb_result.skip_vision_model_reason = Some(SkipVisionModelReason::InvalidFrontmostApp);
+            return cb_result;
         };
+
 
         // Check if enough time elapsed since last distraction alert.  If not, short circuit the screen 
         // analysis to reduce expensive vision model calls.  NOTE: this short-circuit will interfere with 
@@ -312,14 +319,18 @@ impl FocusGuard {
         let enough_time_elapsed_alert = elapsed_alert > self.duration_between_alerts;
         if !enough_time_elapsed_alert {
             println!("FocusGuard: not enough time elapsed {:?} since last distraction alert, not analyzing screenshot", elapsed_alert);
-            return;
+            cb_result.invoked_vision_model = false;
+            cb_result.skip_vision_model_reason = Some(SkipVisionModelReason::NotEnoughTimeElapsedSinceAlert);
+            return cb_result;
         }
 
         // If dev mode is enabled, don't invoke the vision model and short-circuit the processing
         if self.dev_mode {
             println!("FocusGuard: dev mode is enabled, not invoking vision model");
             println!("FocusGuard returning hardcoded productivity score");
-            return;
+            cb_result.invoked_vision_model = false;
+            cb_result.skip_vision_model_reason = Some(SkipVisionModelReason::DevMode);
+            return cb_result;
         }
         
         println!("FocusGuard: resizing image (can be slow) ..");
@@ -327,7 +338,7 @@ impl FocusGuard {
 
                 // Resize the image before sending to the vision model
                 let resize_img_result = FocusGuard::resize_image(
-                    &png_data, 
+                    &cb_event.png_data, 
                     self.image_resize_scale
                 );
 
@@ -336,7 +347,9 @@ impl FocusGuard {
                     Some(resized_img) => resized_img,
                     None => {
                         println!("Error resizing image: see logs.  FocusGuard will not analyze this screenshot.");
-                        return
+                        cb_result.invoked_vision_model = false;
+                        cb_result.skip_vision_model_reason = Some(SkipVisionModelReason::Error);
+                        return cb_result
                     }
                 };
 
@@ -345,16 +358,18 @@ impl FocusGuard {
 
         // Is the perceptual hash delta above the threshold?  If not, short circuit the call to the vision model
         // for massive cost savings in tokens and/or compute budget. 
-        let above_threshold = self.phash_delta_above_threshold(&resized_png_data, png_image_path);
+        let above_threshold = self.phash_delta_above_threshold(&resized_png_data, cb_event.png_image_path);
         if !above_threshold {
-            return
+            cb_result.invoked_vision_model = false;
+            cb_result.skip_vision_model_reason = Some(SkipVisionModelReason::PerceptualHashDuplicate);
+            return cb_result
         }
 
         let prompt = self.create_prompt();
 
         let (productivity_score, raw_llm_result) = {
             // Invoke the actual vision model
-            println!("FocusGuard analyzing image with {}.  Resizing image at png_image_path: {}", self.llava_backend, png_image_path.display());
+            println!("FocusGuard analyzing image with {}.  Resizing image at png_image_path: {}", self.llava_backend, cb_event.png_image_path.display());
 
             now = Instant::now();
 
@@ -362,8 +377,11 @@ impl FocusGuard {
                 LlavaBackendType::OpenAI => self.invoke_openai_vision_model(&prompt, &resized_png_data),
                 LlavaBackendType::Ollama => self.invoke_ollama_vision_model(&prompt, &resized_png_data),
                 LlavaBackendType::LlamaFile => self.invoke_openai_vision_model(&prompt, &resized_png_data),
-                LlavaBackendType::LlamaFileSubprocess => self.invoke_subprocess_vision_model(&prompt, png_image_path),
+                LlavaBackendType::LlamaFileSubprocess => self.invoke_subprocess_vision_model(&prompt, cb_event.png_image_path),
             };
+
+            cb_result.invoked_vision_model = true;
+            cb_result.vision_model_descriptor = format!("{}", self.llava_backend);
 
             let time_to_infer = now.elapsed();
             println!("time_to_infer: {:?}", time_to_infer);
@@ -374,22 +392,58 @@ impl FocusGuard {
                 },
                 None => {
                     println!("FocusGuard could not parse raw result [{}] into number", raw_result);
-                    return
+                    cb_result.vision_model_success = false;
+                    return cb_result;
                 }
             }
     
         };
 
+        cb_result.vision_model_success = true;
+
         // Record the productivity score in the database as this can be used for metrics tracking
         if productivity_score < self.productivity_score_threshold {
-            println!("Productivity score {} is below threshold {} for png_image_path: {}", productivity_score, self.productivity_score_threshold, png_image_path.display());
+            println!("Productivity score {} is below threshold {} for png_image_path: {}", productivity_score, self.productivity_score_threshold, cb_event.png_image_path.display());
 
-            self.show_productivity_alert(app, productivity_score, &raw_llm_result, png_image_path, screenshot_id);
+            self.show_productivity_alert(cb_event.app, productivity_score, &raw_llm_result, cb_event.png_image_path, cb_event.screenshot_id);
             self.last_distraction_alert_time = Instant::now();
 
         } else {
-            println!("Woohoo!  Looks like you're working.  Score is: {} for png_image_path: {}", productivity_score, png_image_path.display());
+            println!("Woohoo!  Looks like you're working.  Score is: {} for png_image_path: {}", productivity_score, cb_event.png_image_path.display());
         }
+
+        cb_result
+
+
+    }
+
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn handle_screentap_event(&mut self, app: &tauri::AppHandle, png_data: Vec<u8>, png_image_path: &Path, screenshot_id: i64, ocr_text: String, frontmost_app: &str, frontmost_browser_tab: &str, frontmost_app_or_tab_changed: bool) {
+
+        println!("FocusGuard handling screentap event # {} with len(ocr_text): {} and len(png_data): {} frontmost app: {} frontmost browser tab: {}", screenshot_id, ocr_text.len(), png_data.len(), frontmost_app, frontmost_browser_tab);
+
+        let focusguard_event = FocusGuardCallbackEvent {
+            app,
+            png_data: &png_data,
+            png_image_path,
+            screenshot_id,
+            ocr_text,
+            frontmost_app,
+            frontmost_browser_tab,
+            frontmost_app_or_tab_changed
+        };
+
+        println!("FocusGuard Event: {}", focusguard_event);
+
+
+        let focus_guard_result = self.process_focus_guard_event(focusguard_event);
+
+        // self.record_result(focus_guard_result)
+        println!("Focus guard result: {:?}", focus_guard_result);
+
+
+
 
 
     }
@@ -421,8 +475,8 @@ impl FocusGuard {
                 }
             },
             None => {
-                println!("phash: {}, but no previous phash to compare to.  Assume delta not above threshold.", phash.to_base64());
-                false
+                println!("phash: {}, but no previous phash to compare to.  New analysis needed.", phash.to_base64());
+                true
             }
         };
 
