@@ -458,9 +458,7 @@ impl FocusGuard {
         println!("Focus guard result: {:?}", focus_guard_result);
 
         self.record_result_event_log(screenshot_id, focus_guard_result)
-
-
-
+        
     }
 
     fn record_result_event_log(&self, screenshot_id: i64, cb_result: FocusGuardCallbackResult) {
