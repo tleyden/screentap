@@ -98,5 +98,6 @@ yarn tauri dev
 
 ## Proprietary
 
+* [screenpipe](https://screenpi.pe/)
 * [rewind.ai](https://rewind.ai)
 * [rize.io](https://rize.io)
